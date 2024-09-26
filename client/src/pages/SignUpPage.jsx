@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
+import axios from 'axios';
 
 const SignUpPage = () => {
   const [name, setName] = useState('');
@@ -8,19 +9,31 @@ const SignUpPage = () => {
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Sign up submitted', { name, email, password, code });
+    try {
+      const response = await axios.post('http://127.0.0.1:8080/api/sign_up/', {
+        name,
+        email,
+        password,
+        user_type: 'student',
+      });
+      
+      console.log('Sign up successful', response.data);
+    } catch (error) {
+      console.error('Error during sign up:', error.response ? error.response.data : error.message);
+    }
   };
 
   return (
+
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-1 flex justify-center items-center p-4 mt-16 md:mt-24 mb-10">
         <div className="w-full max-w-md text-center">
           <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold">SpeakIn ID</h2>
-            <p className="text-gray-600 text-sm md:text-base">Create your SpeakIn Account</p>
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">SpeakIn ID</h2>
+            <p className="text-gray-600 mb-6 text-sm md:text-base">Create your SpeakIn Account</p>
           </div>
           
           <form onSubmit={handleSubmit} className="space-y-4">

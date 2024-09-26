@@ -1,0 +1,7 @@
+.env
+*.pyo
+*.pyd
+__pycache__/
+**/migrations/
+user_service_env
+api_env
