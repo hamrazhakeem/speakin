@@ -2,15 +2,39 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
+import { useDispatch } from 'react-redux';
+import { setTokens } from '../redux/authSlice';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SignInPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Sign in submitted', { email, password });
+    setErrorMessage('');
+    try {
+      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}sign_in/`, { email, password });
+      const { access, refresh, name, id } = response.data;
+
+      dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false }));
+
+      toast.success(`Welcome, ${name}!`);
+
+      console.log('Sign In Successful!', access, refresh);
+      
+      navigate('/home');
+
+    } catch (error) {
+      const message = error.response?.data?.detail || 'Login failed. Please try again.';
+      setErrorMessage(message);
+      console.error('Login failed', message);
+    }
   };
 
   return (
@@ -21,11 +45,13 @@ const SignInPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold mb-2">SpeakIn ID</h1>
           <p className="text-gray-600 mb-6 text-sm md:text-base">Sign In to your SpeakIn Account</p>
           <form onSubmit={handleSubmit} className="flex flex-col">
-            <input
+          <input
               type="email"
               placeholder="Email"
               required
-              className="mb-4 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"
+              className={`mb-4 p-2 border rounded focus:ring-2 outline-none ${
+                errorMessage ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+              }`}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -33,7 +59,9 @@ const SignInPage = () => {
               type="password"
               placeholder="Password"
               required
-              className="mb-4 p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"
+              className={`mb-4 p-2 border rounded focus:ring-2 outline-none ${
+                errorMessage ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
+              }`}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -43,6 +71,7 @@ const SignInPage = () => {
             >
               Sign In
             </button>
+            {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
           </form>
           <div className="flex flex-col space-y-2 mt-4">
             <button

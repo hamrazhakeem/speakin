@@ -47,6 +47,13 @@ services:
     networks:
       - microservice_network
 
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    container_name: redis
+    networks:
+      - microservice_network
 
 volumes:
   postgres_data:
