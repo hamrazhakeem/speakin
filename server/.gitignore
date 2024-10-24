@@ -1,0 +1,13 @@
+.env
+*.pyo
+*.pyd
+__pycache__/
+**/migrations/
+user_service_env
+api_env
+
+tutor_govt_id_images
+profile_images
+media
+https
+tutor_intro_videos

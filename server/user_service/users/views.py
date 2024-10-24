@@ -1,0 +1,620 @@
+from rest_framework import status, generics
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .serializers import ChangePasswordSerializer, TeachingLanguageChangeRequestSerializer, UserSerializer, TutorDetailsSerializer, TutorLanguageToTeachSerializer
+from .models import LanguageSpoken, TeachingLanguageChangeRequest, TutorDetails, TutorLanguageToTeach, User, Language, Proficiency
+from django.core.mail import send_mail
+from django.conf import settings
+import random
+import string
+from django.contrib.auth.hashers import make_password, check_password
+import uuid
+from django.core.cache import cache
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.template.loader import render_to_string
+from rest_framework.views import APIView
+from pycountry import countries
+from django.http import JsonResponse
+import json
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import os
+import logging
+from django.db import transaction, IntegrityError
+from django.utils.datastructures import MultiValueDict
+
+logger = logging.getLogger(__name__)
+
+CACHE_TTL = 300
+
+# Create your views here.
+
+def generate_otp():
+    return ''.join(random.choices(string.digits, k=6))
+
+def send_otp_email(subject, email, html):
+    subject = subject 
+    html_message = html
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [email]
+    send_mail(subject, '', from_email, recipient_list, html_message=html_message, fail_silently=False)
+
+def send_tutor_verification_email(subject, email, html):
+    subject = subject
+    html_message = html
+    from_email = settings.DEFAULT_FROM_EMAIL
+    recipient_list = [email]
+    send_mail(subject, '', from_email, recipient_list, html_message=html_message, fail_silently=False)
+
+@api_view(['POST'])
+def sign_up(request):
+    serializer = UserSerializer(data=request.data)
+    if serializer.is_valid():
+        otp = generate_otp()
+        
+        cache_key = str(uuid.uuid4())
+
+        cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
+
+        cache.set(f'user_data_{cache_key}', {
+            'email': serializer.validated_data['email'],
+            'name': serializer.validated_data['name'],
+            'password': make_password(serializer.validated_data['password']),
+            'user_type': serializer.validated_data['user_type'],
+        })
+
+        send_otp_email('Your OTP for SpeakIn Registration', serializer.validated_data['email'], render_to_string('emails/otp_email.html', {'otp': otp}))
+
+        return Response({'message': 'Please verify your OTP!', 'cache_key': cache_key}, status=status.HTTP_201_CREATED)
+    return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def verify_otp(request):
+    email  = request.data.get('email') 
+    otp = request.data.get('otp')
+    cache_key = request.data.get('cache_key')
+    print(cache_key)
+ 
+    session_otp = cache.get(f'otp_{cache_key}')
+    user_data = cache.get(f'user_data_{cache_key}') 
+
+    print(session_otp, otp, user_data)
+    
+    if session_otp and otp == session_otp and user_data and user_data['email'] == email:
+        user = User.objects.create(
+            email=user_data['email'],
+            name=user_data['name'],
+            password=user_data['password'],
+            user_type=user_data['user_type']
+        )
+
+        refresh = RefreshToken.for_user(user)
+
+        cache.delete(f'otp_{cache_key}')
+        cache.delete(f'user_data_{cache_key}')
+
+        return Response({
+            'message': 'OTP verified successfully! User created.',
+            'access': str(refresh.access_token),
+            'refresh': str(refresh), 
+            'name': user.name,
+            'id': user.id,
+        }, status=status.HTTP_200_OK)
+ 
+    return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def sign_in(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+  
+    user = authenticate(request, username=email, password=password)
+    if user is not None and not user.user_type == 'tutor':
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'name': user.name,
+            'id': user.id,
+        }, status=status.HTTP_200_OK)
+
+    return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+@api_view(['POST'])
+def resend_otp(request):
+    email = request.data.get('email')
+    cache_key = request.data.get('cache_key')
+
+    if not email or not cache_key:
+        return Response({'message': 'Email and cache key are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user_data = cache.get(f'user_data_{cache_key}')
+    if not user_data or user_data['email'] != email:
+        return Response({'message': 'User data not found. Please sign up again.'}, status=status.HTTP_404_NOT_FOUND)
+
+    otp = generate_otp()
+    cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
+
+    send_otp_email('Resend: Your OTP for SpeakIn Registration', email, render_to_string('emails/resend_otp_email.html', {'otp': otp}))
+
+    return Response({'message': 'New OTP sent successfully!'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def resend_forgot_password_otp(request):
+    email = request.data.get('email')
+    cache_key = request.data.get('cache_key')
+
+    if not email or not cache_key:
+        return Response({'message': 'Email and cache key are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    user_data = cache.get(f'user_data_{cache_key}')
+    if not user_data or user_data['email'] != email:
+        return Response({'message': 'User data not found. Please try again.'}, status=status.HTTP_404_NOT_FOUND)
+
+    otp = generate_otp()
+    cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
+
+    send_otp_email('Resend: Your OTP for Password Reset', email, render_to_string('emails/resend_otp_email.html', {'otp': otp}))
+
+    return Response({'message': 'New OTP sent successfully!'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def forgot_password(request):
+    email = request.data.get('email')
+    
+    # Check if the user exists
+    if User.objects.filter(email=email).exists():
+        user = User.objects.get(email=email)
+
+        # If the user is a tutor, check their status
+        if user.user_type == 'tutor':
+            tutor_details = TutorDetails.objects.filter(user=user).first()
+            if tutor_details and tutor_details.status == 'pending':
+                return Response({'error': 'Your tutor account is still pending approval.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Generate OTP and send password reset email (for students, admins, and approved tutors)
+        otp = generate_otp()
+        cache_key = str(uuid.uuid4())
+        cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
+
+        cache.set(f'user_data_{cache_key}', {
+            'email': email,
+        })
+
+        send_otp_email(
+            'Your OTP for SpeakIn Password Reset',
+            email,
+            render_to_string('emails/forgot_password_email.html', {'otp': otp})
+        )
+
+        return Response({'message': 'OTP has been sent to your email.', 'cache_key': cache_key}, status=status.HTTP_200_OK)
+
+    return Response({'error': 'Email not found.'}, status=status.HTTP_404_NOT_FOUND)
+    
+@api_view(['POST'])
+def forgot_password_verify_otp(request):
+    email  = request.data.get('email') 
+    otp = request.data.get('otp')
+    cache_key = request.data.get('cache_key')
+ 
+    session_otp = cache.get(f'otp_{cache_key}')
+    user_data = cache.get(f'user_data_{cache_key}') 
+    
+    if session_otp and otp == session_otp and user_data and user_data['email'] == email:
+        cache.delete(f'otp_{cache_key}')
+        
+        return Response({'message': 'OTP verified successfully! You can create new password now.'}, status=status.HTTP_200_OK)
+ 
+    return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+def set_new_password(request):
+    email = request.data.get('email')
+    new_password = request.data.get('newPassword')
+    cache_key = request.data.get('cache_key')
+    
+    user_data = cache.get(f'user_data_{cache_key}')
+    
+    if user_data and user_data['email'] == email:
+        try:
+            user = User.objects.get(email=email)
+            user.password = make_password(new_password)
+            user.save()
+            
+            cache.delete(f'user_data_{cache_key}')
+            
+            return Response({'message': 'Password updated successfully!'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'message': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    else:
+        return Response({'message': 'Invalid cache key or email'}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserList(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+def get_signin_url():
+    frontend_origin = next((origin for origin in settings.CORS_ALLOWED_ORIGINS if origin.startswith('http://127.0.0.1') or origin.startswith('http://localhost')), None)
+    
+    if not frontend_origin:
+        raise ValueError("No local frontend origin found in CORS_ALLOWED_ORIGINS")
+    
+    return f"{frontend_origin}/tutor-signin/"
+
+# In your view or wherever you need the signin_url
+
+
+class UserDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
+    def perform_update(self, serializer):
+        print("Entering perform_update")
+        if serializer.is_valid():
+            with transaction.atomic():
+                user = serializer.save()
+                print(f"User saved: {user.email}")
+
+                language_spoken_data = self.request.data.get('language_spoken')
+                if language_spoken_data:
+                    try:
+                        # Parse the JSON string into a Python list
+                        languages = json.loads(language_spoken_data)
+                        
+                        # Delete existing language associations
+                        LanguageSpoken.objects.filter(user=user).delete()
+                        
+                        # Create new language associations
+                        for lang_data in languages:
+                            if lang_data.get('language') and lang_data.get('proficiency'):
+                                # Get or create the Language instance
+                                language, _ = Language.objects.get_or_create(
+                                    name=lang_data['language']
+                                )
+                                
+                                # Get or create the Proficiency instance
+                                proficiency, _ = Proficiency.objects.get_or_create(
+                                    level=lang_data['proficiency']
+                                )
+                                
+                                # Create the LanguageSpoken instance
+                                LanguageSpoken.objects.create(
+                                    user=user,
+                                    language=language,
+                                    proficiency=proficiency
+                                )
+                        print("Languages updated successfully")
+                    except json.JSONDecodeError:
+                        print("Invalid JSON format for language_spoken")
+                    except Exception as e:
+                        print(f"Error updating languages: {str(e)}")
+
+                if user.user_type == 'tutor': 
+                    print("User is a tutor")
+                    try:
+                        tutor_details = TutorDetails.objects.get(user=user)
+                        print(f"Tutor status: {tutor_details.status}")
+
+                        speakin_name = self.request.data.get('speakin_name')
+                        required_credits = self.request.data.get('required_credits')
+                        print(speakin_name, required_credits)
+                        if speakin_name:
+                            tutor_details.speakin_name = speakin_name
+                        if required_credits:
+                            tutor_details.required_credits = required_credits
+                        
+                        tutor_details.save()
+                        print("TutorDetails updated")
+
+                        if tutor_details.status == 'pending' and self.request.data.get('action') == 'approve':
+                            tutor_details.status = 'approved'
+                            tutor_details.save()
+                            print('Tutor approved')
+
+                            signin_url = get_signin_url()
+                        
+                            email_content = render_to_string('emails/tutor_approval_email.html', {
+                                'tutor_name': user.name,
+                                'signin_url': signin_url
+                            })
+                            
+                            print('About to send email')
+
+                            send_tutor_verification_email(
+                                'Your Tutor Account has been Approved!',
+                                user.email,
+                                email_content 
+                            )
+                            print('Email sent') 
+                    except TutorDetails.DoesNotExist:
+                        print("TutorDetails not found")
+        else:
+            print("Serializer is not valid")
+            print(serializer.errors)
+
+    def patch(self, request, *args, **kwargs):
+        action = request.data.get('action')
+        print(f"Action: {action}")
+        
+        try:
+            # Create a mutable copy of request.data
+            mutable_data = MultiValueDict(request.data.lists())
+            
+            # If action is 'approve', add it to the mutable data
+            if action == 'approve':
+                mutable_data['action'] = 'approve'
+            
+            # Update the request object with the mutable data
+            request._full_data = mutable_data
+            
+            # Call the original partial update functionality
+            response = self.partial_update(request, *args, **kwargs) 
+            
+            return response
+        except TutorDetails.DoesNotExist:
+            return Response({"error": "Tutor details not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def delete(self, request, *args, **kwargs):
+        try:
+            user = self.get_object()  # Get the user object to delete
+            if user.user_type == 'tutor':
+                try:
+                    tutor_details = TutorDetails.objects.get(user=user)
+                    print(f"Tutor status: {tutor_details.status}")
+                    
+                    if tutor_details.status == 'pending':
+                        # Change tutor status to 'denied'
+                        tutor_details.status = 'denied'
+                        tutor_details.save()
+                        print('Tutor denied')
+
+                        # Send denial email
+                        email_content = render_to_string('emails/tutor_denial_email.html', {
+                            'tutor_name': user.name,
+                        })
+                        
+                        print('About to send denial email')
+
+                        send_tutor_verification_email(
+                            'Your Tutor Account Application has been Denied',
+                            user.email,
+                            email_content
+                        )
+                        print('Denial email sent')
+
+                        # Optionally, you can delete the user or keep the record.
+                        user.delete()  # This will delete the user from the database
+
+                        return Response({"message": "Tutor account denied and deleted."}, status=status.HTTP_204_NO_CONTENT)
+                    
+                    else: 
+                        return Response({"error": "Tutor cannot be denied, status is not pending."}, status=status.HTTP_400_BAD_REQUEST)
+                
+                except TutorDetails.DoesNotExist:
+                    return Response({"error": "Tutor details not found."}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                # If the user is not a tutor, proceed with the standard deletion
+                user.delete()
+                return Response({"message": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+@api_view(['POST'])
+def admin_signin(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+
+    user = authenticate(request, username=email, password=password)
+    if user is not None and user.is_superuser:
+        is_admin = user.is_superuser
+        print(is_admin)
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'name': user.name,
+            'id': user.id,
+            'is_admin': is_admin,
+        }, status=status.HTTP_200_OK)
+    return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class CountryListView(APIView):
+    def get(self, request):
+        country_choices = [(country.name, country.alpha_2) for country in countries]
+        return Response(country_choices)
+
+class PlatformLanguageListView(APIView):
+    def get(self, request):
+        languages = Language.objects.filter(name__in=['English', 'Chinese', 'Arabic', 'French', 'Spanish', 'Hindi'])
+        return Response([{'id': lang.id, 'name': lang.name} for lang in languages])
+
+class SpokenLanguageListView(APIView):
+    def get(self, request):
+        languages = Language.objects.all()
+        allowed_proficiencies = ['B1', 'B2', 'C1', 'C2', 'Native']
+        proficiencies = [{'level': prof.level, 'description': prof.get_level_display()} for prof in Proficiency.objects.filter(level__in=allowed_proficiencies)]
+        return Response({
+            'languages': [{'id': lang.id, 'name': lang.name} for lang in languages],
+            'proficiencies': proficiencies
+        })
+
+@api_view(['POST'])
+@transaction.atomic
+def tutor_request(request):
+    try:
+        data = request.data
+
+        video_file = request.FILES.get('video')
+        image_file = request.FILES.get('image')
+
+        # Create the User instance
+        user = User.objects.create(
+            email=data['email'],
+            name=data['fullName'],
+            password=make_password(data['password']),
+            user_type='tutor',
+            country=data['country'],
+        )
+
+        is_native = data['isNative'].lower() == 'true'
+
+        if is_native:
+            govt_id = image_file
+            certificate = None
+        else:
+            govt_id = None
+            certificate = image_file
+
+        # Create the TutorDetails instance
+        TutorDetails.objects.create(
+            user=user,
+            speakin_name=data['speakinName'],
+            about=data['about'],
+            required_credits=data['hourlyRate'],
+            intro_video=video_file,
+            govt_id=govt_id,
+            certificate=certificate,
+        )
+
+        language_instance = Language.objects.get(name=data['teachingLanguage'])
+        is_native_value = data['isNative'] == 'true'
+
+        # Handle Languages to Teach
+        TutorLanguageToTeach.objects.create(
+            user=user,
+            is_native=is_native_value,
+            language=language_instance
+        )
+
+        # Handle Spoken Languages
+        spoken_languages_str = data.get('spokenLanguages', '[]')
+
+        spoken_languages = json.loads(spoken_languages_str)
+        if not isinstance(spoken_languages, list):
+            spoken_languages = [spoken_languages]
+
+        for spoken_lang in spoken_languages:
+            try:
+                language_obj = Language.objects.get(name=spoken_lang['language'])
+            except Language.DoesNotExist:
+                return Response({'error': f"Language '{spoken_lang['language']}' does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Check for the proficiency object
+            try:
+                proficiency_obj = Proficiency.objects.get(level=spoken_lang['proficiency'])
+            except Proficiency.DoesNotExist:
+                return Response({'error': f"Proficiency level '{spoken_lang['proficiency']}' does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create the LanguageSpoken record
+            LanguageSpoken.objects.create(
+                user=user,
+                language=language_obj,
+                proficiency=proficiency_obj
+            )
+
+        return Response({'message': 'Tutor request submitted successfully!'}, status=status.HTTP_201_CREATED)
+
+    except IntegrityError as e:
+        # Check for specific duplicate key errors
+        if 'unique constraint' in str(e):
+            if 'users_user_email_key' in str(e):
+                return Response({'error': 'This email address is already registered. Please use a different email.'}, status=status.HTTP_400_BAD_REQUEST)
+            elif 'users_tutordetails_speakin_name_key' in str(e):
+                return Response({'error': 'This SpeakIn Name is already taken. Please choose a different name.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        transaction.set_rollback(True)
+        return Response({'error': 'An error occurred while processing your request.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    except json.JSONDecodeError:
+        transaction.set_rollback(True)
+        return Response({'error': 'Invalid spokenLanguages format'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        transaction.set_rollback(True)
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+class BlockUnblockUserView(APIView):
+    def patch(self, request, id):
+        try: 
+            user = User.objects.get(id=id)
+            user.is_active = not user.is_active
+            user.save()
+            if user.is_active:
+                return Response({'message': 'User unblocked successfully!'}, status=status.HTTP_200_OK)
+            return Response({'message': 'User blocked successfully!'}, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+
+@api_view(['POST'])
+def tutor_sign_in(request):
+    email = request.data.get('email')
+    password = request.data.get('password')
+  
+    user = authenticate(request, username=email, password=password)
+    
+    if user is not None and user.user_type != 'student':
+        # Check if the user is a tutor and verify the tutor status
+        if user.user_type == 'tutor':
+            try:
+                tutor_details = user.tutor_details  # Access the related TutorDetails model
+                if tutor_details.status == 'pending':
+                    return Response(
+                        {'detail': 'Your tutor account is still pending approval.'},
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            except TutorDetails.DoesNotExist:
+                return Response(
+                    {'detail': 'Tutor details not found.'},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        
+        # If tutor is approved or user is admin, allow sign-in
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'name': user.name,
+            'id': user.id,
+        }, status=status.HTTP_200_OK)
+    
+    return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class ChangePasswordView(APIView):
+    def post(self, request):
+        print(request.data) 
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
+
+        if serializer.is_valid():
+            # If valid, update the password
+            serializer.update_password(request.user)
+            return Response({"detail": "Password changed successfully"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class TeachingLanguageChangeRequestCreateView(generics.ListCreateAPIView):
+    queryset = TeachingLanguageChangeRequest.objects.all()
+    serializer_class = TeachingLanguageChangeRequestSerializer
+        
+    def perform_create(self, serializer):
+        # Pass the authenticated user to the serializer
+        serializer.save(user=self.request.user)
