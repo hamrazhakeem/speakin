@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #D9534F; color: white; padding: 10px; text-align: center; }
+        .content { padding: 20px; background-color: #f9f9f9; }
+        .highlight { font-size: 18px; font-weight: bold; color: #D9534F; }
+        .button { background-color: #4A90E2; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; }
+        .button:hover { background-color: #357ABD; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>SpeakIn Language Change Request Denied</h1>
+        </div>
+        <div class="content">
+            <p>Dear {{tutor_name}},</p>
+            <p>We regret to inform you that your request to change the language you teach to <span class="highlight">{{language}}</span> on SpeakIn has been <span class="highlight">denied</span>.</p>
+            <p>After a thorough review, our platform's review team has determined that additional experience, qualifications, or materials may be needed to meet the requirements for teaching <span class="highlight">{{language}}</span> effectively. Your current profile suggests that your expertise and qualifications are best suited for teaching <span class="highlight">{{old_language}}</span> at this time.</p>
+            <p>Please note that this decision may be based on various factors, including document verification, certifications, your submitted introduction video, or other relevant qualifications.</p>
+            <p>If you believe there has been an oversight or would like to provide additional information, you are welcome to submit a new request. We encourage you to update any relevant documents or qualifications to support your application to teach <span class="highlight">{{language}}</span>.</p>
+            <p>For any questions or assistance, feel free to reach out to us at <a href="mailto:support@speakin.com">support@speakin.com</a>.</p>
+            <p>Best regards,<br>The SpeakIn Team</p>
+        </div>
+    </div>
+</body>
+</html>

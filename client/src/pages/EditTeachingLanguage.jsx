@@ -12,6 +12,7 @@ const EditTeachingLanguage = () => {
   const navigate = useNavigate();
   const axiosInstance = useAxios();
   const userId = useSelector((state) => state.auth.userId);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Set default values in useForm, setting isNative to "true" for native
   const { control, handleSubmit, register, watch, formState: { errors } } = useForm({
@@ -33,7 +34,8 @@ const EditTeachingLanguage = () => {
         const languagesToTeachResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}get_platform_languages/`);
         if (!languagesToTeachResponse.ok) throw new Error('Failed to fetch languages to teach');
         const languagesToTeachData = await languagesToTeachResponse.json();
-        setLanguagesToTeach(languagesToTeachData);
+        console.log('languagesToTeachData:', languagesToTeachData);
+        setLanguagesToTeach(languagesToTeachData.languages);
       } catch (error) {
         console.error('Error fetching languages:', error);
       }
@@ -95,38 +97,42 @@ const EditTeachingLanguage = () => {
   }, []);
   
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
 
     // Log the languages array before stringifying (for debugging)
     // Prepare form data
-    const formData = new FormData();
-    formData.append("full_name", data.fullName);
-    formData.append("new_language", data.teachingLanguage);
-    formData.append("is_native", data.isNative);
-    formData.append("about", data.about);
-    formData.append("imageUpload", imageFile);
-    formData.append("intro_video", videoFile);
-
-    
-    // Append the entire array as a single JSON string
-    console.log('Form data being sent:', {
-      full_name: data.fullName,
-      new_language: data.teachingLanguage,
-      is_native: data.isNative,
-      about: data.about,
-    });
     try {
-      axiosInstance.post(`edit_teaching_language/${userId}/`, formData, {
+      const formData = new FormData();
+      formData.append("full_name", data.fullName);
+      formData.append("new_language", data.teachingLanguage);
+      formData.append("is_native", data.isNative);
+      formData.append("about", data.about);
+      formData.append("imageUpload", imageFile);
+      formData.append("intro_video", videoFile);
+
+      const response = await axiosInstance.post(`edit_teaching_language/${userId}/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }
       });
-      toast.success("Request submitted successfully, the status will be notifed.");
-      navigate('/tutor-dashboard');
+      
+      if (response.data.error) {
+        toast.error(response.data.error);
+      } else {
+        toast.success("Request submitted successfully, the status will be notified.");
+        navigate('/tutor-dashboard');
+      }
     } catch (error) {
       console.error('Error editing teaching language:', error);
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.error || "An unexpected error occurred. Please try again.");
+      } else {
+        toast.error("Network error. Please check your connection.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
-    console.log(data);
   };
 
   return (
@@ -285,9 +291,33 @@ const EditTeachingLanguage = () => {
               <div className="flex justify-end space-x-4">
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors flex items-center space-x-2"
                 >
-                  Save Changes
+                  {isSubmitting ? (
+                    <svg
+                      className="animate-spin h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                      ></path>
+                    </svg>
+                  ) : (
+                    'Save Changes'
+                  )}
                 </button>
               </div>
             </form>

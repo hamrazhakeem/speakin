@@ -101,11 +101,21 @@ class ChangePasswordSerializer(serializers.Serializer):
         user.set_password(self.validated_data['new_password'])
         user.save()
 
-class TeachingLanguageChangeRequestSerializer(serializers.ModelSerializer):
+class UserEmailStatusSerializer(serializers.ModelSerializer):
+    """Serializer to include email and is_active status of the user."""
     class Meta:
-        model = TeachingLanguageChangeRequest
-        fields = ['id', 'new_language', 'is_native', 'certificate', 'govt_id', 'intro_video', 
-                 'full_name', 'about', 'status']
+        model = User
+        fields = ['email', 'is_active']
+
+class TeachingLanguageChangeRequestSerializer(serializers.ModelSerializer):
+    user = UserEmailStatusSerializer(read_only=True)
+    tutor_language_to_teach = TutorLanguageToTeachSerializer(many=True, source='user.tutor_language_to_teach', read_only=True)
+    new_language = serializers.SlugRelatedField(slug_field='name', queryset=Language.objects.all())
+        
+    class Meta: 
+        model = TeachingLanguageChangeRequest 
+        fields = ['id', 'new_language', 'is_native', 'certificate', 'govt_id', 'intro_video',  
+                 'full_name', 'about', 'status', 'user', 'tutor_language_to_teach']
         read_only_fields = ['status']
 
     def to_internal_value(self, data):
@@ -114,7 +124,7 @@ class TeachingLanguageChangeRequestSerializer(serializers.ModelSerializer):
         if new_language_name:
             try:
                 language = Language.objects.get(name=new_language_name)
-                data['new_language'] = language.id
+                data['new_language'] = language.name
             except Language.DoesNotExist:
                 raise serializers.ValidationError({'new_language': f"Language '{new_language_name}' not found."})
 

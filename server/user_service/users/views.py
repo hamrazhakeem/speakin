@@ -1,8 +1,10 @@
+from django.forms import ValidationError
+from django.shortcuts import get_object_or_404
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import ChangePasswordSerializer, TeachingLanguageChangeRequestSerializer, UserSerializer, TutorDetailsSerializer, TutorLanguageToTeachSerializer
-from .models import LanguageSpoken, TeachingLanguageChangeRequest, TutorDetails, TutorLanguageToTeach, User, Language, Proficiency
+from .models import LanguageSpoken, LanguageToLearn, TeachingLanguageChangeRequest, TutorDetails, TutorLanguageToTeach, User, Language, Proficiency
 from django.core.mail import send_mail
 from django.conf import settings
 import random
@@ -23,6 +25,7 @@ import os
 import logging
 from django.db import transaction, IntegrityError
 from django.utils.datastructures import MultiValueDict
+from django.db.models import Q
 
 logger = logging.getLogger(__name__)
 
@@ -33,14 +36,7 @@ CACHE_TTL = 300
 def generate_otp():
     return ''.join(random.choices(string.digits, k=6))
 
-def send_otp_email(subject, email, html):
-    subject = subject 
-    html_message = html
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = [email]
-    send_mail(subject, '', from_email, recipient_list, html_message=html_message, fail_silently=False)
-
-def send_tutor_verification_email(subject, email, html):
+def send_email(subject, email, html):
     subject = subject
     html_message = html
     from_email = settings.DEFAULT_FROM_EMAIL
@@ -64,7 +60,7 @@ def sign_up(request):
             'user_type': serializer.validated_data['user_type'],
         })
 
-        send_otp_email('Your OTP for SpeakIn Registration', serializer.validated_data['email'], render_to_string('emails/otp_email.html', {'otp': otp}))
+        send_email('Your OTP for SpeakIn Registration', serializer.validated_data['email'], render_to_string('emails/otp_email.html', {'otp': otp}))
 
         return Response({'message': 'Please verify your OTP!', 'cache_key': cache_key}, status=status.HTTP_201_CREATED)
     return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
@@ -136,7 +132,7 @@ def resend_otp(request):
     otp = generate_otp()
     cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
 
-    send_otp_email('Resend: Your OTP for SpeakIn Registration', email, render_to_string('emails/resend_otp_email.html', {'otp': otp}))
+    send_email('Resend: Your OTP for SpeakIn Registration', email, render_to_string('emails/resend_otp_email.html', {'otp': otp}))
 
     return Response({'message': 'New OTP sent successfully!'}, status=status.HTTP_200_OK)
 
@@ -155,7 +151,7 @@ def resend_forgot_password_otp(request):
     otp = generate_otp()
     cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
 
-    send_otp_email('Resend: Your OTP for Password Reset', email, render_to_string('emails/resend_otp_email.html', {'otp': otp}))
+    send_email('Resend: Your OTP for Password Reset', email, render_to_string('emails/resend_otp_email.html', {'otp': otp}))
 
     return Response({'message': 'New OTP sent successfully!'}, status=status.HTTP_200_OK)
 
@@ -182,7 +178,7 @@ def forgot_password(request):
             'email': email,
         })
 
-        send_otp_email(
+        send_email(
             'Your OTP for SpeakIn Password Reset',
             email,
             render_to_string('emails/forgot_password_email.html', {'otp': otp})
@@ -272,39 +268,50 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
                 user = serializer.save()
                 print(f"User saved: {user.email}")
 
-                language_spoken_data = self.request.data.get('language_spoken')
-                if language_spoken_data:
-                    try:
-                        # Parse the JSON string into a Python list
-                        languages = json.loads(language_spoken_data)
+        language_spoken_data = self.request.data.get('language_spoken')
+        if language_spoken_data:
+            try:
+                languages = json.loads(language_spoken_data)
+                LanguageSpoken.objects.filter(user=user).delete()
+                for lang_data in languages:
+                    if lang_data.get('language') and lang_data.get('proficiency'):
+                        language, _ = Language.objects.get_or_create(name=lang_data['language'])
+                        proficiency, _ = Proficiency.objects.get_or_create(level=lang_data['proficiency'])
+                        LanguageSpoken.objects.create(user=user, language=language, proficiency=proficiency)
+                print("Languages spoken updated successfully")
+            except json.JSONDecodeError:
+                print("Invalid JSON format for language_spoken")
+            except Exception as e:
+                print(f"Error updating languages spoken: {str(e)}")
+
+        # Handle language_to_learn data
+        language_to_learn_data = self.request.data.get('language_to_learn')
+        if language_to_learn_data:
+            try:
+                language_data = json.loads(language_to_learn_data)  # Expecting a list (e.g., [{"language": "French", "proficiency": "Beginner"}])
+                
+                if not language_data:  # Empty array case: delete existing LanguageToLearn entry
+                    LanguageToLearn.objects.filter(user=user).delete()
+                    print("Existing language to learn deleted successfully.")
+                
+                elif len(language_data) == 1:  # Single entry expected in the list
+                    language_entry = language_data[0]
+                    language_name = language_entry.get('language')
+                    proficiency_level = language_entry.get('proficiency')
+
+                    if language_name and proficiency_level:
+                        language, _ = Language.objects.get_or_create(name=language_name)
+                        proficiency, _ = Proficiency.objects.get_or_create(level=proficiency_level)
                         
-                        # Delete existing language associations
-                        LanguageSpoken.objects.filter(user=user).delete()
-                        
-                        # Create new language associations
-                        for lang_data in languages:
-                            if lang_data.get('language') and lang_data.get('proficiency'):
-                                # Get or create the Language instance
-                                language, _ = Language.objects.get_or_create(
-                                    name=lang_data['language']
-                                )
-                                
-                                # Get or create the Proficiency instance
-                                proficiency, _ = Proficiency.objects.get_or_create(
-                                    level=lang_data['proficiency']
-                                )
-                                
-                                # Create the LanguageSpoken instance
-                                LanguageSpoken.objects.create(
-                                    user=user,
-                                    language=language,
-                                    proficiency=proficiency
-                                )
-                        print("Languages updated successfully")
-                    except json.JSONDecodeError:
-                        print("Invalid JSON format for language_spoken")
-                    except Exception as e:
-                        print(f"Error updating languages: {str(e)}")
+                        # Delete existing entry and create new one
+                        LanguageToLearn.objects.filter(user=user).delete()
+                        LanguageToLearn.objects.create(user=user, language=language, proficiency=proficiency)
+                        print("Language to learn updated successfully.")
+            
+            except json.JSONDecodeError:
+                print("Invalid JSON format for language_to_learn")
+            except Exception as e: 
+                print(f"Error updating language to learn: {str(e)}")
 
                 if user.user_type == 'tutor': 
                     print("User is a tutor")
@@ -337,7 +344,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
                             
                             print('About to send email')
 
-                            send_tutor_verification_email(
+                            send_email(
                                 'Your Tutor Account has been Approved!',
                                 user.email,
                                 email_content 
@@ -394,7 +401,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
                         
                         print('About to send denial email')
 
-                        send_tutor_verification_email(
+                        send_email(
                             'Your Tutor Account Application has been Denied',
                             user.email,
                             email_content
@@ -446,8 +453,14 @@ class CountryListView(APIView):
 class PlatformLanguageListView(APIView):
     def get(self, request):
         languages = Language.objects.filter(name__in=['English', 'Chinese', 'Arabic', 'French', 'Spanish', 'Hindi'])
-        return Response([{'id': lang.id, 'name': lang.name} for lang in languages])
+        proficiencies = [{'level': prof.level, 'description': prof.get_level_display()} 
+                        for prof in Proficiency.objects.exclude(Q(level='Native') | Q(level='C2'))]
+        return Response({
+            'languages': [{'id': lang.id, 'name': lang.name} for lang in languages], 
+            'proficiencies': proficiencies,
+        })
 
+ 
 class SpokenLanguageListView(APIView):
     def get(self, request):
         languages = Language.objects.all()
@@ -611,10 +624,105 @@ class ChangePasswordView(APIView):
             return Response({"detail": "Password changed successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-class TeachingLanguageChangeRequestCreateView(generics.ListCreateAPIView):
+class TeachingLanguageChangeRequestView(generics.ListCreateAPIView):
     queryset = TeachingLanguageChangeRequest.objects.all()
     serializer_class = TeachingLanguageChangeRequestSerializer
         
     def perform_create(self, serializer):
         # Pass the authenticated user to the serializer
         serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        # Check if the user already has a pending language change request
+        existing_request = TeachingLanguageChangeRequest.objects.filter(user=request.user, status='pending').first()
+        
+        if existing_request:
+            return Response({'error': 'You already have a pending request to change your teaching language. Please wait for it to be resolved before submitting a new request.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # If no existing request, proceed with the creation
+        return super().create(request, *args, **kwargs)
+
+    @transaction.atomic
+    def patch(self, request, id):
+        """
+        Approve a teaching language change request and update related models.
+        """
+        try:
+            # Get the language change request
+            change_request = get_object_or_404(TeachingLanguageChangeRequest, id=id)
+            
+            # Update TutorLanguageToTeach
+            TutorLanguageToTeach.objects.update_or_create(
+                user=change_request.user,
+                defaults={
+                    'language': change_request.new_language,
+                    'is_native': change_request.is_native
+                }
+            )
+            
+            # Update TutorDetails
+            tutor_details = TutorDetails.objects.get(user=change_request.user)
+            if change_request.is_native:
+                tutor_details.govt_id = change_request.govt_id
+                tutor_details.certificate = None
+            else:
+                tutor_details.govt_id = None
+                tutor_details.certificate = change_request.certificate 
+            tutor_details.intro_video = change_request.intro_video
+            tutor_details.about = change_request.about
+            tutor_details.save()
+            
+            # Update User name
+            user = change_request.user
+            user.name = change_request.full_name
+            user.save()
+            
+            # Delete the change request
+            change_request.delete()
+            
+            html_message = render_to_string('emails/language_to_teach_change_approval_email.html', {'language': change_request.new_language, 'tutor_name': tutor_details.speakin_name})
+
+            email = user.email
+
+            send_email('SpeakIn Language Change Approval', email, html_message)
+
+            return Response({
+                'message': 'Language change request approved successfully'
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+    @transaction.atomic
+    def delete(self, request, id):
+        try:
+            change_request = get_object_or_404(TeachingLanguageChangeRequest, id=id)
+            tutor_details = TutorDetails.objects.get(user=change_request.user)
+            user = change_request.user
+
+            old_language = TutorLanguageToTeach.objects.get(user=user).language
+
+            change_request.delete() 
+            
+            html_message = render_to_string(
+                'emails/language_to_teach_change_denial_email.html',
+                {'language': change_request.new_language, 'tutor_name': tutor_details.speakin_name, 'old_language': old_language}
+            )
+
+            send_email('SpeakIn Language Change Denial', user.email, html_message)
+
+            return Response({
+                'message': 'Language change request denied successfully'
+            }, status=status.HTTP_200_OK)
+            
+        except TutorLanguageToTeach.DoesNotExist:
+            return Response({
+                'error': 'Old language data for tutor not found.'
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)

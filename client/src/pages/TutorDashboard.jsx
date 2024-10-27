@@ -220,7 +220,7 @@ const TutorDashboard = () => {
             <nav className="flex space-x-6 mb-8 border-b pb-4">
               <button className="text-blue-600 font-semibold text-lg hover:text-blue-800 transition-colors">Profile</button>
               <button className="text-gray-600 text-lg hover:text-blue-800 transition-colors" onClick={()=>navigate('/tutor-password-change')}>Security</button>
-              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Bookings</button>
+              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Sessions</button>
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Payments</button>
             </nav>
 

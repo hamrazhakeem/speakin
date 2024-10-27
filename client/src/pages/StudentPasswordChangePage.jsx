@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useForm } from "react-hook-form";
-import TutorNavbar from "../components/TutorNavbar";
+import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import useAxios from "../hooks/useAxios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
-const TutorPasswordChangePage = () => {
+const StudentPasswordChangePage = () => {
   const axiosInstance = useAxios();
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -32,13 +32,13 @@ const TutorPasswordChangePage = () => {
       if (response.status === 200) {
         toast.success('Password changed successfully');
       } else if (response.status === 400 && response.data.current_password) {
-        const message = response.data.current_password[0]; // Access the first error message
+        const message = response.data.current_password[0];
         toast.error(message);
       }
       console.log(response.data);
     } catch (error) {
       if (error.response.status === 400 && error.response.data.current_password) {
-        const message = error.response.data.current_password[0]; // Access the first error message
+        const message = error.response.data.current_password[0];
         toast.error(message);
       }
       else{
@@ -63,18 +63,18 @@ const TutorPasswordChangePage = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <TutorNavbar />
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
             <h1 className="text-4xl font-bold mb-8 text-gray-800">Account Security</h1>
 
             <nav className="flex space-x-6 mb-8 border-b pb-4">
-              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors" onClick={()=>navigate('/tutor-dashboard')}>Profile</button>
-              <button className="text-blue-600 font-semibold text-lg hover:text-blue-800 transition-colors">Security</button>
-              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Sessions</button>
-              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Payments</button>
+              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors" onClick={() => navigate('/profile')}>Profile</button>
+              <button className="text-green-600 font-semibold text-lg hover:text-green-800 transition-colors">Security</button>
+              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors">My Bookings</button>
+              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors">Refer a friend</button>
             </nav>
 
             <div className="max-w-md mx-auto">
@@ -87,7 +87,7 @@ const TutorPasswordChangePage = () => {
                     <input
                       type={showCurrentPassword ? "text" : "password"}
                       {...register('currentPassword', { required: 'Current password is required' })}
-                      className={`w-full px-4 py-2 rounded-lg border ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      className={`w-full px-4 py-2 rounded-lg border ${errors.currentPassword ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-green-500`}
                     />
                     <button
                       type="button"
@@ -119,7 +119,7 @@ const TutorPasswordChangePage = () => {
                             'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character'
                         }
                       })}
-                      className={`w-full px-4 py-2 rounded-lg border ${errors.newPassword ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      className={`w-full px-4 py-2 rounded-lg border ${errors.newPassword ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-green-500`}
                     />
                     <button
                       type="button"
@@ -142,7 +142,7 @@ const TutorPasswordChangePage = () => {
                         validate: value => 
                           value === getValues('newPassword') || 'The passwords do not match'
                       })}
-                      className={`w-full px-4 py-2 rounded-lg border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                      className={`w-full px-4 py-2 rounded-lg border ${errors.confirmPassword ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-green-500`}
                     />
                     <button
                       type="button"
@@ -158,7 +158,7 @@ const TutorPasswordChangePage = () => {
                 <div className="flex justify-end mt-6">
                   <button
                     type="submit"
-                    className="bg-blue-600 text-white py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors flex items-center"
+                    className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-colors flex items-center"
                   >
                     <FaLock className="mr-2" /> Change Password
                   </button>
@@ -173,4 +173,4 @@ const TutorPasswordChangePage = () => {
   );
 };
 
-export default TutorPasswordChangePage;
+export default StudentPasswordChangePage;

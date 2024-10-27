@@ -25,4 +25,7 @@ urlpatterns = [
     path('tutor_sign_in/', views.tutor_sign_in, name='tutor_sign_in'),
     path('change_password/', views.change_password, name='change_password'),
     path('edit_teaching_language/<int:id>/', views.edit_teaching_language, name='edit_teaching_language'),
+    path('language_change_requests/', views.language_change_requests, name='language_change_requests'),
+    path('approve_language_change/<int:id>/', views.approve_language_change, name='approve_language_change'),
+    path('deny_language_change/<int:id>/', views.deny_language_change, name='deny_language_change'),
 ]

@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
-const AdminUnauthenticatedRoute = ({ children }) => {
+const AdminUnprotectedRoute = ({ children }) => {
   const isAdmin = useSelector((state) => state.auth.isAdmin);
 
   if (isAdmin) {
@@ -12,4 +12,4 @@ const AdminUnauthenticatedRoute = ({ children }) => {
   return children; 
 };
 
-export default AdminUnauthenticatedRoute;
+export default AdminUnprotectedRoute;

@@ -18,12 +18,14 @@ urlpatterns = [
     path('users/<int:pk>/', UserDetail.as_view()),
     path('block_unblock_user/<int:id>/', BlockUnblockUserView.as_view(), name='block_unblock_user'),
     path('change_password/', ChangePasswordView.as_view(), name='change_password'),
+    path('verify_language_change/<int:id>/', TeachingLanguageChangeRequestView.as_view(), name='language_change_requests'),
 
     path('get_countries/', CountryListView.as_view(), name='get_countries'),
     path('get_platform_languages/', PlatformLanguageListView.as_view(), name='get_platform_languages'),
     path('get_spoken_languages/', SpokenLanguageListView.as_view(), name='get_spoken_languages'),
     path('tutor_request/', tutor_request, name='tutor_request'),
+    path('language_change_requests/', TeachingLanguageChangeRequestView.as_view(), name='language_change_requests'),
 
     path('tutor_sign_in/', tutor_sign_in, name='tutor_sign_in'),
-    path('edit_teaching_language/<int:id>/', TeachingLanguageChangeRequestCreateView.as_view(), name='edit_teaching_language'),
+    path('edit_teaching_language/<int:id>/', TeachingLanguageChangeRequestView.as_view(), name='edit_teaching_language'),
 ]

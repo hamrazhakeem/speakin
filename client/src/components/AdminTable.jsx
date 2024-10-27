@@ -21,13 +21,25 @@ const AdminTable = ({ title, columns, data, showRating, isPending }) => (
                 <td className="p-3">{item.name}</td>
                 <td className="p-3">{item.email}</td>
                 <td className="p-3">{item.language}</td>
-                <td className="p-3">{item.credits || item.details}</td>
+                {title === "Language Change Requests" && (
+                  <td className="p-3">{item.newLanguage}</td>
+                )}
+                {title !== "Language Change Requests" && (
+                  <td className="p-3">{item.credits}</td>
+                )}
                 {showRating && (
                   <td className="p-3 flex items-center">
                     {item.rating} <Star className="w-4 h-4 text-yellow-400 ml-1" />
                   </td>
                 )}
-                {!isPending && (
+                {!isPending && title !== "Language Change Requests" && (
+                  <td className="p-3">
+                    <span className={`inline-block w-20 text-center px-2 py-1 rounded text-white ${item.status === 'Active' ? 'bg-green-500' : 'bg-red-500'}`}>
+                      {item.status}
+                    </span>
+                  </td>
+                )}
+                {title === "Language Change Requests" && (
                   <td className="p-3">
                     <span className={`inline-block w-20 text-center px-2 py-1 rounded text-white ${item.status === 'Active' ? 'bg-green-500' : 'bg-red-500'}`}>
                       {item.status}

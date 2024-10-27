@@ -19,10 +19,12 @@ const AdminManageUsersPage = () => {
         setLoading(true);
         const [usersResponse, requestsResponse] = await Promise.all([
           axiosInstance.get('get_users/'),
-          axiosInstance.get('teaching_language_requests/') // Add your actual endpoint
+          axiosInstance.get('language_change_requests/') // Add your actual endpoint
         ]);
         const users = usersResponse.data;
         const requests = requestsResponse.data;
+        console.log('Users:', users);
+        console.log('Language change requests:', requests);
         // Filter out the data for students, approved tutors, and pending tutors
         setTimeout(() => {
           // Filter out the data for students, approved tutors, and pending tutors
@@ -56,7 +58,7 @@ const AdminManageUsersPage = () => {
   const studentColumns = ['#', 'Name','Email', 'Language to Learn', 'Balance Credits', 'Status', 'Action'];
   const tutorColumns = ['#', 'SpeakIn Name', 'Email', 'Language to Teach', 'Balance Credits', 'Rating', 'Status', 'Action'];
   const pendingColumns = ['#', 'SpeakIn Name','Email', 'Language to Teach', 'Required Credits', 'Action'];
-  const languageRequestColumns = ['#', 'SpeakIn Name', 'Email', 'Current Language', 'Requested Language', 'Status', 'Action'];
+  const languageRequestColumns = ['#', 'Full Name', 'Email', 'Current Language', 'Requested Language', 'Status', 'Action'];
 
   // Action handler for blocking/unblocking tutors and verifying pending tutors
   const handleAction = async (userId) => {
@@ -83,15 +85,22 @@ const AdminManageUsersPage = () => {
     } 
   }
 
-  const handleLanguageRequest = async (requestId, action) => {
+  const handleLanguageChangeVerify = async (requestId) => {
     try {
-      const response = await axiosInstance.patch(`teaching_language_requests/${requestId}/`, {
-        status: action
-      });
-      console.log('Language request updated:', response.data);
-      fetchUsers();
+      const requestData = languageChangeRequests.find(
+        request => request.id === requestId
+      );
+
+      if (requestData) {
+        // Navigate with the found data instead of making a new API call
+        navigate(`/admin/verify-language-change/${requestId}`, {
+          state: requestData
+        });
+      } else {
+        console.error('Language change request not found in cached data');
+      }
     } catch (error) {
-      console.error('Error updating language request:', error);
+      console.error('Error getting language change request:', error);
     }
   };
 
@@ -199,24 +208,18 @@ const AdminManageUsersPage = () => {
                 columns={languageRequestColumns}
                 data={languageChangeRequests.map((request, index) => ({
                   id: index + 1,
-                  name: request.user?.tutor_details?.speakin_name || 'N/A',
+                  name: request.full_name || 'N/A',
                   email: request.user?.email || 'N/A',
-                  language: request.user?.tutor_language_to_teach?.[0]?.language || 'N/A',
-                  newLanguage: request.new_language?.name || 'N/A',
-                  status: request.status,
+                  language: request.tutor_language_to_teach?.[0]?.language || 'N/A',
+                  newLanguage: request.new_language || 'N/A',
+                  status: request.user?.is_active? 'Active' : 'Inactive',
                   action: (
                     <div className="flex gap-2">
                       <button
-                        className="bg-green-500 hover:bg-green-600 text-white rounded px-3 py-1"
-                        onClick={() => handleLanguageRequest(request.id, 'approved')}
+                        className="bg-blue-500 hover:bg-blue-600 text-white rounded px-3 py-1"
+                        onClick={() => handleLanguageChangeVerify(request.id)}
                       >
-                        Approve
-                      </button>
-                      <button
-                        className="bg-red-500 hover:bg-red-600 text-white rounded px-3 py-1"
-                        onClick={() => handleLanguageRequest(request.id, 'rejected')}
-                      >
-                        Reject
+                        Verify
                       </button>
                     </div>
                   ),

@@ -1,269 +1,552 @@
-import React, { useState, useEffect } from 'react';
-import { Camera } from 'lucide-react';
-import useAxios from '../hooks/useAxios';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { FaEdit, FaGlobe, FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Navigate, useNavigate } from 'react-router-dom';
-
-const languagesList = [
-  'English', 'Spanish', 'French', 'German', 'Mandarin', 'Italian', 
-];
+import useAxios from '../hooks/useAxios';
+import { useSelector } from 'react-redux';
 
 const ProfilePage = () => {
-  const [userData, setUserData] = useState();
-  const [name, setName] = useState('');
-  const [languagesSpoken, setLanguagesSpoken] = useState([]);
-  const [languagesToLearn, setLanguagesToLearn] = useState([]);
-  const [image, setImage] = useState('');
-  const [newLanguage, setNewLanguage] = useState('');
-  const [country, setCountry] = useState('');
-  const [proficiency, setProficiency] = useState('');
-  const userId = useSelector((state) => state.auth.userId);
   const axiosInstance = useAxios();
+  const userId = useSelector((state) => state.auth.userId);
   const navigate = useNavigate();
+  
+  const [studentData, setStudentData] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [deleteImage, setDeleteImage] = useState(false);
+  const [countries, setCountries] = useState([]);
+  const [availableLanguages, setAvailableLanguages] = useState([]);
+  const [platformLanguages, setPlatformLanguages] = useState([]);
+  const [spokenProficiencyLevels, setSpokenProficiencyLevels] = useState([]);
+  const [learningProficiencyLevels, setLearningProficiencyLevels] = useState([]);
+  const [spokenLanguages, setSpokenLanguages] = useState([]);
+  const [languageToLearn, setLanguageToLearn] = useState(null);
+  const [languageErrors, setLanguageErrors] = useState([]);
+  const [formErrors, setFormErrors] = useState({});
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors }
+  } = useForm();
+
+  
+  const validateLanguages = () => {
+    let isValid = true;
+    const newErrors = [];
+    const newFormErrors = {};
+
+    // Remove spoken languages validation
+    spokenLanguages.forEach((lang, index) => {
+      const errors = {};
+      if (lang.language && !lang.proficiency) {
+        errors.proficiency = 'Please select a proficiency level';
+        isValid = false;
+      }
+      if (!lang.language && lang.proficiency) {
+        errors.language = 'Please select a language';
+        isValid = false;
+      }
+      newErrors[index] = errors;
+    });
+
+    // Remove required validation for language to learn
+    if (languageToLearn?.language && !languageToLearn?.proficiency) {
+      newFormErrors.languageToLearn = 'Please select a proficiency level';
+      isValid = false;
+    }
+    if (!languageToLearn?.language && languageToLearn?.proficiency) {
+      newFormErrors.languageToLearn = 'Please select a language';
+      isValid = false;
+    }
+
+    setLanguageErrors(newErrors);
+    setFormErrors(newFormErrors);
+    return isValid;
+  };
+
+
+
+  async function fetchUserData() {
+    try {
+      const response = await axiosInstance.get(`get_user/${userId}/`);
+      setStudentData(response.data);
+      console.log(response.data)
+      if (response.data.language_spoken?.length > 0) {
+        setSpokenLanguages(response.data.language_spoken);
+      }
+      
+      if (response.data.language_to_learn?.length > 0) {
+        setLanguageToLearn(response.data.language_to_learn[0]);
+      }
+      
+      setValue("name", response.data.name || "");
+      setValue("balance_credits", response.data.balance_credits || "");
+      setValue("email", response.data.email || "");
+      setValue("country", response.data.country || "");
+
+      // Fetch countries
+      const countriesResponse = await axiosInstance.get(`get_countries/`);
+      setCountries(countriesResponse.data);
+
+      // Fetch available languages and proficiency levels for speaking
+      const spokenLanguagesResponse = await axiosInstance.get(`get_spoken_languages/`);
+      setAvailableLanguages(spokenLanguagesResponse.data.languages);
+      setSpokenProficiencyLevels(spokenLanguagesResponse.data.proficiencies);
+
+      // Fetch platform languages and learning proficiency levels
+      const platformLanguagesResponse = await axiosInstance.get(`get_platform_languages/`);
+      setPlatformLanguages(platformLanguagesResponse.data.languages);
+      setLearningProficiencyLevels(platformLanguagesResponse.data.proficiencies);
+      
+      console.log('Spoken Languages:', spokenLanguagesResponse.data, 'Platform:', platformLanguagesResponse.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axiosInstance.get(`get_user/${userId}/`);
-        if (response.data) {
-          setUserData(response.data);
-          setName(response.data.name);
-          setCountry(response.data.country)
-          setLanguagesSpoken(response.data.languagesSpoken || []);
-          setLanguagesToLearn(response.data.languagesToLearn || []);
-          
-          // Use response.data.profile_image directly here
-          console.log("Fetched user data:", response.data);
-          console.log(response.data.profile_image);
-        
-          setImage(response.data.profile_image);
-        }
-         else{
-          console.error('No user data found');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
-
     fetchUserData();
   }, []);
 
-  const handleImageUpload = (e) => {
-    setImage(e.target.files[0]);
+  const handleEditToggle = () => {
+    setEditMode(!editMode);
+    setDeleteImage(false);
+    setLanguageErrors([]);
+    setFormErrors({});
   };
 
-  const handleLanguageDelete = (lang, type) => {
-    if (type === 'spoken') {
-      setLanguagesSpoken(languagesSpoken.filter((l) => l !== lang));
-    } else {
-      setLanguagesToLearn(languagesToLearn.filter((l) => l !== lang));
-    }
+  const handleProfileImageChange = (e) => {
+    setProfileImage(e.target.files[0]);
+    setDeleteImage(false);
   };
 
-  const handleSaveChanges = async () => {
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('country', country);
-
-    if (image && image.size > 0) {
-        console.log("Appending image to FormData:", image);
-        formData.append('profile_image', image);
-    } else {
-        alert('Please select a valid image file.');
-        return;
-    }
-
-    languagesSpoken.forEach(lang => {
-        formData.append('languagesSpoken[]', lang);
-    });
-
-    languagesToLearn.forEach(lang => {
-        formData.append('languagesToLearn[]', lang);
-    });
-
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
-
-    try {
-        await axiosInstance.put(`update_user/${userId}/`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        });
-        alert('Profile updated successfully');
-    } catch (error) {
-        console.error('Error updating profile:', error);
-        alert('Error updating profile: ' + error.message);
-    }
-};
-
-  const handleAddLanguage = () => {
-    if (newLanguage && proficiency) {
-      setLanguagesToLearn([...languagesToLearn, `${newLanguage} (${proficiency})`]);
-      setNewLanguage('');
-      setProficiency('');
-    } else {
-      alert('Please select a language and proficiency');
-    }
+  const handleDeleteImage = () => {
+    setProfileImage(null);
+    setDeleteImage(true);
   };
 
-  const handleLanguageEdit = (index, lang, type) => {
-    const editedLang = prompt('Edit language:', lang);
-    if (editedLang) {
-      if (type === 'spoken') {
-        const updatedSpoken = [...languagesSpoken];
-        updatedSpoken[index] = editedLang;
-        setLanguagesSpoken(updatedSpoken);
-      } else {
-        const updatedLearn = [...languagesToLearn];
-        updatedLearn[index] = editedLang;
-        setLanguagesToLearn(updatedLearn);
+  const handleAddSpokenLanguage = () => {
+    const hasEmptyFields = spokenLanguages.some((lang, index) => {
+      const errors = {};
+      if (!lang.language) errors.language = 'Please select a language';
+      if (!lang.proficiency) errors.proficiency = 'Please select a proficiency level';
+      
+      if (Object.keys(errors).length > 0) {
+        const newErrors = [...languageErrors];
+        newErrors[index] = errors;
+        setLanguageErrors(newErrors);
+        return true;
       }
+      return false;
+    });
+
+    if (hasEmptyFields) {
+      return;
+    }
+
+    const defaultProficiency = spokenLanguages.length === 0 ? 'Native' : 
+      (spokenProficiencyLevels.find(level => level.level !== 'Native')?.level || '');
+    
+    setSpokenLanguages([
+      ...spokenLanguages, 
+      { language: '', proficiency: defaultProficiency }
+    ]);
+    
+    setLanguageErrors([...languageErrors, {}]);
+  };
+
+  const handleRemoveSpokenLanguage = (index) => {
+    const newLanguages = spokenLanguages.filter((_, i) => i !== index);
+    setSpokenLanguages(newLanguages);
+    
+    const newErrors = languageErrors.filter((_, i) => i !== index);
+    setLanguageErrors(newErrors);
+  };
+
+  const handleSpokenLanguageChange = (index, field, value) => {
+    const newLanguages = [...spokenLanguages];
+    
+    if (field === 'language') {
+      const isLanguageSelected = spokenLanguages.some(
+        (lang, i) => i !== index && lang.language === value
+      );
+      if (isLanguageSelected) return;
+      
+      if (index === 0) {
+        newLanguages[index] = { language: value, proficiency: 'Native' };
+      } else {
+        newLanguages[index] = { ...newLanguages[index], language: value };
+      }
+    } else {
+      newLanguages[index] = { ...newLanguages[index], [field]: value };
+    }
+    
+    const newErrors = [...languageErrors];
+    newErrors[index] = {};
+    setLanguageErrors(newErrors);
+    
+    setSpokenLanguages(newLanguages);
+  };
+
+
+  const handleLanguageToLearnChange = (language, proficiency) => {
+    if (!language && !proficiency) {
+      setLanguageToLearn(null);
+    } else {
+      setLanguageToLearn({ language, proficiency });
     }
   };
 
-  if (!userData) {
-    return <div>Loading...</div>;
-  }
+  const handleRemoveLanguageToLearn = () => {
+    setLanguageToLearn(null);
+  };
+
+  const onSubmit = async (data) => {
+    if (!validateLanguages()) {
+      return;
+    }
+
+    const formData = new FormData();
+    if (profileImage) {
+      formData.append("profile_image", profileImage);
+    } else if (deleteImage) {
+      formData.append("profile_image", "");
+    }
+    
+    formData.append("name", data.name);
+    formData.append("country", data.country);
+    formData.append("language_spoken", JSON.stringify(spokenLanguages));
+    if (languageToLearn) {
+      formData.append("language_to_learn", JSON.stringify([languageToLearn]));
+    } else {
+      formData.append("language_to_learn", JSON.stringify([]));
+    }
+    console.log(languageToLearn)
+    try {
+      await axiosInstance.patch(`update_user/${userId}/`, formData);
+      setEditMode(false);
+      fetchUserData();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
+  };
+
+  const { email, profile_image, balance_credits } = studentData || {};
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Navbar />
-      <main className="flex-1 bg-white-100">
-        <div className="container mx-auto p-4 mt-16 md:mt-24 mb-10">
-          <h1 className="text-2xl font-bold mb-6">Account & Settings</h1>
-          <div className="flex flex-col md:flex-row">
-            {/* Left Sidebar */}
-            <div className="w-full md:w-1/4 pr-0 md:pr-4 mb-4 md:mb-0">
-              <div className="bg-white rounded-lg shadow-md">
-                <div className="p-4 rounded-t-lg">Account Settings</div>
-                <button className="p-4 rounded-t-lg hover:bg-gray-200" onClick={()=> navigate('change-password')}>Change Password</button>
-                <div className="p-4 rounded-t-lg">Bookings</div>
-                <div className="p-4 rounded-t-lg">Refer a Friend</div>
-                <div className="p-4 rounded-t-lg">Delete Account</div>
-              </div>
-            </div>
+      <main className="flex-grow container mx-auto px-4 py-8 mt-20">
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <div className="p-8">
+            <h1 className="text-4xl font-bold mb-8 text-gray-800">Student Profile</h1>
 
-            {/* Right Content Area */}
-            <div className="w-full md:w-3/4 bg-white rounded-lg shadow-md p-6">
-              <div className="flex items-center mb-6">
-                <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center mr-4">
-                  {userData.profile_image && (
-                    <img 
-                      src={`${userData.profile_image}`} 
-                      alt="Profile" 
-                      className="w-20 h-20 rounded-full object-cover"
+            <nav className="flex space-x-6 mb-8 border-b pb-4">
+              <button className="text-green-600 font-semibold text-lg hover:text-green-800 transition-colors">Profile</button>
+              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors" onClick={() => navigate('/student-password-change')}>Security</button>
+              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors">My Bookings</button>
+              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors">Refer a friend</button>
+            </nav>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Profile Picture Section */}
+              <div className="lg:col-span-1">
+                <div className="bg-gray-100 p-6 rounded-lg shadow-md">
+                  {editMode ? (
+                    <div className="space-y-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Profile Picture</label>
+                      <input 
+                        type="file" 
+                        onChange={handleProfileImageChange} 
+                        accept="image/*"
+                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                      />
+                      {(profile_image || profileImage) && !deleteImage && (
+                        <button
+                          type="button"
+                          onClick={handleDeleteImage}
+                          className="bg-red-500 text-white py-2 px-4 rounded-full flex items-center justify-center w-full hover:bg-red-600 transition-colors"
+                        >
+                          <FaTrash className="mr-2" /> Delete Image
+                        </button>
+                      )}
+                    </div>
+                  ) : profile_image && !deleteImage ? (
+                    <img
+                      src={profile_image}
+                      alt="Profile"
+                      className="h-64 w-64 rounded-full mx-auto object-cover shadow-lg"
                     />
+                  ) : (
+                    <div className="bg-gray-200 h-64 w-64 rounded-full mx-auto flex items-center justify-center shadow-inner">
+                      <span className="text-7xl text-gray-400">📷</span>
+                    </div>
                   )}
                 </div>
-                <input type="file" accept="image/*" onChange={handleImageUpload} className="text-blue-500 text-sm ml-2" />
               </div>
 
-              <form>
-                {/* Name input */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1" htmlFor="name">Name</label>
-                  <input
-                    type="text"
-                    id="name"
-                    value={userData.name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
+              {/* Profile Information */}
+              <div className="lg:col-span-2">
+                <div className="bg-gray-100 p-8 rounded-lg shadow-md">
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-semibold text-gray-800">Profile Info</h2>
+                    <div className="flex space-x-4">
+                      <div className="bg-white px-4 py-2 rounded-full shadow text-center">
+                        <p className="text-sm text-gray-600">Credits</p>
+                        <p className="text-2xl font-bold text-green-600">{balance_credits}</p>
+                      </div>
+                    </div>
+                  </div>
 
-                {/* Email input */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1" htmlFor="email">Email</label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={userData.email}
-                    readOnly
-                    className="w-full p-2 border rounded bg-gray-200"
-                  />
-                </div>
+                  <div className="space-y-6">
+                    {/* Basic Info */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                      <input
+                        type="text"
+                        {...register('name', { required: 'Name is required' })}
+                        className="w-full px-4 py-2 rounded-lg border bg-white"
+                        disabled={!editMode}
+                      />
+                      {errors.name && (
+                        <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
+                      )}
+                    </div>
 
-                {/* Country input */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1" htmlFor="country">Country</label>
-                  <input
-                    type="text"
-                    id="country"
-                    value={userData.country}
-                    onChange={(e) => setCountry(e.target.value)}
-                    className="w-full p-2 border rounded"
-                  />
-                </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                      <input
+                        type="email"
+                        value={email ?? "N/A"}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed"
+                        readOnly
+                      />
+                    </div>
 
-                {/* Languages you can speak */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Languages you can speak</label>
-                  {languagesSpoken.length === 0 ? (
-                    <p className="text-gray-500">Languages empty. Click + Add more</p>
-                  ) : (
-                    languagesSpoken.map((lang, index) => (
-                      <div key={index} className="flex items-center mb-2">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                      {editMode ? (
+                        <select
+                          {...register("country", { required: true })}
+                          className="w-full px-4 py-2 rounded-lg border bg-white"
+                        >
+                          {countries.map(([name, code]) => (
+                            <option key={code} value={name}>{name}</option>
+                          ))}
+                        </select>
+                      ) : (
                         <input
                           type="text"
-                          value={lang}
-                          onChange={(e) => handleLanguageEdit(index, e.target.value, 'spoken')}
-                          className="border rounded p-2 mr-2 w-1/2"
+                          value={studentData?.country ?? "N/A"}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed"
+                          readOnly
                         />
-                        <button type="button" onClick={() => handleLanguageDelete(lang, 'spoken')} className="text-red-500">Delete</button>
-                      </div>
-                    ))
-                  )}
-                  <button type="button" onClick={() => handleAddLanguage()} className="text-blue-500 text-sm mt-1">+ Add more</button>
-                </div>
+                      )}
+                    </div>
 
-                {/* Languages to learn */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1">Languages to learn</label>
-                  {languagesToLearn.length === 0 ? (
-                    <p className="text-gray-500">Languages empty. Add below:</p>
-                  ) : (
-                    languagesToLearn.map((lang, index) => (
-                      <div key={index} className="flex items-center mb-2">
-                        <input
-                          type="text"
-                          value={lang}
-                          onChange={(e) => handleLanguageEdit(index, e.target.value, 'learn')}
-                          className="border rounded p-2 mr-2 w-1/2"
-                        />
-                        <button type="button" onClick={() => handleLanguageDelete(lang, 'learn')} className="text-red-500">Delete</button>
+                    {/* Languages Spoken Section */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-4">
+                        <FaGlobe className="text-green-600 text-xl" />
+                        <h3 className="text-lg font-semibold text-gray-800">Languages Spoken</h3>
                       </div>
-                    ))
-                  )}
-                  <div className="flex items-center mb-2">
-                    <select
-                      value={newLanguage}
-                      onChange={(e) => setNewLanguage(e.target.value)}
-                      className="w-1/2 p-2 border rounded mr-2"
-                    >
-                      <option value="">Select a language</option>
-                      {languagesList.map((lang, index) => (
-                        <option key={index} value={lang}>{lang}</option>
-                      ))}
-                    </select>
-                    <input
-                      type="text"
-                      value={proficiency}
-                      onChange={(e) => setProficiency(e.target.value)}
-                      placeholder="Proficiency"
-                      className="w-1/2 p-2 border rounded"
-                    />
-                    <button type="button" onClick={handleAddLanguage} className="text-blue-500 ml-2">Add</button>
+
+                      {formErrors.spokenLanguages && (
+                                  <p className="text-red-500 text-sm mt-1">{formErrors.spokenLanguages}</p>
+                                )}
+
+                      {spokenLanguages.length === 0 ? (
+                        <div className="bg-gray-50 p-6 rounded-lg text-center">
+                          <p className="text-gray-500">No languages selected</p>
+                        </div>
+                      ) : (
+                        spokenLanguages.map((lang, index) => (
+                          <div key={index} className="space-y-2">
+                            <div className="flex gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
+                              <div className="flex-1">
+                                <select
+                                  value={lang.language}
+                                  onChange={(e) => handleSpokenLanguageChange(index, 'language', e.target.value)}
+                                  disabled={!editMode}
+                                  className={`w-full px-4 py-2 rounded-lg border ${
+                                    editMode ? 'bg-white hover:border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200' 
+                                    : 'bg-gray-50 cursor-not-allowed'
+                                  } ${languageErrors[index]?.language ? 'border-red-500' : ''} transition-colors`}
+                                >
+                                  <option value="">Select Language</option>
+                                  {availableLanguages.map((l) => (
+                                    <option 
+                                      key={l.id || l} 
+                                      value={l.name || l}
+                                      disabled={spokenLanguages.some((existing, i) => 
+                                        i !== index && existing.language === (l.name || l)
+                                      )}
+                                    >
+                                      {l.name || l}
+                                    </option>
+                                  ))}
+                                </select>
+                                {languageErrors[index]?.language && (
+                                  <p className="text-red-500 text-sm mt-1">{languageErrors[index].language}</p>
+                                )}
+                              </div>
+                              
+                              <div className="flex-1">
+                                <select
+                                  value={lang.proficiency}
+                                  onChange={(e) => handleSpokenLanguageChange(index, 'proficiency', e.target.value)}
+                                  disabled={!editMode || index === 0}
+                                  className={`w-full px-4 py-2 rounded-lg border ${
+                                    index === 0 || !editMode ? 'bg-gray-50 cursor-not-allowed' 
+                                    : 'bg-white hover:border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200'
+                                  } ${languageErrors[index]?.proficiency ? 'border-red-500' : ''} transition-colors`}
+                                >
+                                  {index === 0 ? (
+                                    <option value="Native">Native</option>
+                                  ) : (
+                                    spokenProficiencyLevels
+                                      .filter(level => level.level !== 'Native')
+                                      .map((level) => (
+                                        <option key={level.level} value={level.level}>
+                                          {level.description}
+                                        </option>
+                                      ))
+                                  )}
+                                </select>
+                                {languageErrors[index]?.proficiency && (
+                                  <p className="text-red-500 text-sm mt-1">{languageErrors[index].proficiency}</p>
+                                )}
+                              </div>
+                              
+                              {editMode && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveSpokenLanguage(index)}
+                                  className="bg-red-100 text-red-600 p-2 rounded-lg hover:bg-red-200 transition-colors"
+                                  aria-label="Remove language"
+                                >
+                                  <FaTrash />
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                      
+                      {editMode && (
+                        <button
+                          type="button"
+                          onClick={handleAddSpokenLanguage}
+                          className="mt-4 bg-green-50 text-green-600 py-2 px-4 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium"
+                        >
+                          + Add Language
+                        </button>
+                      )}
+                    </div>
+
+                                {/* Language to Learn Section */}
+                                <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Language to Learn</label>
+                                  {editMode ? (
+                                    <>
+                                      {formErrors.languageToLearn && (
+                                        <p className="text-red-500 text-sm mb-2">{formErrors.languageToLearn}</p>
+                                      )}
+                                      <div className="flex gap-4">
+                                        <select
+                                          value={languageToLearn?.language || ''}
+                                          onChange={(e) => handleLanguageToLearnChange(e.target.value, languageToLearn?.proficiency || learningProficiencyLevels[0]?.level)}
+                                          className="flex-1 px-4 py-2 rounded-lg border bg-white"
+                                        >
+                                          <option value="">Select Language</option>
+                                          {platformLanguages.map((lang) => (
+                                            <option key={lang.id || lang} value={lang.name || lang}>{lang.name || lang}</option>
+                                          ))}
+                                        </select>
+                                        <select
+                                          value={languageToLearn?.proficiency || ''}
+                                          onChange={(e) => handleLanguageToLearnChange(languageToLearn?.language || '', e.target.value)}
+                                          className="flex-1 px-4 py-2 rounded-lg border bg-white"
+                                        >
+                                          {learningProficiencyLevels.map((level) => (
+                                            <option key={level.level} value={level.level}>
+                                              {level.description}
+                                            </option>
+                                          ))}
+                                        </select>
+                                        {languageToLearn && (
+                                          <button
+                                            type="button"
+                                            onClick={handleRemoveLanguageToLearn}
+                                            className="bg-red-100 text-red-600 p-2 rounded-lg hover:bg-red-200 transition-colors"
+                                            aria-label="Remove language to learn"
+                                          >
+                                            <FaTrash />
+                                          </button>
+                                        )}
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="w-full">
+                                      {languageToLearn ? (
+                                        <div className="flex gap-4">
+                                          <input
+                                            type="text"
+                                            value={languageToLearn.language}
+                                            className="flex-1 px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed"
+                                            readOnly
+                                          />
+                                          <input
+                                            type="text"
+                                            value={languageToLearn.proficiency}
+                                            className="flex-1 px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed"
+                                            readOnly
+                                          />
+                                        </div>
+                                      ) : (
+                                        <div className="bg-gray-50 p-6 rounded-lg text-center">
+                                          <p className="text-gray-500">No languages selected</p>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                    </div>
+
+                    <div className="flex justify-end mt-6">
+                      {editMode ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={handleEditToggle}
+                            className="bg-gray-400 text-white py-2 px-6 rounded-lg mr-4 hover:bg-gray-500 transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-colors"
+                          >
+                            Save Changes
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleEditToggle}
+                          className="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition-colors flex items-center"
+                        >
+                          <FaEdit className="mr-2" /> Edit Profile
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
-
-                <button type="button" onClick={handleSaveChanges} className="bg-blue-500 text-white px-4 py-2 rounded">Save Changes</button>
-              </form>
-            </div>
+              </div>
+            </form>
           </div>
         </div>
       </main>
