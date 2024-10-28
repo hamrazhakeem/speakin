@@ -3,12 +3,13 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const TutorProtectedRoute = () => {
-  const isAdmin = useSelector((state) => state.auth.isAdmin);
-  const isTutor = useSelector((state) => state.auth.isTutor);
+  const { isAuthenticated, isStudent } = useSelector((state) => state.auth)
 
-  if (!isAdmin && !isTutor) {
+  if (!isAuthenticated) {
     return <Navigate to="/tutor-signin" />;
   }
+
+  if (isStudent) return <Navigate to="/home" />;
 
   return <Outlet />; 
 };

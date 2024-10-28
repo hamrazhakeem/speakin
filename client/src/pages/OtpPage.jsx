@@ -60,7 +60,7 @@ const OtpPage = () => {
             const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}verify_otp/`, { email, otp, cache_key: cacheKey });
             const { access, refresh, name, id } = response.data;
 
-            dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, isAdmin: false, userId: id}));
+            dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, isAdmin: false, userId: id, isStudent: true }));
       
             toast.success(`Welcome, ${name}!`);
 

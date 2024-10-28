@@ -3,15 +3,18 @@ import { LogOut, ChevronDown } from 'lucide-react';
 import { useSelector, useDispatch } from "react-redux";
 import { clearTokens } from "../redux/authSlice";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 const AdminNavbar = () => {
     const { userName } = useSelector((state) => state.auth);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const handleLogout = () => {
         toast.success("Logged out successfully!")
         dispatch(clearTokens());
+        navigate('/admin/signin'); 
     };
   
     return (

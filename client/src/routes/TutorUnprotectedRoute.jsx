@@ -3,14 +3,19 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const TutorUnprotectedRoute = () => {
-  const { isAuthenticated, isTutor } = useSelector((state) => state.auth);
+  const { isAuthenticated, isStudent, isAdmin } = useSelector((state) => state.auth);
 
-  console.log("TutorUnprotectedRoute-------", isAuthenticated, isTutor);
-  if (isAuthenticated && isTutor) {
-    return <Navigate to="/tutor-dashboard" />; 
+  if (isAuthenticated) {
+    if (isStudent) {
+      return <Navigate to="/home" />; 
+    }
+    if (isAdmin) {
+      return <Navigate to="/admin/manage-users" />;
+    }
+    return <Navigate to="/tutor-dashboard" />;
   }
 
-  return <Outlet />;
+  return <Outlet />; 
 }
 
 export default TutorUnprotectedRoute;

@@ -10,6 +10,7 @@ const authSlice = createSlice({
     userId: null,
     isAdmin: false,
     isTutor: false,
+    isStudent: false,
   },
   reducers: {
     setTokens: (state, action) => {
@@ -20,6 +21,7 @@ const authSlice = createSlice({
       state.userId = action.payload.userId;  
       state.isAdmin = action.payload.isAdmin; 
       state.isTutor = action.payload.isTutor;
+      state.isStudent = action.payload.isStudent;  
     },
     clearTokens: (state) => {
       state.accessToken = null;
@@ -29,6 +31,7 @@ const authSlice = createSlice({
       state.userId = null;
       state.isAdmin = false;
       state.isTutor = false;
+      state.isStudent = false;
     },
   },
 });

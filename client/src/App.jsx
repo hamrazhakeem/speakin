@@ -1,5 +1,7 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
+import useProactiveTokenRefresh from './hooks/useProactiveTokenRefresh';
+
 import LandingPage from './pages/LandingPage';
 import SignInPage from './pages/SigninPage';
 import SignUpPage from './pages/SignUpPage';
@@ -9,27 +11,29 @@ import HomePage from './pages/HomePage';
 import ForgotPassword from './pages/ForgotPassword';
 import ForgotPasswordOtpPage from './pages/ForgotPasswordOtpPage';
 import SetNewPassword from './pages/SetNewPassword';
-import StudentUnprotectedRoute from './routes/StudentUnprotectedRoute';
-import StudentProtectedRoute from './routes/StudentProtectedRoute';
 import ProfilePage from './pages/ProfilePage';
+import StudentPasswordChangePage from './pages/StudentPasswordChangePage';
+
 import TutorLandingPage from './pages/TutorLandingPage';
 import TutorSignInPage from './pages/TutorSignInPage';
-import AdminSignInPage from './pages/AdminSignInPage';
-import AdminDashboardPage from './pages/AdminDashboardPage';
-import AdminProtectedRoute from './routes/AdminProtectedRoute';
-import AdminUnprotectedRoute from './routes/AdminUnprotectedRoute';
-import AdminManageUsersPage from './pages/AdminManageUsersPage';
 import TutorRequestPage from './pages/TutorRequestPage';
-import useProactiveTokenRefresh from './hooks/useProactiveTokenRefresh';
-import ApplicationConfirmation from './pages/ApplicationConfirmation';
-import AdminVerifyTutorPage from './pages/AdminVerifyTutorPage';
-import TutorProtectedRoute from './routes/TutorProtectedRoute';
-import TutorUnprotectedRoute from './routes/TutorUnprotectedRoute';
 import TutorDashboard from './pages/TutorDashboard';
 import TutorPasswordChangePage from './pages/TutorPasswordChangePage';
 import EditTeachingLanguage from './pages/EditTeachingLanguage';
+
+import AdminSignInPage from './pages/AdminSignInPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminManageUsersPage from './pages/AdminManageUsersPage';
+import ApplicationConfirmation from './pages/ApplicationConfirmation';
+import AdminVerifyTutorPage from './pages/AdminVerifyTutorPage';
 import AdminVerifyLanguageChangePage from './pages/AdminVerifyLanguageChangePage';
-import StudentPasswordChangePage from './pages/StudentPasswordChangePage';
+
+import StudentUnprotectedRoute from './routes/StudentUnprotectedRoute';
+import StudentProtectedRoute from './routes/StudentProtectedRoute';
+import TutorProtectedRoute from './routes/TutorProtectedRoute';
+import TutorUnprotectedRoute from './routes/TutorUnprotectedRoute';
+import AdminProtectedRoute from './routes/AdminProtectedRoute';
+import AdminUnprotectedRoute from './routes/AdminUnprotectedRoute';
 
 const App = () => {
   useProactiveTokenRefresh();
@@ -91,6 +95,9 @@ const App = () => {
           <Route path='/admin/verify-tutor/:userId' element={<AdminVerifyTutorPage />} />
           <Route path='/admin/verify-language-change/:requestId' element={<AdminVerifyLanguageChangePage />} />
         </Route>
+
+        {/* Default route for unmatched paths */}
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );

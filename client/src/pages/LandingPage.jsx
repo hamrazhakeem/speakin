@@ -54,6 +54,7 @@ const LandingPage = () => {
               <p className="text-4xl font-bold mt-4">₹0</p>
               <ul className="text-gray-600 mt-4 list-disc pl-5">
                 <li>1-on-1 trial with Tutors</li>
+                <li>Chat with Tutors</li>
                 <li>Earn credits by referring friends</li>
               </ul>
             </div>
@@ -63,7 +64,6 @@ const LandingPage = () => {
               <ul className="text-gray-600 mt-4 list-disc pl-5">
                 <li>All features from Free plan</li>
                 <li>Priority booking for popular Tutors</li>
-                <li>Chat with Tutors</li>
                 <li>Faster Customer Care support</li>
               </ul>
             </div>

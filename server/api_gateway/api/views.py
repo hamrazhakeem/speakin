@@ -94,6 +94,7 @@ def delete_api(endpoint, permissions=[AllowAny]):
     
     return api_view_func
 
+# User Service
 # User Authentication Endpoints
 sign_up = post_api('sign_up/')
 verify_otp = post_api('verify_otp/')
