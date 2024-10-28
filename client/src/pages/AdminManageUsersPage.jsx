@@ -34,6 +34,7 @@ const AdminManageUsersPage = () => {
   
           // Update state with the fetched data
           setStudents(studentData);
+          console.log(studentData)
           setTutors(approvedTutors);
           setPendingTutors(pendingTutorsData);
           setLanguageChangeRequests(requests);
@@ -77,7 +78,7 @@ const AdminManageUsersPage = () => {
 
   const handleVerify = async (userId) => {
     try {
-      const response = await axiosInstance.get(`get_user/${userId}/`);
+      const response = await axiosInstance.get(`admin_get_user/${userId}/`);
       navigate(`/admin/verify-tutor/${userId}`, { state: response.data });
       console.log("Tutor data:", response.data);
     } catch (error) {
@@ -144,7 +145,7 @@ const AdminManageUsersPage = () => {
                   id: index + 1,
                   name: student.name,
                   email: student.email,
-                  language: student.language_to_learn?.language || 'N/A',
+                  language: student.language_to_learn.map(lang => lang.language).join(', ') || 'N/A',
                   credits: `${student.balance_credits} Credits`,
                   status: student.is_active ? 'Active' : 'Inactive',
                   action: (

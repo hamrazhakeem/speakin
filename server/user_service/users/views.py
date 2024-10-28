@@ -1,15 +1,14 @@
-from django.forms import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import ChangePasswordSerializer, TeachingLanguageChangeRequestSerializer, UserSerializer, TutorDetailsSerializer, TutorLanguageToTeachSerializer
+from .serializers import ChangePasswordSerializer, TeachingLanguageChangeRequestSerializer, UserSerializer
 from .models import LanguageSpoken, LanguageToLearn, TeachingLanguageChangeRequest, TutorDetails, TutorLanguageToTeach, User, Language, Proficiency
 from django.core.mail import send_mail
 from django.conf import settings
 import random
 import string
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import make_password
 import uuid
 from django.core.cache import cache
 from django.contrib.auth import authenticate
@@ -17,15 +16,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.template.loader import render_to_string
 from rest_framework.views import APIView
 from pycountry import countries
-from django.http import JsonResponse
 import json
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-import os
 import logging
 from django.db import transaction, IntegrityError
 from django.utils.datastructures import MultiValueDict
 from django.db.models import Q
+from rest_framework.permissions import IsAdminUser
 
 logger = logging.getLogger(__name__)
 
@@ -229,6 +225,7 @@ def set_new_password(request):
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
 
 def get_signin_url():
     frontend_origin = next((origin for origin in settings.CORS_ALLOWED_ORIGINS if origin.startswith('http://127.0.0.1') or origin.startswith('http://localhost')), None)
@@ -238,25 +235,29 @@ def get_signin_url():
     
     return f"{frontend_origin}/tutor-signin/"
 
-# In your view or wherever you need the signin_url
-
+class AdminUserDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    def update(self, request, *args, **kwargs):
+    def get_object(self):
+        return self.request.user
+ 
+    def update(self, request, *args, **kwargs): 
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
+        serializer.is_valid(raise_exception=True) 
         self.perform_update(serializer)
 
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
 
         return Response(serializer.data)
-
+ 
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
@@ -312,24 +313,58 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
                 print("Invalid JSON format for language_to_learn")
             except Exception as e: 
                 print(f"Error updating language to learn: {str(e)}")
+        
+        else:
+            print("Serializer is not valid")
+            print(serializer.errors)
+
+        if user.user_type == 'tutor': 
+            print("User is a tutor")
+            try:
+                tutor_details = TutorDetails.objects.get(user=user)
+                print(f"Tutor status: {tutor_details.status}")
+
+                speakin_name = self.request.data.get('speakin_name')
+                required_credits = self.request.data.get('required_credits')
+                print(speakin_name, required_credits)
+                if speakin_name:
+                    tutor_details.speakin_name = speakin_name
+                if required_credits:
+                    tutor_details.required_credits = required_credits
+                
+                tutor_details.save()
+                print("TutorDetails updated")
+            except TutorDetails.DoesNotExist:
+                print("TutorDetails not found")
+
+
+    def patch(self, request, *args, **kwargs):
+        
+        try:        
+            # Call the original partial update functionality
+            response = self.partial_update(request, *args, **kwargs) 
+            
+            return response
+        except TutorDetails.DoesNotExist:
+            return Response({"error": "Tutor details not found."}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class TutorRequestView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAdminUser]
+
+    def perform_update(self, serializer):
+        if serializer.is_valid():
+            with transaction.atomic():
+                user = serializer.save()
 
                 if user.user_type == 'tutor': 
                     print("User is a tutor")
                     try:
                         tutor_details = TutorDetails.objects.get(user=user)
-                        print(f"Tutor status: {tutor_details.status}")
-
-                        speakin_name = self.request.data.get('speakin_name')
-                        required_credits = self.request.data.get('required_credits')
-                        print(speakin_name, required_credits)
-                        if speakin_name:
-                            tutor_details.speakin_name = speakin_name
-                        if required_credits:
-                            tutor_details.required_credits = required_credits
-                        
-                        tutor_details.save()
-                        print("TutorDetails updated")
-
+ 
                         if tutor_details.status == 'pending' and self.request.data.get('action') == 'approve':
                             tutor_details.status = 'approved'
                             tutor_details.save()
@@ -352,80 +387,42 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
                             print('Email sent') 
                     except TutorDetails.DoesNotExist:
                         print("TutorDetails not found")
+
+    def perform_destroy(self, instance):
+        if instance.user_type == 'tutor':
+            try:
+                tutor_details = TutorDetails.objects.get(user=instance)
+                if tutor_details.status == 'pending':
+                    # Change tutor status to 'denied'
+                    tutor_details.status = 'denied'
+                    tutor_details.save()
+                    print('Tutor denied')
+
+                    # Send denial email
+                    email_content = render_to_string('emails/tutor_denial_email.html', {
+                        'tutor_name': instance.name,
+                    })
+                    
+                    print('About to send denial email')
+                    send_email(
+                        'Your Tutor Account Application has been Denied',
+                        instance.email,
+                        email_content
+                    )
+                    print('Denial email sent')
+
+                    # Optionally, you can delete the user or keep the record.
+                    instance.delete()  # This will delete the user from the database
+                    return Response({"message": "Tutor account denied and deleted."}, status=status.HTTP_204_NO_CONTENT)
+                else:
+                    return Response({"error": "Tutor cannot be denied, status is not pending."}, status=status.HTTP_400_BAD_REQUEST)
+            except TutorDetails.DoesNotExist:
+                return Response({"error": "Tutor details not found."}, status=status.HTTP_404_NOT_FOUND)
         else:
-            print("Serializer is not valid")
-            print(serializer.errors)
+            # If the user is not a tutor, proceed with the standard deletion
+            instance.delete()
+            return Response({"message": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
-    def patch(self, request, *args, **kwargs):
-        action = request.data.get('action')
-        print(f"Action: {action}")
-        
-        try:
-            # Create a mutable copy of request.data
-            mutable_data = MultiValueDict(request.data.lists())
-            
-            # If action is 'approve', add it to the mutable data
-            if action == 'approve':
-                mutable_data['action'] = 'approve'
-            
-            # Update the request object with the mutable data
-            request._full_data = mutable_data
-            
-            # Call the original partial update functionality
-            response = self.partial_update(request, *args, **kwargs) 
-            
-            return response
-        except TutorDetails.DoesNotExist:
-            return Response({"error": "Tutor details not found."}, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
-    def delete(self, request, *args, **kwargs):
-        try:
-            user = self.get_object()  # Get the user object to delete
-            if user.user_type == 'tutor':
-                try:
-                    tutor_details = TutorDetails.objects.get(user=user)
-                    print(f"Tutor status: {tutor_details.status}")
-                    
-                    if tutor_details.status == 'pending':
-                        # Change tutor status to 'denied'
-                        tutor_details.status = 'denied'
-                        tutor_details.save()
-                        print('Tutor denied')
-
-                        # Send denial email
-                        email_content = render_to_string('emails/tutor_denial_email.html', {
-                            'tutor_name': user.name,
-                        })
-                        
-                        print('About to send denial email')
-
-                        send_email(
-                            'Your Tutor Account Application has been Denied',
-                            user.email,
-                            email_content
-                        )
-                        print('Denial email sent')
-
-                        # Optionally, you can delete the user or keep the record.
-                        user.delete()  # This will delete the user from the database
-
-                        return Response({"message": "Tutor account denied and deleted."}, status=status.HTTP_204_NO_CONTENT)
-                    
-                    else: 
-                        return Response({"error": "Tutor cannot be denied, status is not pending."}, status=status.HTTP_400_BAD_REQUEST)
-                
-                except TutorDetails.DoesNotExist:
-                    return Response({"error": "Tutor details not found."}, status=status.HTTP_404_NOT_FOUND)
-            else:
-                # If the user is not a tutor, proceed with the standard deletion
-                user.delete()
-                return Response({"message": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
 @api_view(['POST'])
 def admin_signin(request):
     email = request.data.get('email')
@@ -477,12 +474,30 @@ def tutor_request(request):
     try:
         data = request.data
 
+        # Pre-validate unique fields before creating any objects
+        speakin_name = data.get('speakinName')
+        email = data.get('email')
+        
+        # Check if email exists
+        if User.objects.filter(email=email).exists():
+            return Response(
+                {'error': 'This email address is already registered. Please use a different email.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        # Check if speakinName exists
+        if TutorDetails.objects.filter(speakin_name=speakin_name).exists():
+            return Response(
+                {'error': 'This SpeakIn Name is already taken. Please choose a different name.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         video_file = request.FILES.get('video')
         image_file = request.FILES.get('image')
 
         # Create the User instance
         user = User.objects.create(
-            email=data['email'],
+            email=email,
             name=data['fullName'],
             password=make_password(data['password']),
             user_type='tutor',
@@ -501,7 +516,7 @@ def tutor_request(request):
         # Create the TutorDetails instance
         TutorDetails.objects.create(
             user=user,
-            speakin_name=data['speakinName'],
+            speakin_name=speakin_name,
             about=data['about'],
             required_credits=data['hourlyRate'],
             intro_video=video_file,
@@ -522,55 +537,57 @@ def tutor_request(request):
         # Handle Spoken Languages
         spoken_languages_str = data.get('spokenLanguages', '[]')
 
-        spoken_languages = json.loads(spoken_languages_str)
-        if not isinstance(spoken_languages, list):
-            spoken_languages = [spoken_languages]
+        try:
+            spoken_languages = json.loads(spoken_languages_str)
+            if not isinstance(spoken_languages, list):
+                spoken_languages = [spoken_languages]
 
-        for spoken_lang in spoken_languages:
-            try:
-                language_obj = Language.objects.get(name=spoken_lang['language'])
-            except Language.DoesNotExist:
-                return Response({'error': f"Language '{spoken_lang['language']}' does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+            # Pre-validate all languages and proficiencies before creating any objects
+            language_proficiency_pairs = []
+            for spoken_lang in spoken_languages:
+                try:
+                    language_obj = Language.objects.get(name=spoken_lang['language'])
+                    proficiency_obj = Proficiency.objects.get(level=spoken_lang['proficiency'])
+                    language_proficiency_pairs.append((language_obj, proficiency_obj))
+                except Language.DoesNotExist:
+                    return Response(
+                        {'error': f"Language '{spoken_lang['language']}' does not exist."}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+                except Proficiency.DoesNotExist:
+                    return Response(
+                        {'error': f"Proficiency level '{spoken_lang['proficiency']}' does not exist."}, 
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
 
-            # Check for the proficiency object
-            try:
-                proficiency_obj = Proficiency.objects.get(level=spoken_lang['proficiency'])
-            except Proficiency.DoesNotExist:
-                return Response({'error': f"Proficiency level '{spoken_lang['proficiency']}' does not exist."}, status=status.HTTP_400_BAD_REQUEST)
+            # Create all LanguageSpoken records
+            for language_obj, proficiency_obj in language_proficiency_pairs:
+                LanguageSpoken.objects.create(
+                    user=user,
+                    language=language_obj,
+                    proficiency=proficiency_obj
+                )
 
-            # Create the LanguageSpoken record
-            LanguageSpoken.objects.create(
-                user=user,
-                language=language_obj,
-                proficiency=proficiency_obj
-            )
+        except json.JSONDecodeError:
+            raise ValueError('Invalid spokenLanguages format')
 
         return Response({'message': 'Tutor request submitted successfully!'}, status=status.HTTP_201_CREATED)
 
-    except IntegrityError as e:
-        # Check for specific duplicate key errors
-        if 'unique constraint' in str(e):
-            if 'users_user_email_key' in str(e):
-                return Response({'error': 'This email address is already registered. Please use a different email.'}, status=status.HTTP_400_BAD_REQUEST)
-            elif 'users_tutordetails_speakin_name_key' in str(e):
-                return Response({'error': 'This SpeakIn Name is already taken. Please choose a different name.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        transaction.set_rollback(True)
-        return Response({'error': 'An error occurred while processing your request.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    except json.JSONDecodeError:
-        transaction.set_rollback(True)
-        return Response({'error': 'Invalid spokenLanguages format'}, status=status.HTTP_400_BAD_REQUEST)
-    except Exception as e:
+    except ValueError as e:
         transaction.set_rollback(True)
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        transaction.set_rollback(True)
+        print(f"Unexpected error: {str(e)}")  # Log the unexpected error
+        return Response({'error': 'An error occurred while processing your request.'}, status=status.HTTP_400_BAD_REQUEST)
 
 class BlockUnblockUserView(APIView):
+    permission_classes = [IsAdminUser]
     def patch(self, request, id):
         try: 
             user = User.objects.get(id=id)
             user.is_active = not user.is_active
-            user.save()
+            user.save() 
             if user.is_active:
                 return Response({'message': 'User unblocked successfully!'}, status=status.HTTP_200_OK)
             return Response({'message': 'User blocked successfully!'}, status=status.HTTP_200_OK)
@@ -624,7 +641,7 @@ class ChangePasswordView(APIView):
             return Response({"detail": "Password changed successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-class TeachingLanguageChangeRequestView(generics.ListCreateAPIView):
+class TeachingLanguageChangeRequestCreateView(generics.ListCreateAPIView):
     queryset = TeachingLanguageChangeRequest.objects.all()
     serializer_class = TeachingLanguageChangeRequestSerializer
         
@@ -638,9 +655,14 @@ class TeachingLanguageChangeRequestView(generics.ListCreateAPIView):
         
         if existing_request:
             return Response({'error': 'You already have a pending request to change your teaching language. Please wait for it to be resolved before submitting a new request.'}, status=status.HTTP_400_BAD_REQUEST)
-
+ 
         # If no existing request, proceed with the creation
         return super().create(request, *args, **kwargs)
+
+class TeachingLanguageChangeRequestView(generics.ListCreateAPIView):
+    queryset = TeachingLanguageChangeRequest.objects.all()
+    serializer_class = TeachingLanguageChangeRequestSerializer
+    permission_classes = [IsAdminUser]
 
     @transaction.atomic
     def patch(self, request, id):

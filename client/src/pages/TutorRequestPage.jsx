@@ -52,7 +52,7 @@ const TutorRequestPage = () => {
           throw new Error('Failed to fetch languages to teach');
         }
         const languagesToTeachData = await languagesToTeachResponse.json();
-        setLanguagesToTeach(languagesToTeachData);
+        setLanguagesToTeach(languagesToTeachData.languages);
   
         // Fetch spoken languages
         const spokenLanguagesResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}get_spoken_languages/`);

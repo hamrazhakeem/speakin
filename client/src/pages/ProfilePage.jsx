@@ -5,11 +5,9 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import useAxios from '../hooks/useAxios';
-import { useSelector } from 'react-redux';
 
 const ProfilePage = () => {
   const axiosInstance = useAxios();
-  const userId = useSelector((state) => state.auth.userId);
   const navigate = useNavigate();
   
   const [studentData, setStudentData] = useState(null);
@@ -72,7 +70,7 @@ const ProfilePage = () => {
 
   async function fetchUserData() {
     try {
-      const response = await axiosInstance.get(`get_user/${userId}/`);
+      const response = await axiosInstance.get(`get_user/`);
       setStudentData(response.data);
       console.log(response.data)
       if (response.data.language_spoken?.length > 0) {
@@ -225,9 +223,11 @@ const ProfilePage = () => {
     } else {
       formData.append("language_to_learn", JSON.stringify([]));
     }
-    console.log(languageToLearn)
+    for (const [key, value] of formData.entries()) {
+      console.log(`${key}: ${value}`);
+    }
     try {
-      await axiosInstance.patch(`update_user/${userId}/`, formData);
+      await axiosInstance.patch(`update_user/`, formData);
       setEditMode(false);
       fetchUserData();
     } catch (error) {

@@ -111,7 +111,7 @@ const EditTeachingLanguage = () => {
       formData.append("imageUpload", imageFile);
       formData.append("intro_video", videoFile);
 
-      const response = await axiosInstance.post(`edit_teaching_language/${userId}/`, formData, {
+      const response = await axiosInstance.post(`edit_teaching_language/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

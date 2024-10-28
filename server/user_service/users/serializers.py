@@ -59,7 +59,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         for attr, value in validated_data.items():
-            print('hello1')
             if attr == 'password':
                 setattr(instance, attr, make_password(value))
             elif attr == 'profile_image':

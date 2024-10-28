@@ -64,10 +64,10 @@ def patch_api(endpoint, permissions=[AllowAny]):
     @csrf_exempt
     @api_view(['PATCH'])
     @permission_classes(permissions)
-    def api_view_func(request, id):
+    def api_view_func(request, id=None):
         token = request.headers.get('Authorization')
         json_data, files_data = _prepare_data(request)
-        endpoint_url = f'{BASE_URL}{endpoint.replace("<int:id>", str(id))}'
+        endpoint_url = f'{BASE_URL}{endpoint.replace("<int:id>", str(id))}' if id else f'{BASE_URL}{endpoint}'
         
         try:
             response = _request_with_files('PATCH', endpoint_url, json_data, files_data, {'Authorization': token})
@@ -110,25 +110,26 @@ admin_signin = post_api('admin_signin/')
 
 # Data Retrieval Endpoints
 get_countries = get_api('get_countries/')
-get_platform_languages = get_api('get_platform_languages/')
+get_platform_languages = get_api('get_platform_languages/') 
 get_spoken_languages = get_api('get_spoken_languages/')
-
+ 
 # Tutor Request Endpoints
-tutor_request = post_api('tutor_request/')
-edit_teaching_language = post_api('edit_teaching_language/<int:id>/', permissions=[IsAuthenticatedWithJWT])
+tutor_request = post_api('tutor_request/') 
+edit_teaching_language = post_api('edit_teaching_language/', permissions=[IsAuthenticatedWithJWT])
 language_change_requests = get_api('language_change_requests/', permissions=[IsAuthenticatedWithJWT])
 approve_language_change = patch_api('verify_language_change/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 deny_language_change = delete_api('verify_language_change/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 
-# User Management Endpoints
-update_user = patch_api('users/<int:id>/', permissions=[IsAuthenticatedWithJWT])
-get_user = get_api('users/<int:id>/', permissions=[IsAuthenticatedWithJWT])
+# User Management Endpoints 
+update_user = patch_api('user/', permissions=[IsAuthenticatedWithJWT])
+get_user = get_api('user/', permissions=[IsAuthenticatedWithJWT])
 get_users = get_api('users/', permissions=[IsAuthenticatedWithJWT])
+admin_get_user = get_api('admin_get_user/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 block_unblock_user = patch_api('block_unblock_user/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 
 # Tutor Verification Endpoints
-approve_tutor = patch_api('users/<int:id>/', permissions=[IsAuthenticatedWithJWT])
-deny_tutor = delete_api('users/<int:id>/', permissions=[IsAuthenticatedWithJWT])
+approve_tutor = patch_api('tutor_request_verify/<int:id>/', permissions=[IsAuthenticatedWithJWT])
+deny_tutor = delete_api('tutor_request_verify/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 
 # Password Management Endpoints
 change_password = post_api('change_password/', permissions=[IsAuthenticatedWithJWT])

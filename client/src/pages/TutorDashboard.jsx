@@ -59,7 +59,7 @@ const TutorDashboard = () => {
 
   async function fetchUserData() {
     try {
-      const response = await axiosInstance.get(`get_user/${userId}/`);
+      const response = await axiosInstance.get(`get_user/`);
 
       setTutorData(response.data);
       if (response.data.language_spoken) {
@@ -149,7 +149,7 @@ const TutorDashboard = () => {
     }
 
     try {
-      await axiosInstance.patch(`update_user/${userId}/`, formData);
+      await axiosInstance.patch(`update_user/`, formData);
       console.log("Profile updated successfully");
       setEditMode(false); // Exit edit mode
       fetchUserData(); // Refetch user data
