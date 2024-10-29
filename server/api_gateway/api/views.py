@@ -115,21 +115,20 @@ get_spoken_languages = get_api('get_spoken_languages/')
  
 # Tutor Request Endpoints
 tutor_request = post_api('tutor_request/') 
-edit_teaching_language = post_api('edit_teaching_language/', permissions=[IsAuthenticatedWithJWT])
+edit_teaching_language = post_api('edit_teaching_language/', permissions=[IsAuthenticatedWithJWT]) 
 language_change_requests = get_api('language_change_requests/', permissions=[IsAuthenticatedWithJWT])
 approve_language_change = patch_api('verify_language_change/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 deny_language_change = delete_api('verify_language_change/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 
 # User Management Endpoints 
-update_user = patch_api('user/', permissions=[IsAuthenticatedWithJWT])
-get_user = get_api('user/', permissions=[IsAuthenticatedWithJWT])
+update_user = patch_api('users/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 get_users = get_api('users/', permissions=[IsAuthenticatedWithJWT])
-admin_get_user = get_api('admin_get_user/<int:id>/', permissions=[IsAuthenticatedWithJWT])
+users = get_api('users/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 block_unblock_user = patch_api('block_unblock_user/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 
 # Tutor Verification Endpoints
 approve_tutor = patch_api('tutor_request_verify/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 deny_tutor = delete_api('tutor_request_verify/<int:id>/', permissions=[IsAuthenticatedWithJWT])
-
+ 
 # Password Management Endpoints
-change_password = post_api('change_password/', permissions=[IsAuthenticatedWithJWT])
+change_password = post_api('change_password/', permissions=[IsAuthenticatedWithJWT]) 

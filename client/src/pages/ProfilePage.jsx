@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import useAxios from '../hooks/useAxios';
+import { useSelector } from 'react-redux';
 
 const ProfilePage = () => {
   const axiosInstance = useAxios();
@@ -23,6 +24,7 @@ const ProfilePage = () => {
   const [languageToLearn, setLanguageToLearn] = useState(null);
   const [languageErrors, setLanguageErrors] = useState([]);
   const [formErrors, setFormErrors] = useState({});
+  const userId = useSelector((state) => state.auth.userId);
 
   const {
     register,
@@ -70,7 +72,7 @@ const ProfilePage = () => {
 
   async function fetchUserData() {
     try {
-      const response = await axiosInstance.get(`get_user/`);
+      const response = await axiosInstance.get(`users/${userId}/`);
       setStudentData(response.data);
       console.log(response.data)
       if (response.data.language_spoken?.length > 0) {
@@ -227,7 +229,7 @@ const ProfilePage = () => {
       console.log(`${key}: ${value}`);
     }
     try {
-      await axiosInstance.patch(`update_user/`, formData);
+      await axiosInstance.patch(`update_user/${userId}/`, formData);
       setEditMode(false);
       fetchUserData();
     } catch (error) {
@@ -331,7 +333,7 @@ const ProfilePage = () => {
                       <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
                       {editMode ? (
                         <select
-                          {...register("country", { required: true })}
+                          {...register("country")}
                           className="w-full px-4 py-2 rounded-lg border bg-white"
                         >
                           {countries.map(([name, code]) => (

@@ -6,6 +6,7 @@ import useAxios from "../hooks/useAxios";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form"; // Import useForm
+import { toast } from "react-toastify";
 
 const Modal = ({ isOpen, onClose, onProceed, children }) => {
   if (!isOpen) return null;
@@ -59,7 +60,7 @@ const TutorDashboard = () => {
 
   async function fetchUserData() {
     try {
-      const response = await axiosInstance.get(`get_user/`);
+      const response = await axiosInstance.get(`users/${userId}/`);
 
       setTutorData(response.data);
       if (response.data.language_spoken) {
@@ -149,12 +150,18 @@ const TutorDashboard = () => {
     }
 
     try {
-      await axiosInstance.patch(`update_user/`, formData);
+      await axiosInstance.patch(`update_user/${userId}/`, formData);
       console.log("Profile updated successfully");
       setEditMode(false); // Exit edit mode
-      fetchUserData(); // Refetch user data
+      fetchUserData(); // Refetch user data 
     } catch (error) {
-      console.error("Error updating profile:", error.response?.data || error);
+      const errorMessage = error.response?.data?.error || error.message;
+      if (errorMessage.includes("duplicate key value violates unique constraint")) {
+        toast.error("The selected SpeakIn name is already taken. Please choose a different one.");
+      } else {
+        toast.error("Error updating profile: " + errorMessage);
+      }
+      console.error("Error updating profile:", errorMessage);
     }
   };
 

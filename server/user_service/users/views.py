@@ -22,6 +22,7 @@ from django.db import transaction, IntegrityError
 from django.utils.datastructures import MultiValueDict
 from django.db.models import Q
 from rest_framework.permissions import IsAdminUser
+from .permissions import IsAdminOrUserSelf
 
 logger = logging.getLogger(__name__)
 
@@ -222,11 +223,6 @@ def set_new_password(request):
     else:
         return Response({'message': 'Invalid cache key or email'}, status=status.HTTP_400_BAD_REQUEST)
 
-class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = [IsAdminUser]
-
 def get_signin_url():
     frontend_origin = next((origin for origin in settings.CORS_ALLOWED_ORIGINS if origin.startswith('http://127.0.0.1') or origin.startswith('http://localhost')), None)
     
@@ -235,13 +231,14 @@ def get_signin_url():
     
     return f"{frontend_origin}/tutor-signin/"
 
-class AdminUserDetail(generics.RetrieveUpdateDestroyAPIView):
+class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
 class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = [IsAdminOrUserSelf]
 
     def get_object(self):
         return self.request.user
@@ -249,7 +246,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     def update(self, request, *args, **kwargs): 
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial) 
         serializer.is_valid(raise_exception=True) 
         self.perform_update(serializer)
 

@@ -78,7 +78,7 @@ const AdminManageUsersPage = () => {
 
   const handleVerify = async (userId) => {
     try {
-      const response = await axiosInstance.get(`admin_get_user/${userId}/`);
+      const response = await axiosInstance.get(`users/${userId}/`);
       navigate(`/admin/verify-tutor/${userId}`, { state: response.data });
       console.log("Tutor data:", response.data);
     } catch (error) {
