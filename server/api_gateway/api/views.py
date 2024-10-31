@@ -35,7 +35,7 @@ def post_api(endpoint, permissions=[AllowAny]):
         headers = {k: v for k, v in request.headers.items() if k != 'Content-Type'}
         json_data, files_data = _prepare_data(request)
         endpoint_url = f'{BASE_URL}{endpoint.replace("<int:id>", str(id))}' if id else f'{BASE_URL}{endpoint}'
-        
+         
         try:
             response = _request_with_files('POST', endpoint_url, json_data, files_data, headers)
             return JsonResponse(response.json(), status=response.status_code)
@@ -99,6 +99,7 @@ def delete_api(endpoint, permissions=[AllowAny]):
 sign_up = post_api('sign_up/')
 verify_otp = post_api('verify_otp/')
 sign_in = post_api('sign_in/')
+google_sign_in = post_api('google_sign_in/')
 tutor_sign_in = post_api('tutor_sign_in/')
 token_refresh = post_api('token/refresh/')
 resend_otp = post_api('resend_otp/')

@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import GoogleLoginButton from '../components/GoogleButton';
 
 const SignUpPage = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
@@ -47,6 +48,21 @@ const SignUpPage = () => {
           <div className="text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-bold mb-2">SpeakIn ID</h2>
             <p className="text-gray-600 mb-6 text-sm md:text-base">Create your SpeakIn Account</p>
+          </div>
+
+          {/* Google Login Button */}
+          <div className="mb-6 flex justify-center">
+            <GoogleLoginButton />
+          </div>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">or continue with email</span>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

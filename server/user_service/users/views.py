@@ -20,9 +20,10 @@ import json
 import logging
 from django.db import transaction, IntegrityError
 from django.utils.datastructures import MultiValueDict
-from django.db.models import Q
+from django.db.models import Q 
 from rest_framework.permissions import IsAdminUser
 from .permissions import IsAdminOrUserSelf
+from .utils import get_id_token
 
 logger = logging.getLogger(__name__)
 
@@ -103,14 +104,17 @@ def sign_in(request):
     password = request.data.get('password')
   
     user = authenticate(request, username=email, password=password)
+
     if user is not None and not user.user_type == 'tutor':
+        if user.with_google:
+            return Response({'detail': 'You have created account with google, Click sign in with google'}, status=status.HTTP_401_UNAUTHORIZED)
         refresh = RefreshToken.for_user(user)
         return Response({
             'access': str(refresh.access_token),
             'refresh': str(refresh),
             'name': user.name,
             'id': user.id,
-        }, status=status.HTTP_200_OK)
+        }, status=status.HTTP_200_OK) 
 
     return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -159,7 +163,10 @@ def forgot_password(request):
     # Check if the user exists
     if User.objects.filter(email=email).exists():
         user = User.objects.get(email=email)
-
+        if user.with_google:
+            return Response({
+                'error': 'You created your account using Google. Please click "Sign in with Google" to access your account.'
+            }, status=status.HTTP_403_FORBIDDEN)
         # If the user is a tutor, check their status
         if user.user_type == 'tutor':
             tutor_details = TutorDetails.objects.filter(user=user).first()
@@ -175,7 +182,7 @@ def forgot_password(request):
             'email': email,
         })
 
-        send_email(
+        send_email( 
             'Your OTP for SpeakIn Password Reset',
             email,
             render_to_string('emails/forgot_password_email.html', {'otp': otp})
@@ -230,6 +237,42 @@ def get_signin_url():
         raise ValueError("No local frontend origin found in CORS_ALLOWED_ORIGINS")
     
     return f"{frontend_origin}/tutor-signin/"
+
+class LoginWithGoogle(APIView):
+    def post(self, request):
+        if 'code' in request.data:
+            code = request.data['code']
+            id_token = get_id_token(code)
+            
+            if 'email' not in id_token:
+                return Response({"detail": "Invalid token or missing email"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            email = id_token['email']
+            name = id_token['name']
+     
+            user = get_user_or_create(email, name)
+            
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'role':"user",
+                'name': user.name,
+                'id': user.id,
+            }, status=status.HTTP_200_OK)
+        
+        return Response({"detail": "Code not provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+def get_user_or_create(email, name):
+    try:
+        user = User.objects.get(email=email)
+        if not user.is_active:
+            return Response({'error': 'User is blocked'}, status=status.HTTP_400_BAD_REQUEST)
+    except User.DoesNotExist:
+        user = User.objects.create_user(email=email, name=name, user_type='student', with_google=True, password=None)
+    return user
 
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()

@@ -12,7 +12,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
         user = self.model(email=email, name=name, **extra_fields)
-        user.set_password(password)
+        user.set_password(password) 
         user.save(using=self._db)
         return user
 
@@ -41,7 +41,7 @@ class User(AbstractUser):
     name = models.CharField(max_length=150)
     email = models.EmailField(unique=True)
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES) 
-
+    with_google = models.BooleanField(default=False)
     country = models.CharField(max_length=100, choices=country_choices, blank=True, null=True)
 
     profile_image = models.ImageField(storage=S3Boto3Storage(), upload_to='profile_images/', blank=True, null=True)

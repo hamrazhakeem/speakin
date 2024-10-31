@@ -28,4 +28,5 @@ urlpatterns = [
     path('language_change_requests/', views.language_change_requests, name='language_change_requests'),
     path('approve_language_change/<int:id>/', views.approve_language_change, name='approve_language_change'),
     path('deny_language_change/<int:id>/', views.deny_language_change, name='deny_language_change'),
+    path('google_sign_in/', views.google_sign_in, name='google_sign_in')
 ]

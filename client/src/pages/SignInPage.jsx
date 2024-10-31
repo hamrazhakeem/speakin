@@ -7,6 +7,7 @@ import { setTokens } from '../redux/authSlice';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import GoogleLoginButton from '../components/GoogleButton';
 
 const SignInPage = () => {
   const [email, setEmail] = useState('');
@@ -25,11 +26,8 @@ const SignInPage = () => {
       dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false, isStudent: true}));
 
       toast.success(`Welcome, ${name}!`);
-
       console.log('Sign In Successful!', access, refresh);
-      
       navigate('/home');
-
     } catch (error) {
       const message = error.response?.data?.detail || 'Login failed. Please try again.';
       setErrorMessage(message);
@@ -44,8 +42,25 @@ const SignInPage = () => {
         <div className="w-full max-w-md text-center">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">SpeakIn ID</h1>
           <p className="text-gray-600 mb-6 text-sm md:text-base">Sign In to your SpeakIn Account</p>
+          
+          {/* Google Login Button */}
+          <div className="mb-6 flex justify-center">
+            <GoogleLoginButton />
+          </div>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-gray-500">or continue with email</span>
+            </div>
+          </div>
+
+          {/* Email/Password Form */}
           <form onSubmit={handleSubmit} className="flex flex-col">
-          <input
+            <input
               type="email"
               placeholder="Email"
               required
@@ -73,6 +88,7 @@ const SignInPage = () => {
             </button>
             {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
           </form>
+
           <div className="flex flex-col space-y-2 mt-4">
             <button
               onClick={() => navigate('/signup')}

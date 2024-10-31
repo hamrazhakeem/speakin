@@ -6,6 +6,7 @@ urlpatterns = [
     path('sign_up/', sign_up, name='sign_up'),
     path('verify_otp/', verify_otp, name='verify_otp'),
     path('sign_in/', sign_in, name='sign_in'),
+    path('google_sign_in/', LoginWithGoogle.as_view()),
     path('resend_otp/', resend_otp, name='resend_otp'),
     path('forgot_password/', forgot_password, name='forgot_password'),
     path('forgot_password_verify_otp/', forgot_password_verify_otp, name='forgot_password_verify_otp'),
