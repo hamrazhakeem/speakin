@@ -4,3 +4,4 @@ __pycache__/
 .git/
 Dockerfile
 docker-compose.yml
+user_service_env

@@ -5,6 +5,7 @@ __pycache__/
 **/migrations/
 user_service_env
 api_env
+payment_service_env
 
 tutor_govt_id_images
 profile_images

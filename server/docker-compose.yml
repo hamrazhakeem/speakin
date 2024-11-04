@@ -1,41 +1,8 @@
 version: '3.8'
 
 services:
-  user_service_db:
-    image: postgres:13
-    environment:
-      POSTGRES_DB: ${USER_DB_NAME}
-      POSTGRES_USER: ${USER_DB_USER}
-      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    container_name: user_service_db
-    networks:
-      - microservice_network
-    ports:
-      - "5432:5432"
-
-  user_service:
-    build:
-      context: ./user_service
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - ./user_service:/app
-    ports:
-      - "8000:8000"
-    environment:
-      - USER_DB_NAME=${USER_DB_NAME}
-      - USER_DB_USER=${USER_DB_USER}
-      - USER_DB_PASSWORD=${USER_DB_PASSWORD}
-      - USER_DB_HOST=${USER_DB_HOST}
-      - USER_DB_PORT=${USER_DB_PORT}
-    depends_on:
-      - user_service_db
-    container_name: user_service
-    networks:
-      - microservice_network
-
   api_gateway:
+    container_name: api_gateway
     build:
       context: ./api_gateway
     command: python manage.py runserver 0.0.0.0:8080
@@ -43,20 +10,88 @@ services:
       - ./api_gateway:/app
     ports:
       - "8080:8080" 
-    container_name: api_gateway
     networks:
       - microservice_network
+
+  user_service:
+    container_name: user_service
+    build:
+      context: ./user_service
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./user_service:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - user_service_db
+    networks:
+      - microservice_network
+
+  payment_service:
+    container_name: payment_service
+    build:
+      context: ./payment_service
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - ./payment_service:/app
+    ports:
+      - "8001:8001"
+    depends_on:
+      - payment_service_db
+    networks:
+      - microservice_network
+
+  user_service_db:
+    image: postgres:13
+    container_name: user_service_db
+    environment:
+      POSTGRES_DB: ${USER_DB_NAME}
+      POSTGRES_USER: ${USER_DB_USER}
+      POSTGRES_PASSWORD: ${USER_DB_PASSWORD}
+    volumes:
+      - user_db_data:/var/lib/postgresql/data
+    networks:
+      - microservice_network
+    ports:
+      - "5432:5432"
+
+  payment_service_db:
+    image: postgres:13
+    container_name: payment_service_db
+    environment:
+      POSTGRES_DB: ${PAYMENT_DB_NAME}
+      POSTGRES_USER: ${PAYMENT_DB_USER}
+      POSTGRES_PASSWORD: ${PAYMENT_DB_PASSWORD}
+    volumes:
+      - payment_db_data:/var/lib/postgresql/data
+    networks:
+      - microservice_network
+    ports:
+      - "5433:5432"
 
   redis:
     image: redis:alpine
+    container_name: redis
     ports:
       - "6379:6379"
-    container_name: redis
     networks:
       - microservice_network
 
+  stripe_cli:
+    image: stripe/stripe-cli:latest
+    container_name: stripe_cli
+    command: listen --forward-to http://host.docker.internal:8080/api/webhook/
+    networks:
+      - microservice_network
+    depends_on:
+      - payment_service
+    restart: on-failure:5 
+    volumes:
+      - ./payment_service:/app
+
 volumes:
-  postgres_data:
+  user_db_data:
+  payment_db_data:
 
 networks:
   microservice_network:

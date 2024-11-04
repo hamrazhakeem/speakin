@@ -94,6 +94,7 @@ def verify_otp(request):
             'refresh': str(refresh), 
             'name': user.name,
             'id': user.id,
+            'credits': user.balance_credits
         }, status=status.HTTP_200_OK)
  
     return Response({'message': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
@@ -114,6 +115,7 @@ def sign_in(request):
             'refresh': str(refresh),
             'name': user.name,
             'id': user.id,
+            'credits': user.required_credits
         }, status=status.HTTP_200_OK) 
 
     return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -260,6 +262,7 @@ class LoginWithGoogle(APIView):
                 'role':"user",
                 'name': user.name,
                 'id': user.id,
+                'credits': user.balance_credits
             }, status=status.HTTP_200_OK)
         
         return Response({"detail": "Code not provided"}, status=status.HTTP_400_BAD_REQUEST)
@@ -666,6 +669,7 @@ def tutor_sign_in(request):
             'refresh': str(refresh),
             'name': user.name,
             'id': user.id,
+            'credits': user.balance_credits
         }, status=status.HTTP_200_OK)
     
     return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)

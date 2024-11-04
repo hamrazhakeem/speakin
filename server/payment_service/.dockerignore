@@ -4,4 +4,4 @@ __pycache__/
 .git/
 Dockerfile
 docker-compose.yml
-api_env
+payment_service_env
