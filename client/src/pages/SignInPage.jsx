@@ -21,12 +21,11 @@ const SignInPage = () => {
     setErrorMessage('');
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}sign_in/`, { email, password });
-      const { access, refresh, name, id } = response.data;
+      const { access, refresh, name, id, credits } = response.data;
 
-      dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false, isStudent: true}));
+      dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false, isStudent: true, credits: credits }));
 
       toast.success(`Welcome, ${name}!`);
-      console.log('Sign In Successful!', access, refresh);
       navigate('/home');
     } catch (error) {
       const message = error.response?.data?.detail || 'Login failed. Please try again.';

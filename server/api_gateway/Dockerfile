@@ -13,3 +13,5 @@ RUN pip install django-redis
 COPY . /app/
 
 ENV DJANGO_SETTINGS_MODULE=api_gateway.settings
+
+CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8080"]

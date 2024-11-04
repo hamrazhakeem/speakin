@@ -121,6 +121,7 @@ const TutorDashboard = () => {
   const handleEditToggle = () => {
     setEditMode(!editMode); // Toggle edit mode
     setDeleteImage(false);
+    console.log('Toggle edit mode', editMode);
   };
 
   const handleProfileImageChange = (e) => {

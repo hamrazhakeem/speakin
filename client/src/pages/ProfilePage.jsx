@@ -117,6 +117,7 @@ const ProfilePage = () => {
     setDeleteImage(false);
     setLanguageErrors([]);
     setFormErrors({});
+    console.log('Toggle edit mode', editMode);
   };
 
   const handleProfileImageChange = (e) => {

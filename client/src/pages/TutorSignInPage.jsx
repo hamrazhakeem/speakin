@@ -20,9 +20,9 @@ const SignInPage = () => {
     setErrorMessage('');
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}tutor_sign_in/`, { email, password });
-      const { access, refresh, name, id } = response.data;
+      const { access, refresh, name, id, credits } = response.data;
 
-      dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false, isTutor: true }));
+      dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false, isTutor: true, credits: credits }));
 
       toast.success(`Welcome, ${name}!`);
 

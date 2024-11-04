@@ -34,6 +34,9 @@ import TutorProtectedRoute from './routes/TutorProtectedRoute';
 import TutorUnprotectedRoute from './routes/TutorUnprotectedRoute';
 import AdminProtectedRoute from './routes/AdminProtectedRoute';
 import AdminUnprotectedRoute from './routes/AdminUnprotectedRoute';
+import BuyCredits from './pages/BuyCredits';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentCancelPage from './pages/PaymentCancelPage';
 
 const App = () => {
   useProactiveTokenRefresh();
@@ -81,6 +84,9 @@ const App = () => {
           <Route path='/home' element={<HomePage />} />
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/student-password-change' element={<StudentPasswordChangePage />} />
+          <Route path='/buy-credits' element={<BuyCredits />} />
+          <Route path='/payment/success' element={<PaymentSuccessPage />} />
+          <Route path='/payment/cancel' element={<PaymentCancelPage />} />
         </Route>
 
         {/* Admin Unprotected routes */}

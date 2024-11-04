@@ -6,19 +6,20 @@ from rest_framework.views import APIView
 from django.db import transaction
 from .models import Transactions
 from .serializers import TransactionsSerializer
+from grpc_services.grpc_client import notify_user_service
 import os
 from dotenv import load_dotenv
 
 load_dotenv()  
 
 # Create your views here. 
- 
-stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+  
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY') 
 
-class CreateCheckoutSession(APIView):
-    def post(self, request):
+class CreateCheckoutSession(APIView): 
+    def post(self, request): 
         serializer = TransactionsSerializer(data=request.data)
-        if serializer.is_valid():
+        if serializer.is_valid(): 
             credits = serializer.validated_data['purchased_credits']  # Assuming 'purchased_credits' is in request data
             price_per_credit = serializer.validated_data['price_per_credit']
             currency = serializer.validated_data['currency']
@@ -84,7 +85,7 @@ class StripeWebhook(APIView):
 def handle_checkout_completed(session):
     try:
         credits = int(session['metadata']['credits'])
-        user_id = session['metadata']['user_id']
+        user_id = int(session['metadata']['user_id'])
         transaction_type = session['metadata']['transaction_type']
 
         Transactions.objects.create(
@@ -95,6 +96,27 @@ def handle_checkout_completed(session):
             status='completed',
             reference_id=session['payment_intent'],
         ) 
+        # Notify user service via gRPC
+        grpc_success = notify_user_service(user_id, credits)
+        
+        # Handle gRPC failure by initiating a refund
+        if not grpc_success:
+            refund_transaction(transaction, session['payment_intent'])
+    
     except Exception as e:
         print(f"Error processing payment: {str(e)}")
         raise
+
+
+def refund_transaction(transaction, payment_intent):
+    """ Initiates a refund with Stripe and updates the transaction status """
+    try:
+        # Create a refund
+        stripe.Refund.create(payment_intent=payment_intent)
+        
+        # Update transaction status to 'refunded'
+        transaction.status = 'refund'
+        transaction.save()
+
+    except Exception as e:
+        print(f"Refund failed: {str(e)}")

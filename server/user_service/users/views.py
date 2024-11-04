@@ -202,7 +202,7 @@ def forgot_password_verify_otp(request):
  
     session_otp = cache.get(f'otp_{cache_key}')
     user_data = cache.get(f'user_data_{cache_key}') 
-    
+     
     if session_otp and otp == session_otp and user_data and user_data['email'] == email:
         cache.delete(f'otp_{cache_key}')
         
@@ -259,7 +259,7 @@ class LoginWithGoogle(APIView):
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
-                'role':"user",
+                'role':"user", 
                 'name': user.name,
                 'id': user.id,
                 'credits': user.balance_credits

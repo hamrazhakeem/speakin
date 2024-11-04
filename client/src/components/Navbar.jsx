@@ -1,135 +1,283 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux'; 
-import { FaBell, FaUserCircle, FaCoins } from 'react-icons/fa';
-import { clearTokens } from '../redux/authSlice';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { Bell, User, Menu, X, CreditCard, LogOut, Settings, Plus } from 'lucide-react';
+import { clearTokens } from '../redux/authSlice';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const userProfileImage = '';
   const dispatch = useDispatch();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { isAuthenticated, credits } = useSelector((state) => state.auth);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = () => {
-    dispatch(clearTokens()); 
-    navigate('/signin'); 
+    dispatch(clearTokens());
+    navigate('/signin');
   };
 
-  const toggleDropdown = () => {
-    setDropdownOpen(!dropdownOpen); 
-  };
+  const navigationLinks = [
+    { title: 'Find a tutor', href: '/home' },
+    { title: 'Become a tutor', href: '/become-a-tutor' },
+  ];
 
   return (
-    <nav className="fixed w-full z-20 top-0 start-0 border-b border-gray-200 bg-white/80 backdrop-blur-md transition-colors duration-300">
-      <div className="max-w-screen-xl flex items-center justify-between mx-auto p-4">
-        <img onClick={() => navigate('/')} src="/src/assets/logo.webp" className="h-8 w-auto sm:h-10 md:h-12 lg:h-12 hover:cursor-pointer" alt="SpeakIn Logo" />
+    <nav className="fixed w-full z-50 top-0 border-b bg-white/80 backdrop-blur-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between h-16">
+          {/* Logo Section */}
+          <div className="flex-shrink-0 flex items-center">
+            <img
+              onClick={() => navigate('/')}
+              src="/src/assets/logo.webp"
+              className="h-8 w-auto cursor-pointer"
+              alt="SpeakIn Logo"
+            />
+          </div>
 
-        <div className="flex items-center space-x-4 md:space-x-8">
-          {isAuthenticated ? (
-            <>
-              <div className="flex items-center space-x-2">
-                <span className="flex items-center">
-                  <FaCoins className="text-yellow-500" />
-                  <span className="ml-1">+127 Credits</span>
-                </span>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex md:items-center md:space-x-8">
+            {!isAuthenticated && (
+              <div className="flex space-x-8">
+                {navigationLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium transition-colors"
+                  >
+                    {link.title}
+                  </Link>
+                ))}
+              </div>
+            )}
+
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-6">
+                {/* Credits Section with Buy Button */}
+                <div className="flex items-center space-x-2">
+                  <div className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm">
+                    <CreditCard className="h-4 w-4" />
+                    <span>{credits} Credits</span>
+                  </div>
+                  <div className="relative group">
+                    {/* Gradient border effect on hover */}
+                    <div className="absolute -inset-[1px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full opacity-0 group-hover:opacity-100 blur-sm transition-all duration-500"></div>
+                    
+                    <button
+                      onClick={() => navigate('/buy-credits')}
+                      className="relative px-4 py-1 bg-[#6772E5] text-white border border-[#6772E5] hover:bg-white rounded-full transition-all duration-300 flex items-center justify-center gap-1 group-hover:shadow-xl"
+                    >
+                      <Plus className="h-3 w-3 text-white group-hover:text-[#6772E5] transition-colors duration-300" />
+                      <span className="text-sm font-medium text-white group-hover:text-[#6772E5] transition-colors duration-300">
+                        Buy
+                      </span>
+                      
+                      {/* Subtle shine effect */}
+                      <div className="absolute inset-0 overflow-hidden rounded-full">
+                        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transition-opacity duration-500"></div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Subscribe Button */}
                 <button
-                  type="button"
-                  className="flex items-center text-gray-900 hover:text-[#007AFF] p-2"
                   onClick={() => navigate('/subscribe')}
+                  className="hidden lg:flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <FaBell className="mr-1" /> {/* Subscription icon */}
-                  Sub to SpeakIn+
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center p-2"
-                  onClick={() => navigate('/notifications')}
-                >
-                  <FaBell className="text-gray-900 hover:text-[#007AFF]" />
+                  Subscribe to SpeakIn+
                 </button>
 
-                {/* Profile Image with Dropdown */}
+                {/* Notifications */}
+                <button
+                  onClick={() => navigate('/notifications')}
+                  className="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <Bell className="h-5 w-5" />
+                </button>
+
+                {/* User Menu */}
                 <div className="relative">
                   <button
-                    type="button"
-                    className="flex items-center p-2"
-                    onClick={toggleDropdown}
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors"
                   >
-                    {userProfileImage ? (
-                      <img src={userProfileImage} alt="User Profile" className="h-8 w-8 rounded-full" />
-                    ) : (
-                      <FaUserCircle className="h-8 w-8 text-gray-900" /> // Default image
-                    )}
+                    <User className="h-5 w-5" />
                   </button>
 
                   {/* Dropdown Menu */}
-                  {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2">
-                      <button
-                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                        onClick={() => navigate('/profile')}
-                      >
-                        Profile
-                      </button>
-                      <button
-                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                        onClick={handleLogout}
-                      >
-                        Logout
-                      </button>
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
+                      <div className="py-1 divide-y divide-gray-100">
+                        <div className="px-4 py-2">
+                          <p className="text-sm font-medium text-gray-900">My Account</p>
+                        </div>
+                        <div className="py-1">
+                          <button
+                            onClick={() => {
+                              navigate('/profile');
+                              setIsDropdownOpen(false);
+                            }}
+                            className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          >
+                            <User className="mr-2 h-4 w-4" />
+                            Profile
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate('/settings');
+                              setIsDropdownOpen(false);
+                            }}
+                            className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          >
+                            <Settings className="mr-2 h-4 w-4" />
+                            Settings
+                          </button>
+                          <button
+                            onClick={() => {
+                              navigate('/buy-credits');
+                              setIsDropdownOpen(false);
+                            }}
+                            className="flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                          >
+                            <CreditCard className="mr-2 h-4 w-4" />
+                            Buy Credits
+                          </button>
+                        </div>
+                        <div className="py-1">
+                          <button
+                            onClick={() => {
+                              handleLogout();
+                              setIsDropdownOpen(false);
+                            }}
+                            className="flex w-full items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                          >
+                            <LogOut className="mr-2 h-4 w-4" />
+                            Logout
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
-            </>
-          ) : (
-            <ul className="hidden md:flex md:space-x-8 font-medium">
-              <li>
-                <Link 
-                  to="/home"
-                  className="text-gray-900 hover:text-[#007AFF] px-3 py-2 rounded md:p-0"
-                >
-                  Find a tutor
-                </Link>
-              </li>
-              <li>
-                <Link to="/become-a-tutor"
-                  className="text-gray-900 hover:text-[#007AFF] px-3 py-2 rounded md:p-0"
-                >
-                  Become a tutor
-                </Link>
-              </li>
-            </ul>
-          )}
+            ) : (
+              <button
+                onClick={() => navigate('/signin')}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Sign In
+              </button>
+            )}
+          </div>
 
-          {!isAuthenticated && (
+          {/* Mobile menu button */}
+          <div className="flex items-center md:hidden">
             <button
-              type="button"
-              className="text-white bg-[#007AFF] hover:bg-[#0066CC] focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 font-medium rounded-lg text-sm px-4 py-2 text-center"
-              onClick={() => navigate('/signin')}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              Sign In
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
-          )}
-          
-          <button
-            data-collapse-toggle="navbar-sticky"
-            type="button"
-            className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-            aria-controls="navbar-sticky"
-            aria-expanded="false"
-          >
-            <span className="sr-only">Open main menu</span>
-            <svg className="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-              <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h15M1 7h15M1 13h15" />
-            </svg>
-          </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white border-t">
+          <div className="px-4 pt-2 pb-3 space-y-2">
+            {!isAuthenticated ? (
+              <>
+                {navigationLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    to={link.href}
+                    className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {link.title}
+                  </Link>
+                ))}
+                <button 
+                  className="w-full mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                  onClick={() => {
+                    navigate('/signin');
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Sign In
+                </button>
+              </>
+            ) : (
+              <div className="space-y-2">
+                <div className="px-3 py-2 space-y-2">
+                  <div className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full text-sm inline-flex">
+                    <CreditCard className="h-4 w-4" />
+                    <span>{credits} Credits</span>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigate('/buy-credits');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-1 px-3 py-1 text-sm font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-full transition-colors"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Buy Credits
+                  </button>
+                </div>
+                <button
+                  className="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  onClick={() => {
+                    navigate('/subscribe');
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  Subscribe to SpeakIn+
+                </button>
+                <button
+                  className="w-full flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => {
+                    navigate('/profile');
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </button>
+                <button
+                  className="w-full flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => {
+                    navigate('/notifications');
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <Bell className="mr-2 h-4 w-4" />
+                  Notifications
+                </button>
+                <button
+                  className="w-full flex items-center px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                  onClick={() => {
+                    handleLogout();
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </nav>
   );
-}
+};
 
 export default Navbar;
