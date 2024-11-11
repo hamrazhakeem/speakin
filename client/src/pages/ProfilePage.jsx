@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import useAxios from '../hooks/useAxios';
 import { useSelector } from 'react-redux';
+import Avatar from '../components/Avatar';
 
 const ProfilePage = () => {
   const axiosInstance = useAxios();
@@ -238,7 +239,7 @@ const ProfilePage = () => {
     }
   };
 
-  const { email, profile_image, balance_credits } = studentData || {};
+  const { email, profile_image, balance_credits, name } = studentData || {};
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -251,7 +252,7 @@ const ProfilePage = () => {
             <nav className="flex space-x-6 mb-8 border-b pb-4">
               <button className="text-green-600 font-semibold text-lg hover:text-green-800 transition-colors">Profile</button>
               <button className="text-gray-600 text-lg hover:text-green-600 transition-colors" onClick={() => navigate('/student-password-change')}>Security</button>
-              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors">My Bookings</button>
+              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors" onClick={() => navigate('/bookings')}>My Bookings</button>
               <button className="text-gray-600 text-lg hover:text-green-600 transition-colors">Refer a friend</button>
             </nav>
 
@@ -278,15 +279,13 @@ const ProfilePage = () => {
                         </button>
                       )}
                     </div>
-                  ) : profile_image && !deleteImage ? (
-                    <img
-                      src={profile_image}
-                      alt="Profile"
-                      className="h-64 w-64 rounded-full mx-auto object-cover shadow-lg"
-                    />
                   ) : (
-                    <div className="bg-gray-200 h-64 w-64 rounded-full mx-auto flex items-center justify-center shadow-inner">
-                      <span className="text-7xl text-gray-400">📷</span>
+                    <div className="flex justify-center">
+                      <Avatar
+                        src={profile_image} 
+                        name={name || ''} 
+                        size={256} 
+                      />
                     </div>
                   )}
                 </div>

@@ -20,6 +20,7 @@ import TutorRequestPage from './pages/TutorRequestPage';
 import TutorDashboard from './pages/TutorDashboard';
 import TutorPasswordChangePage from './pages/TutorPasswordChangePage';
 import EditTeachingLanguage from './pages/EditTeachingLanguage';
+import TutorSessionsPage from './pages/TutorSessionsPage';
 
 import AdminSignInPage from './pages/AdminSignInPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -37,6 +38,7 @@ import AdminUnprotectedRoute from './routes/AdminUnprotectedRoute';
 import BuyCredits from './pages/BuyCredits';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
+import StudentBookingsPage from './pages/StudentBookingsPage';
 
 const App = () => {
   useProactiveTokenRefresh();
@@ -65,6 +67,7 @@ const App = () => {
           <Route path='/tutor-dashboard' element={<TutorDashboard />} />
           <Route path='/tutor-password-change' element={<TutorPasswordChangePage />} />
           <Route path='/edit-teaching-language' element={<EditTeachingLanguage />} />
+          <Route path='/tutor-sessions' element={<TutorSessionsPage />} />
         </Route>
 
         {/* Student Unprotected routes */}
@@ -87,6 +90,7 @@ const App = () => {
           <Route path='/buy-credits' element={<BuyCredits />} />
           <Route path='/payment/success' element={<PaymentSuccessPage />} />
           <Route path='/payment/cancel' element={<PaymentCancelPage />} />
+          <Route path='/bookings' element={<StudentBookingsPage />} />
         </Route>
 
         {/* Admin Unprotected routes */}

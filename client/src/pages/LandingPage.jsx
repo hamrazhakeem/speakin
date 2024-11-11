@@ -1,13 +1,13 @@
 import React from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { useNavigate } from 'react-router-dom'
 
 const LandingPage = () => {
+  const navigate = useNavigate();
   return (
     <div >
-
       <Navbar />
-
     <div className='p-8'>
       <section className="hero bg-white text-center py-16">
         <div className="container mx-auto px-4">
@@ -20,7 +20,7 @@ const LandingPage = () => {
           </div>
           <h1 className="text-4xl font-bold mt-8">Learn languages effortlessly with expert 1-on-1 tutoring.</h1>
           <p className="text-lg text-gray-600 mt-4">Start today and explore new languages!</p>
-          <button className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg">Get Started</button>
+          <button className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg" onClick={() => navigate('/signin')}>Get Started</button>
         </div>
       </section>
 
@@ -76,7 +76,7 @@ const LandingPage = () => {
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-semibold mb-4">Become a tutor</h2>
           <p className="text-lg text-gray-600 mb-8">Earn money by sharing your language expertise.</p>
-          <button className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg">Sign Up</button>
+          <button className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg" onClick={() => navigate('/become-a-tutor')}>Sign up</button>
         </div>
       </section>
       </div>

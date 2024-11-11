@@ -1,8 +1,10 @@
 import React from 'react';
 import TutorNavbar from '../components/TutorNavbar';
 import Footer from '../components/Footer';
+import { useNavigate } from 'react-router-dom';
 
 const TutorLandingPage = () => {
+  const navigate = useNavigate();
   return (
     <div>
       <TutorNavbar />
@@ -43,7 +45,7 @@ const TutorLandingPage = () => {
                 </div>
                 {/* Center the button below the grid */}
                 <div className="flex justify-center mt-10">
-                <button className="bg-blue-500 text-white px-6 py-3 rounded-lg transition duration-300 hover:bg-blue-600">
+                <button className="bg-blue-500 text-white px-6 py-3 rounded-lg transition duration-300 hover:bg-blue-600" onClick={() => navigate('/tutor-request')}>
                     Give request to become tutor now
                 </button>
                 </div>

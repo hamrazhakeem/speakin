@@ -11,7 +11,8 @@ const authSlice = createSlice({
     isAdmin: false,
     isTutor: false,
     isStudent: false,
-    credits: 0
+    credits: 0,
+    required_credits: 0
   },
   reducers: {
     setTokens: (state, action) => {
@@ -24,6 +25,7 @@ const authSlice = createSlice({
       state.isTutor = action.payload.isTutor;
       state.isStudent = action.payload.isStudent;  
       state.credits = action.payload.credits; 
+      state.required_credits = action.payload.required_credits;
     },
     clearTokens: (state) => {
       state.accessToken = null;
@@ -35,12 +37,16 @@ const authSlice = createSlice({
       state.isTutor = false;
       state.isStudent = false;
       state.credits = 0
+      state.required_credits = 0;
     },
     updateCredits: (state, action) => {
       state.credits = action.payload;
     },
+    updateRequiredCredits: (state, action) => {
+      state.required_credits = action.payload;
+    },
   },
 });
 
-export const { setTokens, clearTokens, updateCredits } = authSlice.actions;
+export const { setTokens, clearTokens, updateCredits, updateRequiredCredits } = authSlice.actions;
 export default authSlice.reducer;

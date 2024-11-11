@@ -5,7 +5,7 @@ import { setTokens, clearTokens } from "../redux/authSlice";
 
 const useProactiveTokenRefresh = () => {
     const dispatch = useDispatch();
-    const refreshToken = useSelector((state) => state.auth.refreshToken);
+    const { refreshToken, userName, userId, isStudent, isAuthenticated, isAdmin, credits, isTutor, required_credits }= useSelector((state) => state.auth);
   
     useEffect(() => {
       const refreshTokens = async () => {
@@ -16,27 +16,26 @@ const useProactiveTokenRefresh = () => {
                 refresh: refreshToken,
               }
               );
-            console.log(refreshToken) 
+            console.log(refreshToken)
             const { access, refresh } = response.data;
   
             // Update tokens in the store
             console.log('token updated', access, refresh);
-            dispatch(setTokens({ accessToken: access, refreshToken: refresh, isAdmin: true, isAuthenticated: true }));
+            dispatch(setTokens({ accessToken: access, refreshToken: refresh, isAuthenticated, isAdmin, userName, userId, isStudent, credits, isTutor, required_credits }));
           } catch (error) {
             console.error('Error refreshing token:', error);
-            dispatch(clearTokens()); // Clear tokens if refresh fails
+            if (error.response && error.response.status === 401) {
+              console.log('Token expired, clearing tokens');
+              dispatch(clearTokens());
+            }
           }
         }
       };
       
-      
-      // Refresh the tokens every 4 minutes (240,000 milliseconds)
-      const interval = setInterval(refreshTokens, 2700000 ); // 45 minutes
+      const interval = setInterval(refreshTokens, 2700000); // 45 minutes
       
       // Cleanup interval on component unmount
       return () => clearInterval(interval);
-
-      
 
     }, [refreshToken, dispatch]);
   

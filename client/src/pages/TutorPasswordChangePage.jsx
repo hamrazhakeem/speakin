@@ -73,7 +73,7 @@ const TutorPasswordChangePage = () => {
             <nav className="flex space-x-6 mb-8 border-b pb-4">
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors" onClick={()=>navigate('/tutor-dashboard')}>Profile</button>
               <button className="text-blue-600 font-semibold text-lg hover:text-blue-800 transition-colors">Security</button>
-              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Sessions</button>
+              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors" onClick={()=>navigate('/tutor-sessions')}>Sessions</button>
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Payments</button>
             </nav>
 

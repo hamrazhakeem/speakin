@@ -71,7 +71,6 @@ const stripePromise = loadStripe(`${import.meta.env.VITE_STRIPE_PK}`);
             purchased_credits: credits,  
             price_per_credit: pricePerCredit, 
             currency: 'inr', 
-
           });
       
           const data = response.data; 

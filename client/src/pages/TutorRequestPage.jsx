@@ -86,11 +86,11 @@ const TutorRequestPage = () => {
     }
   
     // Check file size
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error("Image size must not exceed 2 MB.");
-      e.target.value = null;
-      return;
-    }
+    // if (file.size > 4 * 1024 * 1024) {
+    //   toast.error("Image size must not exceed 2 MB.");
+    //   e.target.value = null;
+    //   return;
+    // }
     setImage(file)
   }, [])
   
@@ -103,11 +103,11 @@ const TutorRequestPage = () => {
     }
   
     // Check file size
-    if (file.size > 8 * 1024 * 1024) {
-      toast.error("Video size must not exceed 5 MB.");
-      e.target.value = null;
-      return;
-    }
+    // if (file.size > 8 * 1024 * 1024) {
+    //   toast.error("Video size must not exceed 5 MB.");
+    //   e.target.value = null;
+    //   return;
+    // }
     setVideo(file)
     // Add your logic to handle the video file here
     console.log("Video uploaded:", file);

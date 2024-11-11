@@ -7,6 +7,9 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form"; // Import useForm
 import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { updateRequiredCredits } from "../redux/authSlice";
+import Avatar from "../components/Avatar";
 
 const Modal = ({ isOpen, onClose, onProceed, children }) => {
   if (!isOpen) return null;
@@ -48,6 +51,7 @@ const TutorDashboard = () => {
   const [languages, setLanguages] = useState([]);
   const [proficiencies, setProficiencies] = useState([]);
   const [selectedLanguages, setSelectedLanguages] = useState([]);
+  const dispatch = useDispatch();
 
   const navigate = useNavigate(); // For navigation
 
@@ -155,6 +159,7 @@ const TutorDashboard = () => {
       console.log("Profile updated successfully");
       setEditMode(false); // Exit edit mode
       fetchUserData(); // Refetch user data 
+      dispatch(updateRequiredCredits(parseInt(data.requiredCredits)))
     } catch (error) {
       const errorMessage = error.response?.data?.error || error.message;
       if (errorMessage.includes("duplicate key value violates unique constraint")) {
@@ -227,8 +232,8 @@ const TutorDashboard = () => {
 
             <nav className="flex space-x-6 mb-8 border-b pb-4">
               <button className="text-blue-600 font-semibold text-lg hover:text-blue-800 transition-colors">Profile</button>
-              <button className="text-gray-600 text-lg hover:text-blue-800 transition-colors" onClick={()=>navigate('/tutor-password-change')}>Security</button>
-              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Sessions</button>
+              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors" onClick={()=>navigate('/tutor-password-change')}>Security</button>
+              <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors" onClick={()=>navigate('/tutor-sessions')}>Sessions</button>
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Payments</button>
             </nav>
 
@@ -255,15 +260,13 @@ const TutorDashboard = () => {
                         </button>
                       )}
                     </div>
-                  ) : profile_image && !deleteImage ? (
-                    <img
-                      src={profile_image}
-                      alt="Profile"
-                      className="h-64 w-64 rounded-full mx-auto object-cover shadow-lg"
-                    />
                   ) : (
-                    <div className="bg-gray-300 h-64 w-64 rounded-full mx-auto flex items-center justify-center shadow-inner">
-                      <span className="text-7xl text-gray-400">📷</span>
+                    <div className="flex justify-center">
+                      <Avatar
+                        src={profile_image} 
+                        name={tutorData?.name || ''} 
+                        size={256} 
+                      />
                     </div>
                   )}
                 </div>

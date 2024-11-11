@@ -6,12 +6,10 @@ import TutorNavbar from "../components/TutorNavbar";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useAxios from '../hooks/useAxios';
-import { useSelector } from "react-redux";
 
 const EditTeachingLanguage = () => {
   const navigate = useNavigate();
   const axiosInstance = useAxios();
-  const userId = useSelector((state) => state.auth.userId);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Set default values in useForm, setting isNative to "true" for native
@@ -63,11 +61,11 @@ const EditTeachingLanguage = () => {
     }
   
     // Validate file size (limit: 4MB)
-    if (file.size > 4 * 1024 * 1024) {
-      toast.error("Image size must not exceed 4 MB.");
-      e.target.value = null;  // Reset input
-      return;
-    }
+    // if (file.size > 4 * 1024 * 1024) {
+    //   toast.error("Image size must not exceed 4 MB.");
+    //   e.target.value = null;  // Reset input
+    //   return;
+    // }
   
     // If valid, set image
     setImage(file);
@@ -85,11 +83,11 @@ const EditTeachingLanguage = () => {
     }
   
     // Validate file size (limit: 8MB as per your condition, although the error message says 5MB, so choose accordingly)
-    if (file.size > 8 * 1024 * 1024) {
-      toast.error("Video size must not exceed 8 MB.");
-      e.target.value = null;  // Reset input if invalid
-      return;
-    }
+    // if (file.size > 8 * 1024 * 1024) {
+    //   toast.error("Video size must not exceed 8 MB.");
+    //   e.target.value = null;  // Reset input if invalid
+    //   return;
+    // }
   
     // If valid, set the video file
     setVideo(file);
