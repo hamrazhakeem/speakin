@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import ChangePasswordSerializer, TeachingLanguageChangeRequestSerializer, UserSerializer
+from .serializers import ChangePasswordSerializer, TeachingLanguageChangeRequestSerializer, UserSerializer, TutorDetailsSerializer
 from .models import LanguageSpoken, LanguageToLearn, TeachingLanguageChangeRequest, TutorDetails, TutorLanguageToTeach, User, Language, Proficiency
 from django.core.mail import send_mail
 from django.conf import settings
@@ -18,12 +18,12 @@ from rest_framework.views import APIView
 from pycountry import countries
 import json
 import logging
-from django.db import transaction, IntegrityError
-from django.utils.datastructures import MultiValueDict
+from django.db import transaction
 from django.db.models import Q 
 from rest_framework.permissions import IsAdminUser
 from .permissions import IsAdminOrUserSelf
 from .utils import get_id_token
+from rest_framework.exceptions import NotFound
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +115,7 @@ def sign_in(request):
             'refresh': str(refresh),
             'name': user.name,
             'id': user.id,
-            'credits': user.required_credits
+            'credits': user.balance_credits
         }, status=status.HTTP_200_OK) 
 
     return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -152,6 +152,7 @@ def resend_forgot_password_otp(request):
         return Response({'message': 'User data not found. Please try again.'}, status=status.HTTP_404_NOT_FOUND)
 
     otp = generate_otp()
+    print(otp)
     cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
 
     send_email('Resend: Your OTP for Password Reset', email, render_to_string('emails/resend_otp_email.html', {'otp': otp}))
@@ -233,7 +234,7 @@ def set_new_password(request):
         return Response({'message': 'Invalid cache key or email'}, status=status.HTTP_400_BAD_REQUEST)
 
 def get_signin_url():
-    frontend_origin = next((origin for origin in settings.CORS_ALLOWED_ORIGINS if origin.startswith('http://127.0.0.1') or origin.startswith('http://localhost')), None)
+    frontend_origin = next((origin for origin in settings.CORS_ALLOWED_ORIGINS if origin.startswith('http://localhost') or origin.startswith('http://127.0.0.1')), None)
     
     if not frontend_origin:
         raise ValueError("No local frontend origin found in CORS_ALLOWED_ORIGINS")
@@ -268,7 +269,7 @@ class LoginWithGoogle(APIView):
         return Response({"detail": "Code not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-def get_user_or_create(email, name):
+def get_user_or_create(email, name): 
     try:
         user = User.objects.get(email=email)
         if not user.is_active:
@@ -287,6 +288,15 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAdminOrUserSelf]
 
     def get_object(self):
+        # Check if the user is an admin
+        if self.request.user.is_superuser:
+            user_id = self.kwargs.get('pk')
+            if user_id:
+                return User.objects.get(pk=user_id)
+            else:
+                return self.request.user 
+        
+        # If not an admin, return the authenticated user's info
         return self.request.user
  
     def update(self, request, *args, **kwargs): 
@@ -407,7 +417,7 @@ class TutorRequestView(generics.RetrieveUpdateDestroyAPIView):
                     print("User is a tutor")
                     try:
                         tutor_details = TutorDetails.objects.get(user=user)
- 
+  
                         if tutor_details.status == 'pending' and self.request.data.get('action') == 'approve':
                             tutor_details.status = 'approved'
                             tutor_details.save()
@@ -645,7 +655,6 @@ def tutor_sign_in(request):
     password = request.data.get('password')
   
     user = authenticate(request, username=email, password=password)
-    
     if user is not None and user.user_type != 'student':
         # Check if the user is a tutor and verify the tutor status
         if user.user_type == 'tutor':
@@ -669,7 +678,8 @@ def tutor_sign_in(request):
             'refresh': str(refresh),
             'name': user.name,
             'id': user.id,
-            'credits': user.balance_credits
+            'credits': user.balance_credits,
+            'required_credits': user.tutor_details.required_credits,
         }, status=status.HTTP_200_OK)
     
     return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -792,3 +802,27 @@ class TeachingLanguageChangeRequestView(generics.ListCreateAPIView):
             return Response({
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
+        
+class UserBalanceView(generics.GenericAPIView):
+    def get(self, request, pk):
+        try:
+            user = User.objects.get(id=pk)
+            return Response({"balance_credits": user.balance_credits})
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=404)  
+        
+class TutorDetailsView(generics.RetrieveAPIView):
+    queryset = TutorDetails.objects.all()
+    serializer_class = TutorDetailsSerializer
+
+class TutorDetailsByUserView(generics.GenericAPIView):
+    def get(self, request, id, *args, **kwargs):
+        try:
+            user = User.objects.get(id=id)
+            tutor_details = TutorDetails.objects.get(user=user) 
+            serializer = TutorDetailsSerializer(tutor_details)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            raise NotFound("User not found")
+        except TutorDetails.DoesNotExist:
+            raise NotFound("Tutor details not found for this user")

@@ -3,14 +3,24 @@ syntax = "proto3";
 package user_service;
 
 service UserService {
-    rpc UpdateBalance(UpdateBalanceRequest) returns (UpdateBalanceResponse);
+    rpc AddPurchasedCredits(AddPurchasedCreditsRequest) returns (AddPurchasedCreditsResponse);
+    rpc DeductBalanceCredits (DeductBalanceCreditsRequest) returns (DeductBalanceCreditsResponse);
 }
 
-message UpdateBalanceRequest {
+message AddPurchasedCreditsRequest {
     int32 user_id = 1;
     int32 credits = 2;
 }
 
-message UpdateBalanceResponse {
+message AddPurchasedCreditsResponse {
     bool success = 1;
+}
+
+message DeductBalanceCreditsRequest {
+  int32 user_id = 1;
+  int32 new_balance_credits = 2;
+}
+
+message DeductBalanceCreditsResponse {
+  bool success = 1;
 }

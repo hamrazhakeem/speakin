@@ -66,7 +66,7 @@ class StripeWebhook(APIView):
         sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
         
         try:
-
+ 
             event = stripe.Webhook.construct_event(
                 payload, sig_header, os.getenv('STRIPE_WEBHOOK_SECRET')
             )
@@ -88,7 +88,7 @@ def handle_checkout_completed(session):
         user_id = int(session['metadata']['user_id'])
         transaction_type = session['metadata']['transaction_type']
 
-        Transactions.objects.create(
+        transaction = Transactions.objects.create(
             user_id=user_id,
             amount=session['amount_total'] / 100,  # Convert from paise to rupees 
             purchased_credits=credits,
@@ -115,7 +115,7 @@ def refund_transaction(transaction, payment_intent):
         stripe.Refund.create(payment_intent=payment_intent)
         
         # Update transaction status to 'refunded'
-        transaction.status = 'refund'
+        transaction.status = 'refunded'
         transaction.save()
 
     except Exception as e:

@@ -32,4 +32,13 @@ urlpatterns = [
     path('google_sign_in/', views.google_sign_in, name='google_sign_in'),
     path('create-checkout-session/', views.create_checkout_session, name='create-checkout-session'),
     path('webhook/', views.webhook, name='webhook'),
+    path('get-tutor-availabilities/', views.get_tutor_availabilities, name='get_tutor_availabilities'),
+    path('tutor-availabilities/', views.create_tutor_availabilities, name='tutor_availabilities'),
+    path('tutor-availabilities/<int:id>/', views.tutor_availabilities, name='tutor_availabilities'),
+    path('delete-tutor-availabilities/<int:id>/', views.delete_tutor_availabilities, name='delete_tutor_availabilities'),
+    path('bookings/', views.bookings, name='bookings'),
+    path('get-bookings/', views.get_bookings, name='get_bookings'),
+    path('get-user-bookings/<int:id>/', views.get_user_bookings, name='get_user_bookings'),
+    path('tutor-details/<int:id>/', views.tutor_details, name='tutor_details'),
+    path('users/<int:id>/tutor-details/', views.users_tutor_details, name='users_tutor_details'),
 ]

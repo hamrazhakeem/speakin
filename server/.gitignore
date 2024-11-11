@@ -3,9 +3,10 @@
 *.pyd
 __pycache__/
 **/migrations/
-user_service_env
 api_env
+user_service_env
 payment_service_env
+session_service_env
 
 tutor_govt_id_images
 profile_images

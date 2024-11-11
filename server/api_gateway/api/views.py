@@ -5,12 +5,12 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from .permissions import IsAuthenticatedWithJWT
-from rest_framework.views import APIView
 
 # Service URLs Configuration
 SERVICE_URLS = {
     'user': 'http://host.docker.internal:8000/',
     'payment': 'http://host.docker.internal:8001/',
+    'session': 'http://host.docker.internal:8002/'
 }
 
 class ServiceRouter:
@@ -82,6 +82,7 @@ class ServiceRouter:
                 is_webhook = request.path.endswith('/webhook/')
                 if method in ['POST', 'PATCH']:
                     json_data, files_data = ServiceRouter._prepare_data(request)
+                    print('json dataaaaaaaaaaa', json_data)
                     response = ServiceRouter._request_with_files(
                         method, 
                         endpoint_url, 
@@ -95,8 +96,11 @@ class ServiceRouter:
                         method,
                         endpoint_url,
                         headers=headers, 
-                        json=request.data if method != 'GET' else None
+                        json=request.data 
                     )
+                    print('response in api gatewayyyyyyyyyyyyy',response)
+                if response.status_code == 204:
+                    return JsonResponse({'message': 'No Content'}, status=response.status_code)
 
                 # Handle both JSON and non-JSON responses
                 return JsonResponse(response.json(), status=response.status_code, safe=False)
@@ -157,6 +161,8 @@ update_user = patch_api('user', 'users/<int:id>/', permissions=[IsAuthenticatedW
 get_users = get_api('user', 'users/', permissions=[IsAuthenticatedWithJWT])
 users = get_api('user', 'users/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 block_unblock_user = patch_api('user', 'block_unblock_user/<int:id>/', permissions=[IsAuthenticatedWithJWT])
+tutor_details = get_api('user', 'tutor-details/<int:id>/', permissions=[IsAuthenticatedWithJWT])
+users_tutor_details = get_api('user', 'users-tutor-details/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 
 # Tutor Verification Endpoints
 approve_tutor = patch_api('user', 'tutor_request_verify/<int:id>/', permissions=[IsAuthenticatedWithJWT])
@@ -168,8 +174,20 @@ change_password = post_api('user', 'change_password/', permissions=[IsAuthentica
 # ----------------------------------------------------------------
 
 # Payment Service Endpoints
-# Payment Processing Endpoints
+# Payment Processing Endpoints 
 create_checkout_session = post_api('payment', 'create_checkout_session/', permissions=[IsAuthenticatedWithJWT])
 
 # Webhook Endpoints 
 webhook = post_api('payment', 'webhook/')  
+
+# ----------------------------------------------------------------
+
+# Session Service Endpoints
+
+get_tutor_availabilities = get_api('session' ,'tutor-availabilities/', permissions=[IsAuthenticatedWithJWT])
+tutor_availabilities = get_api('session' ,'tutor-availabilities/<int:id>/', permissions=[IsAuthenticatedWithJWT])
+create_tutor_availabilities = post_api('session', 'tutor-availabilities/', permissions=[IsAuthenticatedWithJWT]) 
+delete_tutor_availabilities = delete_api('session', 'tutor-availabilities/<int:id>/', permissions=[IsAuthenticatedWithJWT])
+bookings = post_api('session', 'bookings/', permissions=[IsAuthenticatedWithJWT])
+get_bookings = get_api('session', 'bookings/', permissions=[IsAuthenticatedWithJWT])
+get_user_bookings = get_api('session', 'bookings/student/<int:id>/', permissions=[IsAuthenticatedWithJWT])

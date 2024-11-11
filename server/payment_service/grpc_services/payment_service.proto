@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+service PaymentService {
+  rpc LockCredits (LockCreditsRequest) returns (LockCreditsResponse);
+}
+
+message LockCreditsRequest {
+  int32 student_id = 1;
+  int32 tutor_id = 2;
+  int32 booking_id = 3;
+  int32 credits_locked = 4;
+  string status = 5; // 'locked'
+}
+
+message LockCreditsResponse {
+  bool success = 1;
+}

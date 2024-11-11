@@ -34,8 +34,22 @@ services:
       - ./payment_service:/app
     ports:
       - "8001:8001"
+      - "50052:50052"
     depends_on:
       - payment_service_db
+    networks:
+      - microservice_network
+
+  session_service:
+    container_name: session_service
+    build:
+      context: ./session_service
+    volumes:
+      - ./session_service:/app
+    ports:
+      - "8002:8002"
+    depends_on:
+      - session_service_db
     networks:
       - microservice_network
 
@@ -67,6 +81,20 @@ services:
     ports:
       - "5433:5432"
 
+  session_service_db:
+    image: postgres:13
+    container_name: session_service_db
+    environment:
+      POSTGRES_DB: ${SESSION_DB_NAME}
+      POSTGRES_USER: ${SESSION_DB_USER}
+      POSTGRES_PASSWORD: ${SESSION_DB_PASSWORD}
+    volumes:
+      - session_db_data:/var/lib/postgresql/data
+    networks:
+      - microservice_network
+    ports:
+      - "5434:5432"
+
   redis:
     image: redis:alpine
     container_name: redis
@@ -90,6 +118,7 @@ services:
 volumes:
   user_db_data:
   payment_db_data:
+  session_db_data:
 
 networks:
   microservice_network:

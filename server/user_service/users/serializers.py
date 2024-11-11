@@ -23,7 +23,7 @@ class LanguageToLearnSerializer(serializers.ModelSerializer):
 class TutorDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TutorDetails
-        fields = ['speakin_name', 'about', 'required_credits', 'intro_video', 'certificate', 'govt_id', 'status', 'rating', 'total_reviews']
+        fields = ['id','user','speakin_name', 'about', 'required_credits', 'intro_video', 'certificate', 'govt_id', 'status', 'rating', 'total_reviews']
 
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')  # Assuming user_id is passed in the request
