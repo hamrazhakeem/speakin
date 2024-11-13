@@ -23,7 +23,6 @@ urlpatterns = [
     path('verify_language_change/<int:id>/', TeachingLanguageChangeRequestView.as_view(), name='language_change_requests'),
     path('tutor_request_verify/<int:pk>/', TutorRequestView.as_view(), name='deny_tutor'),
     path('tutor-details/<int:pk>/', TutorDetailsView.as_view(), name='tutor_details'),
-    path('users-tutor-details/<int:id>/', TutorDetailsByUserView.as_view(), name='users_tutor_details'),
 
     path('get_countries/', CountryListView.as_view(), name='get_countries'),
     path('get_platform_languages/', PlatformLanguageListView.as_view(), name='get_platform_languages'),

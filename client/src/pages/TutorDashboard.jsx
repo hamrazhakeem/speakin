@@ -76,8 +76,8 @@ const TutorDashboard = () => {
       setValue("email", response.data.email || "");
       setValue("name", response.data.name || "");
       setCountry(response.data.country || "");
-      console.log('Tutor Data:', response.data);
-
+      console.log('Tutor Data:', response.data)
+      sessionStorage.setItem('teachingLanguage', response.data.tutor_language_to_teach[0].language);
       const countriesResponse = await axiosInstance.get(`get_countries/`);
       setCountries(countriesResponse.data); 
 
@@ -231,7 +231,7 @@ const TutorDashboard = () => {
             <h1 className="text-4xl font-bold mb-8 text-gray-800">Tutor Profile</h1>
 
             <nav className="flex space-x-6 mb-8 border-b pb-4">
-              <button className="text-blue-600 font-semibold text-lg hover:text-blue-800 transition-colors">Profile</button>
+              <button className="text-blue-600 font-semibold text-lg hover:text-blue-800 transition-colors" onClick={()=>navigate('/tutor-dashboard')}>Profile</button>
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors" onClick={()=>navigate('/tutor-password-change')}>Security</button>
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors" onClick={()=>navigate('/tutor-sessions')}>Sessions</button>
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Payments</button>

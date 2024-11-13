@@ -64,7 +64,7 @@ const HomePage = () => {
                   languageSpoken={tutor.language_spoken}
                   languageToTeach={tutor.tutor_language_to_teach}
                   country={tutor.country}
-                  tutor_id={tutor.tutor_details.id}
+                  tutor_id={tutor.id}
                 />
               ))}
             </div>

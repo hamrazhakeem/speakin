@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from django.db import transaction
 from .models import Transactions
 from .serializers import TransactionsSerializer
+from .permissions import IsOwner
 from grpc_services.grpc_client import notify_user_service
 import os
 from dotenv import load_dotenv
@@ -17,6 +18,7 @@ load_dotenv()
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY') 
 
 class CreateCheckoutSession(APIView): 
+    permission_classes = [IsOwner] 
     def post(self, request): 
         serializer = TransactionsSerializer(data=request.data)
         if serializer.is_valid(): 

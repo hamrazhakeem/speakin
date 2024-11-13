@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import useAxios from '../hooks/useAxios';
 import { format, toDate } from 'date-fns';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { updateCredits } from '../redux/authSlice';
-import { useDispatch } from 'react-redux';
 
 const AvailabilityModal = ({ tutorId, onClose }) => {
   const axiosInstance = useAxios();
@@ -12,25 +11,29 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { userId } = useSelector((state) => state.auth);
+  const { userId, credits } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
-  const { credits } = useSelector((state) => state.auth);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch all availabilities and bookings in parallel
         const [availabilityResponse, bookingsResponse] = await Promise.all([
           axiosInstance.get('get-tutor-availabilities/'),
           axiosInstance.get('get-bookings/')
         ]);
 
-        // Filter availabilities for the specific tutor
-        const tutorAvailabilities = availabilityResponse.data.filter(slot => 
-          slot.tutor_id === tutorId
-        );
+        // Current time for comparison
+        const now = new Date();
 
-        // Create a map of availability IDs to booking status
+        // Filter availabilities for the specific tutor and apply lead time
+        const tutorAvailabilities = availabilityResponse.data
+          .filter(slot => slot.tutor_id === tutorId)
+          .filter(slot => {
+            const startTime = toDate(slot.start_time);
+            const leadTimeRequired = 3 * 60 * 60 * 1000;
+            return startTime.getTime() - now.getTime() > leadTimeRequired;
+          });
+
         const bookingsMap = bookingsResponse.data.reduce((acc, booking) => {
           if (booking.student_id === userId) {
             acc[booking.availability] = booking.booking_status;
@@ -38,12 +41,11 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
           return acc;
         }, {});
 
-        // Enhance availability data with booking information
         const enhancedAvailabilities = tutorAvailabilities.map(slot => ({
           ...slot,
           bookedByYou: bookingsMap[slot.id] || null
         }));
-        console.log(availabilityResponse, bookingsResponse)
+
         setAvailability(enhancedAvailabilities);
         setBookings(bookingsResponse.data);
       } catch (error) {
@@ -71,19 +73,14 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
         onClose();
       }
     } catch (err) {
-      console.log(err);
-      if (err.response) {
-        const errorMessage = err.response?.data?.non_field_errors?.[0] || 
-                           err.response?.data?.detail || 
+      const errorMessage = err.response?.data?.non_field_errors?.[0] ||
+                           err.response?.data?.detail ||
                            (err.response?.data?.error === 'Failed to connect to session_service' 
                              ? "Internal Server Error" 
-                             : err.response?.data?.error) || 
-                           err.response?.data?.message || 
+                             : err.response?.data?.error) ||
+                           err.response?.data?.message ||
                            "An error occurred";
         toast.error(errorMessage);
-      } else {
-        toast.error("Network error");
-      }
     }
   };
 

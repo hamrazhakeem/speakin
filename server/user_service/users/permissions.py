@@ -13,9 +13,10 @@ class IsAdminOrUserSelf(BasePermission):
     """
 
     def has_permission(self, request, view):
+        if request.method == 'GET':
+            return True
         # Extract user ID from URL, assumed to be passed as `id`
         user_id_in_url = view.kwargs.get('pk')  # Assumes URL pattern includes `<int:id>`
-
         # Get JWT token from the request header
         token = request.headers.get('Authorization')
         if not token:

@@ -4,7 +4,7 @@ import { useSelector } from 'react-redux';
 import useAxios from '../hooks/useAxios';
 import { toast } from 'react-toastify';
 
-const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailability }) => {
+const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailability, teachingLanguage }) => {
   const [step, setStep] = useState(1);
   const [sessionType, setSessionType] = useState(null);
   const [selectedDate, setSelectedDate] = useState('');
@@ -21,7 +21,7 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
     
     const currentTime = new Date();
     const minimumTime = new Date(
-      currentTime.getTime() + (duration === 20 ? 30 : 60) * 60 * 1000
+      currentTime.getTime() + (duration === 20 ? 4 : 8) * 60 * 60 * 1000
     );
   
     for (let hour = start; hour <= end; hour++) {
@@ -65,18 +65,6 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
     setStep(2);
   };
 
-  const getTutorIdFromUserService = async (userId) => {
-    try {
-      // Make an API request to the User Service to get TutorDetails
-      const response = await axiosInstance.get(`users/${userId}/tutor-details/`);
-      console.log('responseeeeeeeee',response.data)
-      return response.data.id;  // Assuming the tutor id is in the response data
-    } catch (error) {
-      console.error('Error fetching tutor details:', error);
-      throw new Error('Unable to fetch tutor details');
-    }
-  };
-
   const handleSubmit = async () => {
     const time24 = convertTo24Hour(selectedTime);
 
@@ -86,25 +74,23 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
     // Calculate the end datetime based on session type (trial or full session)
     const endDateTime = new Date(startDateTime.getTime() + (sessionType === 'trial' ? 20 : 60) * 60 * 1000);
     
-    const tutorId = await getTutorIdFromUserService(userId);
-    console.log('Tutor ID:', tutorId);  // Ensure tutorId is being correctly retrieved
     const sessionData = {
-      tutor_id: tutorId,
+      tutor_id: userId,
       session_type: sessionType,
+      language_to_teach: teachingLanguage,
       start_time: startDateTime.toISOString(), // Start time in ISO 8601 format
       end_time: endDateTime.toISOString(),  
       credits_required: sessionType === 'trial' ? Math.round(tutorCredits * 0.25) : tutorCredits,
       status: 'available',
     };
-    console.log('sessiondata', sessionData);
 
     try {
+      console.log(sessionData)
       const response = await axiosInstance.post('tutor-availabilities/', sessionData);
       console.log('Session created:', response.data);
       fetchTutorAvailability(); // Trigger the fetch to refresh sessions
       onClose(); // Close the modal or form
     } catch (error) {
-      console.log(error)
       // Check if it's a 409 conflict error and handle it gracefully
       if (error.response && error.response.status === 409) {
         toast.error("A slot with this time range already exists. Please choose a different time.");
@@ -160,7 +146,7 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
             </div>
           )}
 
-          {step === 2 && (
+        {step === 2 && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -181,17 +167,23 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
                     Select Time
                   </label>
                   <div className="h-64 overflow-y-auto border rounded-lg">
-                    {generateTimeSlots(sessionType === 'trial' ? 20 : 60).map((slot) => (
-                      <button
-                        key={slot.display}
-                        onClick={() => setSelectedTime(slot.display)}
-                        className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
-                          selectedTime === slot.display ? 'bg-blue-50 text-blue-700' : ''
-                        }`}
-                      >
-                        {slot.display}
-                      </button>
-                    ))}
+                    {generateTimeSlots(sessionType === 'trial' ? 20 : 60).length > 0 ? (
+                      generateTimeSlots(sessionType === 'trial' ? 20 : 60).map((slot) => (
+                        <button
+                          key={slot.display}
+                          onClick={() => setSelectedTime(slot.display)}
+                          className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
+                            selectedTime === slot.display ? 'bg-blue-50 text-blue-700' : ''
+                          }`}
+                        >
+                          {slot.display}
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-4 py-2 text-gray-600">
+                        No available time slots for the selected date.
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

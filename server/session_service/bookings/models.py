@@ -14,6 +14,7 @@ class TutorAvailability(models.Model):
     )
     tutor_id = models.IntegerField()
     session_type = models.CharField(choices=SESSION_TYPE_CHOICES, max_length=8)
+    language_to_teach = models.CharField(max_length=100)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
     credits_required = models.IntegerField()
@@ -30,7 +31,7 @@ class Bookings(models.Model):
         ('no_show_by_tutor', 'No-show by Tutor'),
         ('no_show_by_student', 'No-show by Student'),
     )
-    availability = models.ForeignKey(TutorAvailability, on_delete=models.CASCADE)
+    availability = models.ForeignKey(TutorAvailability, related_name='bookings', on_delete=models.CASCADE)
     student_id = models.IntegerField()
     booking_status = models.CharField(choices=BOOKING_STATUS_CHOICES, max_length=25)
     canceled_at = models.DateTimeField(null=True, blank=True)

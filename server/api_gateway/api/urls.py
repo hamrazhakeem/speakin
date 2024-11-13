@@ -40,5 +40,4 @@ urlpatterns = [
     path('get-bookings/', views.get_bookings, name='get_bookings'),
     path('get-user-bookings/<int:id>/', views.get_user_bookings, name='get_user_bookings'),
     path('tutor-details/<int:id>/', views.tutor_details, name='tutor_details'),
-    path('users/<int:id>/tutor-details/', views.users_tutor_details, name='users_tutor_details'),
 ]

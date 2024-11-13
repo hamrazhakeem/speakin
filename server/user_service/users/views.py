@@ -110,8 +110,10 @@ def sign_in(request):
         if user.with_google:
             return Response({'detail': 'You have created account with google, Click sign in with google'}, status=status.HTTP_401_UNAUTHORIZED)
         refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+        access_token['is_admin'] = user.is_staff
         return Response({
-            'access': str(refresh.access_token),
+            'access': str(access_token),
             'refresh': str(refresh),
             'name': user.name,
             'id': user.id,
@@ -256,10 +258,11 @@ class LoginWithGoogle(APIView):
             user = get_user_or_create(email, name)
             
             refresh = RefreshToken.for_user(user)
-            
+            access_token = refresh.access_token
+            access_token['is_admin'] = user.is_staff
             return Response({
+                'access': str(access_token),
                 'refresh': str(refresh),
-                'access': str(refresh.access_token),
                 'role':"user", 
                 'name': user.name,
                 'id': user.id,
@@ -287,17 +290,21 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAdminOrUserSelf]
 
-    def get_object(self):
-        # Check if the user is an admin
-        if self.request.user.is_superuser:
-            user_id = self.kwargs.get('pk')
-            if user_id:
-                return User.objects.get(pk=user_id)
-            else:
-                return self.request.user 
+    # def get_object(self):
+    #     # Check if the user is an admin
+    #     if self.request.user.is_superuser:
+    #         user_id = self.kwargs.get('pk')
+    #         if user_id:
+    #             return User.objects.get(pk=user_id)
+    #         else:
+    #             return self.request.user 
         
-        # If not an admin, return the authenticated user's info
-        return self.request.user
+    #     # If not an admin, return the authenticated user's info
+    #     return self.request.user
+
+    def get_object(self):
+        user_id = self.kwargs.get('pk')
+        return User.objects.get(pk=user_id)
  
     def update(self, request, *args, **kwargs): 
         partial = kwargs.pop('partial', False)
@@ -484,10 +491,11 @@ def admin_signin(request):
     user = authenticate(request, username=email, password=password)
     if user is not None and user.is_superuser:
         is_admin = user.is_superuser
-        print(is_admin)
         refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+        access_token['is_admin'] = user.is_staff
         return Response({
-            'access': str(refresh.access_token),
+            'access': str(access_token),
             'refresh': str(refresh),
             'name': user.name,
             'id': user.id,
@@ -673,8 +681,10 @@ def tutor_sign_in(request):
         
         # If tutor is approved or user is admin, allow sign-in
         refresh = RefreshToken.for_user(user)
+        access_token = refresh.access_token
+        access_token['is_admin'] = user.is_staff
         return Response({
-            'access': str(refresh.access_token),
+            'access': str(access_token),
             'refresh': str(refresh),
             'name': user.name,
             'id': user.id,
@@ -815,14 +825,6 @@ class TutorDetailsView(generics.RetrieveAPIView):
     queryset = TutorDetails.objects.all()
     serializer_class = TutorDetailsSerializer
 
-class TutorDetailsByUserView(generics.GenericAPIView):
-    def get(self, request, id, *args, **kwargs):
-        try:
-            user = User.objects.get(id=id)
-            tutor_details = TutorDetails.objects.get(user=user) 
-            serializer = TutorDetailsSerializer(tutor_details)
-            return Response(serializer.data)
-        except User.DoesNotExist:
-            raise NotFound("User not found")
-        except TutorDetails.DoesNotExist:
-            raise NotFound("Tutor details not found for this user")
+    def get_object(self):
+        user_id = self.kwargs.get('pk') 
+        return get_object_or_404(TutorDetails, user_id=user_id)

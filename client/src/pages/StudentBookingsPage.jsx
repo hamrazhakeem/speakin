@@ -27,6 +27,9 @@ const StudentBookingsPage = () => {
             const tutorAvailabilityResponse = await axiosInstance.get(`tutor-availabilities/${session.availability}/`);
             console.log(`Session details for booking ${session.id}:`, tutorAvailabilityResponse.data);
 
+            const tutorUserResponse = await axiosInstance.get(`users/${tutorAvailabilityResponse.data.tutor_id}/`)
+            console.log(`'tutor user details for booking ${session.id}:'`, tutorUserResponse.data, tutorAvailabilityResponse.data.tutor_id)
+
             // Fetch tutor details
             const tutorResponse = await axiosInstance.get(`tutor-details/${tutorAvailabilityResponse.data.tutor_id}/`);
             console.log(`Tutor details for session ${session.id}:`, tutorResponse.data);
@@ -35,7 +38,8 @@ const StudentBookingsPage = () => {
             return {
               ...session,
               tutorDetails: tutorResponse.data,
-              availabilityDetails: tutorAvailabilityResponse.data
+              availabilityDetails: tutorAvailabilityResponse.data,
+              tutorUserResponse: tutorUserResponse.data
             };
           } catch (error) {
             console.error(`Error fetching details for session ${session.id}:`, error);
@@ -63,13 +67,13 @@ const StudentBookingsPage = () => {
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">
             <div className="flex justify-between items-center mb-8">
-              <h1 className="text-4xl font-bold text-gray-800">My Sessions</h1>
+              <h1 className="text-4xl font-bold text-gray-800">My Bookings</h1>
             </div>
 
             <nav className="flex space-x-6 mb-8 border-b pb-4">
               <button className="text-gray-600 text-lg hover:text-green-600 transition-colors" onClick={() => navigate('/profile')}>Profile</button>
               <button className="text-gray-600 text-lg hover:text-green-600 transition-colors" onClick={() => navigate('/student-password-change')}>Security</button>
-              <button className="text-green-600 font-semibold text-lg hover:text-green-800 transition-colors">My Sessions</button>
+              <button className="text-green-600 font-semibold text-lg hover:text-green-800 transition-colors" onClick={() => navigate('/bookings')}>Bookings</button>
               <button className="text-gray-600 text-lg hover:text-green-600 transition-colors">Refer a friend</button>
             </nav>
 

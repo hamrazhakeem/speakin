@@ -9,6 +9,7 @@ from django.db import transaction
 from django.conf import settings
 import requests
 from grpc_services.grpc_client import deduct_balance_credits, lock_credits_in_escrow
+from .permissoins import IsAdminOrOwnerPermission
 
 # Create your views here.
 
@@ -37,7 +38,8 @@ class TutorAvailabilityList(generics.ListCreateAPIView):
 
 class TutorAvailabilityDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = TutorAvailability.objects.all()
-    serializer_class = TutorAvailabilitySerializer
+    serializer_class = TutorAvailabilitySerializer 
+    permission_classes = [IsAdminOrOwnerPermission]
     
 class BookingsList(generics.ListCreateAPIView):
     queryset = Bookings.objects.all()
@@ -74,7 +76,7 @@ class BookingsList(generics.ListCreateAPIView):
                 credits_required=credits_required):
             deduct_balance_credits(student_id, user_data['balance_credits'])
             raise ValidationError("Failed to lock credits in escrow")
-        
+         
         tutor_availability.status = 'booked'
         tutor_availability.save()
         

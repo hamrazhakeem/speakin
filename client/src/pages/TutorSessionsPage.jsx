@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Clock, Users, Plus, Filter, ChevronRight } from 'lucide-react';
+import { Plus, Filter } from 'lucide-react';
 import TutorNavbar from "../components/TutorNavbar";
 import Footer from "../components/Footer";
 import { useNavigate } from 'react-router-dom';
@@ -15,43 +15,28 @@ const TutorSessionsPage = () => {
   const axiosInstance = useAxios();
   const { userId, required_credits } = useSelector((state) => state.auth);
   const [sessions, setSessions] = useState([]);
-  const [tutorId, setTutorId] = useState(null); // State to store tutor_id
+  const [teachingLanguage, setTeachingLanguage] = useState(null); // State to store teaching language
 
   const handleAddSession = () => {
     setIsModalOpen(true);
   };
 
-  // Fetch tutor_id from the user service
-  const fetchTutorId = async () => {
-    try {
-      const response = await axiosInstance.get(`users/${userId}/tutor-details/`);
-      setTutorId(response.data.id); // Store tutor_id in the state
-    } catch (error) {
-      console.error('Error fetching tutor details:', error);
-    }
-  };
-
   // Fetch tutor availability only if tutorId is available
   const fetchTutorAvailability = async () => {
-    if (!tutorId) return; // Make sure tutorId is available before fetching data
     try {
       const response = await axiosInstance.get('get-tutor-availabilities/');
-      const tutorAvailabilities = response.data.filter(slot => slot.tutor_id === tutorId);
+      const tutorAvailabilities = response.data.filter(slot => slot.tutor_id === userId);
       setSessions(tutorAvailabilities);
+      console.log(tutorAvailabilities);
     } catch (error) {
       console.error('Error fetching session availability:', error);
     }
-  };
+  }; // Dependency on userId to refetch when it changes
 
   useEffect(() => {
-    fetchTutorId(); // Fetch tutorId once when component mounts
-  }, [userId]); // Dependency on userId to refetch when it changes
-
-  useEffect(() => {
-    if (tutorId) {
       fetchTutorAvailability(); // Fetch tutor availability once tutorId is set
-    }
-  }, [tutorId]);
+      setTeachingLanguage(sessionStorage.getItem('teachingLanguage'));
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
@@ -74,13 +59,14 @@ const TutorSessionsPage = () => {
                     onClose={() => setIsModalOpen(false)}
                     tutorCredits={required_credits} // Pass the tutor's credit requirement here
                     fetchTutorAvailability={fetchTutorAvailability} // Pass the fetch function here
+                    teachingLanguage={teachingLanguage}
                 />
             </div>
 
             <nav className="flex space-x-6 mb-8 border-b pb-4">
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors" onClick={()=>navigate('/tutor-dashboard')}>Profile</button>
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors" onClick={()=>navigate('/tutor-password-change')}>Security</button>
-              <button className="text-blue-600 font-semibold text-lg hover:text-blue-800 transition-colors">Sessions</button>
+              <button className="text-blue-600 font-semibold text-lg hover:text-blue-800 transition-colors" onClick={()=>navigate('/tutor-sessions')}>Sessions</button>
               <button className="text-gray-600 text-lg hover:text-blue-600 transition-colors">Payments</button>
             </nav>
 

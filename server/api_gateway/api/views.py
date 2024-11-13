@@ -162,7 +162,6 @@ get_users = get_api('user', 'users/', permissions=[IsAuthenticatedWithJWT])
 users = get_api('user', 'users/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 block_unblock_user = patch_api('user', 'block_unblock_user/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 tutor_details = get_api('user', 'tutor-details/<int:id>/', permissions=[IsAuthenticatedWithJWT])
-users_tutor_details = get_api('user', 'users-tutor-details/<int:id>/', permissions=[IsAuthenticatedWithJWT])
 
 # Tutor Verification Endpoints
 approve_tutor = patch_api('user', 'tutor_request_verify/<int:id>/', permissions=[IsAuthenticatedWithJWT])
