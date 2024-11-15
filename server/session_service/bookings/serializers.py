@@ -28,7 +28,7 @@ class BookingsSerializer(serializers.ModelSerializer):
         # Check for time conflicts with other confirmed bookings
         overlapping_bookings = Bookings.objects.filter(
             student_id=student_id,
-            booking_status='confirmed',
+            booking_status__in=['confirmed', 'ongoing'],
             availability__start_time__lt=end_time,
             availability__end_time__gt=start_time
         )
@@ -42,23 +42,31 @@ class TutorAvailabilitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TutorAvailability
-        fields = ['id', 'tutor_id', 'session_type', 'language_to_teach', 'start_time', 'end_time', 'credits_required', 'status', 'created_at', 'bookings']
+        fields = ['id', 'tutor_id', 'session_type', 'language_to_teach', 'start_time', 'end_time', 'credits_required', 'is_booked', 'created_at', 'bookings']
 
     def validate(self, data):
         start_time = data['start_time']
         end_time = data['end_time']
         tutor_id = data['tutor_id']
 
-        # Check if there are any conflicting slots
         conflicting_slots = TutorAvailability.objects.filter(
             tutor_id=tutor_id,
             start_time__lt=end_time,
-            end_time__gt=start_time,
-            status__in=['available', 'booked']  # Only consider available or booked slots
+            end_time__gt=start_time
         )
 
-        # If there are conflicts, raise a validation error
-        if conflicting_slots.exists():
-            raise serializers.ValidationError("This time slot overlaps with an existing slot.")
+        # Filter out slots that are already booked and check if any are confirmed or ongoing
+        conflicting_bookings = Bookings.objects.filter(
+            availability__in=conflicting_slots,
+            booking_status__in=['confirmed', 'ongoing']
+        )
+
+        # If any conflicting bookings exist, raise a validation error
+        if conflicting_bookings.exists():
+            raise serializers.ValidationError("This time slot overlaps with an existing confirmed or ongoing booking.")
+
+        # If no bookings are found, check for available (unbooked) slots
+        if conflicting_slots.filter(is_booked=False).exists():
+            raise serializers.ValidationError("This time slot overlaps with an existing available slot.")
 
         return data

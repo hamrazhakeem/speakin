@@ -8,8 +8,10 @@ from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from django.conf import settings
 import requests
-from grpc_services.grpc_client import deduct_balance_credits, lock_credits_in_escrow
+from grpc_services.grpc_client import deduct_balance_credits, lock_credits_in_escrow, refund_credits_from_escrow
 from .permissoins import IsAdminOrOwnerPermission
+from django.utils import timezone
+from datetime import timedelta
 
 # Create your views here.
 
@@ -24,7 +26,7 @@ class TutorAvailabilityList(generics.ListCreateAPIView):
             serializer.is_valid(raise_exception=True)
         except ValidationError as e:
             # Check if the error is specifically about overlapping slots
-            if "This time slot overlaps with an existing slot." in str(e):
+            if "This time slot overlaps with an existing confirmed or ongoing booking." or "This time slot overlaps with an existing available slot." in str(e):
                 # Return the error with a 409 status code for conflict
                 return Response({"detail": str(e)}, status=status.HTTP_409_CONFLICT)
             else:
@@ -40,6 +42,56 @@ class TutorAvailabilityDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = TutorAvailability.objects.all()
     serializer_class = TutorAvailabilitySerializer 
     permission_classes = [IsAdminOrOwnerPermission]
+
+    def patch(self, request, *args, **kwargs):
+        session = self.get_object()
+        booking = session.bookings.filter(booking_status='confirmed').first()
+
+        if not booking:
+            return Response({"error": "No confirmed booking found to cancel."}, status=status.HTTP_400_BAD_REQUEST)
+
+        new_status = request.data.get('booking_status')
+
+        if new_status not in ['canceled_by_student', 'canceled_by_tutor']:
+            return Response({"error": "Invalid booking status."}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            success = refund_credits_from_escrow(booking_id=booking.id)
+            if not success:
+                return Response({"error": "Failed to refund credits from escrow."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Refund credits via Payment Service
+            refund_success = deduct_balance_credits(booking.student_id, session.credits_required, refund_from_escrow=True)
+            if not refund_success:
+                return Response({"error": "Failed to refund credits to user."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
+            if session.start_time and session.start_time - timezone.now() >= timedelta(hours=3) and new_status == 'canceled_by_student':
+                session.is_booked = False
+                session.save()
+
+            booking.booking_status = new_status    
+            booking.canceled_at = timezone.now()
+            booking.refund_status = True
+            booking.save()
+
+            return Response({"message": "Session canceled and credits refunded."}, status=status.HTTP_204_NO_CONTENT)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+    def delete(self, request, *args, **kwargs):
+        session = self.get_object()
+
+        # Check if any related bookings have a 'confirmed' status
+        confirmed_booking = session.bookings.filter(booking_status='confirmed').exists()
+        if confirmed_booking:
+            return Response(
+                {"error": "Unable to delete the session as it has been booked by a student."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # If no confirmed booking exists, proceed with deletion
+        return super().delete(request, *args, **kwargs)
     
 class BookingsList(generics.ListCreateAPIView):
     queryset = Bookings.objects.all()
@@ -69,7 +121,7 @@ class BookingsList(generics.ListCreateAPIView):
         if not deduct_balance_credits(student_id, user_data['balance_credits'] - credits_required):
             raise ValidationError("Failed to update user balance")
 
-        if not lock_credits_in_escrow(
+        if not lock_credits_in_escrow( 
                 student_id=student_id,
                 tutor_id=tutor_availability.tutor_id,
                 booking_id=booking_id,
@@ -77,7 +129,7 @@ class BookingsList(generics.ListCreateAPIView):
             deduct_balance_credits(student_id, user_data['balance_credits'])
             raise ValidationError("Failed to lock credits in escrow")
          
-        tutor_availability.status = 'booked'
+        tutor_availability.is_booked = True
         tutor_availability.save()
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -30,16 +30,30 @@ class UserService(user_service_pb2_grpc.UserServiceServicer):
         with connection.cursor():
             user_id = request.user_id
             new_balance_credits = request.new_balance_credits
+            refund_from_escrow = request.refund_from_escrow
+            print('Initial debug - refund_from_escrow:', refund_from_escrow)  # Confirm the initial value
 
             try:
                 user = User.objects.get(id=user_id)
+                print('User fetched - balance:', user.balance_credits)  # Confirm the user was fetched
+
+                if refund_from_escrow:
+                    print('Inside escrow condition')  # Check if we enter this block
+                    print('Balance before addition:', user.balance_credits)
+                    user.balance_credits += new_balance_credits
+                    user.save()
+                    return user_service_pb2.DeductBalanceCreditsResponse(success=True)
+
+                print('Outside escrow condition')  # This will print if `refund_from_escrow` is False
                 user.balance_credits = new_balance_credits
                 user.save()
                 return user_service_pb2.DeductBalanceCreditsResponse(success=True)
+
             except User.DoesNotExist:
                 context.set_details('User not found.')
                 context.set_code(grpc.StatusCode.NOT_FOUND)
                 return user_service_pb2.DeductBalanceCreditsResponse(success=False)
+
             except Exception as e:
                 context.set_details(f"An unexpected error occurred: {e}")
                 context.set_code(grpc.StatusCode.INTERNAL)

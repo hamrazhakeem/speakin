@@ -81,7 +81,6 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
       start_time: startDateTime.toISOString(), // Start time in ISO 8601 format
       end_time: endDateTime.toISOString(),  
       credits_required: sessionType === 'trial' ? Math.round(tutorCredits * 0.25) : tutorCredits,
-      status: 'available',
     };
 
     try {

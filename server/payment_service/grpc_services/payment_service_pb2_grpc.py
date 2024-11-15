@@ -39,6 +39,11 @@ class PaymentServiceStub(object):
                 request_serializer=grpc__services_dot_payment__service__pb2.LockCreditsRequest.SerializeToString,
                 response_deserializer=grpc__services_dot_payment__service__pb2.LockCreditsResponse.FromString,
                 _registered_method=True)
+        self.RefundLockedCredits = channel.unary_unary(
+                '/PaymentService/RefundLockedCredits',
+                request_serializer=grpc__services_dot_payment__service__pb2.RefundLockedCreditsRequest.SerializeToString,
+                response_deserializer=grpc__services_dot_payment__service__pb2.RefundLockedCreditsResponse.FromString,
+                _registered_method=True)
 
 
 class PaymentServiceServicer(object):
@@ -50,6 +55,13 @@ class PaymentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RefundLockedCredits(self, request, context):
+        """New method for refund
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_PaymentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -57,6 +69,11 @@ def add_PaymentServiceServicer_to_server(servicer, server):
                     servicer.LockCredits,
                     request_deserializer=grpc__services_dot_payment__service__pb2.LockCreditsRequest.FromString,
                     response_serializer=grpc__services_dot_payment__service__pb2.LockCreditsResponse.SerializeToString,
+            ),
+            'RefundLockedCredits': grpc.unary_unary_rpc_method_handler(
+                    servicer.RefundLockedCredits,
+                    request_deserializer=grpc__services_dot_payment__service__pb2.RefundLockedCreditsRequest.FromString,
+                    response_serializer=grpc__services_dot_payment__service__pb2.RefundLockedCreditsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -86,6 +103,33 @@ class PaymentService(object):
             '/PaymentService/LockCredits',
             grpc__services_dot_payment__service__pb2.LockCreditsRequest.SerializeToString,
             grpc__services_dot_payment__service__pb2.LockCreditsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RefundLockedCredits(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/PaymentService/RefundLockedCredits',
+            grpc__services_dot_payment__service__pb2.RefundLockedCreditsRequest.SerializeToString,
+            grpc__services_dot_payment__service__pb2.RefundLockedCreditsResponse.FromString,
             options,
             channel_credentials,
             insecure,

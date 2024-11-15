@@ -25,27 +25,45 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
         // Current time for comparison
         const now = new Date();
 
+        console.log(availabilityResponse.data)
         // Filter availabilities for the specific tutor and apply lead time
         const tutorAvailabilities = availabilityResponse.data
-          .filter(slot => slot.tutor_id === tutorId)
-          .filter(slot => {
-            const startTime = toDate(slot.start_time);
-            const leadTimeRequired = 3 * 60 * 60 * 1000;
-            return startTime.getTime() - now.getTime() > leadTimeRequired;
-          });
+        .filter(slot => slot.tutor_id === tutorId)
+        .filter(slot => {
+          const startTime = toDate(slot.start_time);
+          const leadTimeRequired = 3 * 60 * 60 * 1000; // Example: 3 hours in milliseconds
+          return startTime.getTime() - now.getTime() > leadTimeRequired;
+        })
+        .filter(slot => {
+          // Only display slots that are not booked (`is_booked` is false) or have `booking_status` as 'confirmed'
+          const hasBooking = slot.bookings && slot.bookings.length > 0;
+          
+          if (!hasBooking) {
+            return !slot.is_booked; // Display if `is_booked` is false and no bookings exist
+          } else {
+            return slot.bookings.some(
+              booking => booking.booking_status === 'confirmed' || 
+                         (booking.booking_status === 'canceled_by_student' && !slot.is_booked)
+            );          }
+        });
+      
+      
 
         const bookingsMap = bookingsResponse.data.reduce((acc, booking) => {
-          if (booking.student_id === userId) {
+          // Check if the booking belongs to the current user and is confirmed
+          if (booking.student_id === userId && booking.booking_status === 'confirmed') {
             acc[booking.availability] = booking.booking_status;
           }
           return acc;
         }, {});
+        
 
         const enhancedAvailabilities = tutorAvailabilities.map(slot => ({
           ...slot,
           bookedByYou: bookingsMap[slot.id] || null
         }));
-
+        console.log(enhancedAvailabilities)
+        console.log(bookingsResponse.data)
         setAvailability(enhancedAvailabilities);
         setBookings(bookingsResponse.data);
       } catch (error) {
@@ -81,6 +99,7 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
                            err.response?.data?.message ||
                            "An error occurred";
         toast.error(errorMessage);
+        onClose();
     }
   };
 
@@ -92,8 +111,8 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
       };
     }
     return {
-      text: slot.status.charAt(0).toUpperCase() + slot.status.slice(1),
-      color: slot.status === 'available' ? 'text-green-500' : 'text-red-500'
+      text: slot.is_booked === false ? 'Available' : 'Booked',
+      color: slot.is_booked === false ? 'text-green-500' : 'text-red-500'
     };
   };
 
@@ -152,7 +171,7 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
                   <p className="text-gray-600">
                     Duration: {slot.session_type === 'trial' ? '20 minutes' : '60 minutes'}
                   </p>
-                  {slot.status === 'available' && !slot.bookedByYou && (
+                  {slot.is_booked === false && !slot.bookedByYou && (
                     <button
                       className="mt-4 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded"
                       onClick={() => handleBooking(slot.id, slot.credits_required)}

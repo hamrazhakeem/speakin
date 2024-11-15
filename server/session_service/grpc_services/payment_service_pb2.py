@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n#grpc_services/payment_service.proto\"v\n\x12LockCreditsRequest\x12\x12\n\nstudent_id\x18\x01 \x01(\x05\x12\x10\n\x08tutor_id\x18\x02 \x01(\x05\x12\x12\n\nbooking_id\x18\x03 \x01(\x05\x12\x16\n\x0e\x63redits_locked\x18\x04 \x01(\x05\x12\x0e\n\x06status\x18\x05 \x01(\t\"&\n\x13LockCreditsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32J\n\x0ePaymentService\x12\x38\n\x0bLockCredits\x12\x13.LockCreditsRequest\x1a\x14.LockCreditsResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n#grpc_services/payment_service.proto\"v\n\x12LockCreditsRequest\x12\x12\n\nstudent_id\x18\x01 \x01(\x05\x12\x10\n\x08tutor_id\x18\x02 \x01(\x05\x12\x12\n\nbooking_id\x18\x03 \x01(\x05\x12\x16\n\x0e\x63redits_locked\x18\x04 \x01(\x05\x12\x0e\n\x06status\x18\x05 \x01(\t\"&\n\x13LockCreditsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"0\n\x1aRefundLockedCreditsRequest\x12\x12\n\nbooking_id\x18\x02 \x01(\x05\".\n\x1bRefundLockedCreditsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\x9c\x01\n\x0ePaymentService\x12\x38\n\x0bLockCredits\x12\x13.LockCreditsRequest\x1a\x14.LockCreditsResponse\x12P\n\x13RefundLockedCredits\x12\x1b.RefundLockedCreditsRequest\x1a\x1c.RefundLockedCreditsResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -35,6 +35,10 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_LOCKCREDITSREQUEST']._serialized_end=157
   _globals['_LOCKCREDITSRESPONSE']._serialized_start=159
   _globals['_LOCKCREDITSRESPONSE']._serialized_end=197
-  _globals['_PAYMENTSERVICE']._serialized_start=199
-  _globals['_PAYMENTSERVICE']._serialized_end=273
+  _globals['_REFUNDLOCKEDCREDITSREQUEST']._serialized_start=199
+  _globals['_REFUNDLOCKEDCREDITSREQUEST']._serialized_end=247
+  _globals['_REFUNDLOCKEDCREDITSRESPONSE']._serialized_start=249
+  _globals['_REFUNDLOCKEDCREDITSRESPONSE']._serialized_end=295
+  _globals['_PAYMENTSERVICE']._serialized_start=298
+  _globals['_PAYMENTSERVICE']._serialized_end=454
 # @@protoc_insertion_point(module_scope)

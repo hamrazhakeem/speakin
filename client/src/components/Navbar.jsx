@@ -3,14 +3,35 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Bell, User, Menu, X, CreditCard, LogOut, Settings, Plus } from 'lucide-react';
-import { clearTokens } from '../redux/authSlice';
+import { clearTokens, updateCredits } from '../redux/authSlice';
+import { useEffect } from 'react';
+import useAxios from '../hooks/useAxios';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated, credits } = useSelector((state) => state.auth);
+  const { isAuthenticated, userId, credits } = useSelector((state) => state.auth);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const axiosInstance = useAxios();
+
+  useEffect(() => {
+    const fetchUserCredits = async () => {
+      try {
+        const response = await axiosInstance.get(`users/${userId}/`);
+        console.log(response)
+        if (response.data.balance_credits !== credits) {
+          dispatch(updateCredits(response.data.balance_credits));
+        }
+      } catch (error) {
+        console.error('Error fetching user credits:', error);
+      }
+    };
+
+    if (isAuthenticated && userId) {
+      fetchUserCredits();
+    }
+  }, [isAuthenticated, userId, dispatch, credits]);
 
   const handleLogout = () => {
     dispatch(clearTokens());

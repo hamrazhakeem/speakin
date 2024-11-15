@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n grpc_services/user_service.proto\x12\x0cuser_service\">\n\x1a\x41\x64\x64PurchasedCreditsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63redits\x18\x02 \x01(\x05\".\n\x1b\x41\x64\x64PurchasedCreditsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"K\n\x1b\x44\x65\x64uctBalanceCreditsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x1b\n\x13new_balance_credits\x18\x02 \x01(\x05\"/\n\x1c\x44\x65\x64uctBalanceCreditsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\xe8\x01\n\x0bUserService\x12j\n\x13\x41\x64\x64PurchasedCredits\x12(.user_service.AddPurchasedCreditsRequest\x1a).user_service.AddPurchasedCreditsResponse\x12m\n\x14\x44\x65\x64uctBalanceCredits\x12).user_service.DeductBalanceCreditsRequest\x1a*.user_service.DeductBalanceCreditsResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n grpc_services/user_service.proto\x12\x0cuser_service\">\n\x1a\x41\x64\x64PurchasedCreditsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x0f\n\x07\x63redits\x18\x02 \x01(\x05\".\n\x1b\x41\x64\x64PurchasedCreditsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\"g\n\x1b\x44\x65\x64uctBalanceCreditsRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\x05\x12\x1b\n\x13new_balance_credits\x18\x02 \x01(\x05\x12\x1a\n\x12refund_from_escrow\x18\x03 \x01(\x08\"/\n\x1c\x44\x65\x64uctBalanceCreditsResponse\x12\x0f\n\x07success\x18\x01 \x01(\x08\x32\xe8\x01\n\x0bUserService\x12j\n\x13\x41\x64\x64PurchasedCredits\x12(.user_service.AddPurchasedCreditsRequest\x1a).user_service.AddPurchasedCreditsResponse\x12m\n\x14\x44\x65\x64uctBalanceCredits\x12).user_service.DeductBalanceCreditsRequest\x1a*.user_service.DeductBalanceCreditsResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -36,9 +36,9 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_ADDPURCHASEDCREDITSRESPONSE']._serialized_start=114
   _globals['_ADDPURCHASEDCREDITSRESPONSE']._serialized_end=160
   _globals['_DEDUCTBALANCECREDITSREQUEST']._serialized_start=162
-  _globals['_DEDUCTBALANCECREDITSREQUEST']._serialized_end=237
-  _globals['_DEDUCTBALANCECREDITSRESPONSE']._serialized_start=239
-  _globals['_DEDUCTBALANCECREDITSRESPONSE']._serialized_end=286
-  _globals['_USERSERVICE']._serialized_start=289
-  _globals['_USERSERVICE']._serialized_end=521
+  _globals['_DEDUCTBALANCECREDITSREQUEST']._serialized_end=265
+  _globals['_DEDUCTBALANCECREDITSRESPONSE']._serialized_start=267
+  _globals['_DEDUCTBALANCECREDITSRESPONSE']._serialized_end=314
+  _globals['_USERSERVICE']._serialized_start=317
+  _globals['_USERSERVICE']._serialized_end=549
 # @@protoc_insertion_point(module_scope)

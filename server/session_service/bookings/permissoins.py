@@ -7,14 +7,17 @@ from rest_framework.permissions import BasePermission
 class IsAdminOrOwnerPermission(BasePermission):
     def decode_jwt(self, token):
         """Decodes the JWT and returns the payload."""
-        parts = token.split('.')
-        if len(parts) != 3:
-            return None  # Invalid JWT format
+        try:
+            parts = token.split('.')
+            if len(parts) != 3:
+                return None  # Invalid JWT format
 
-        payload_base64 = parts[1]
-        payload_json = base64.urlsafe_b64decode(payload_base64 + '==')
-        payload = json.loads(payload_json)
-        return payload
+            payload_base64 = parts[1]
+            payload_json = base64.urlsafe_b64decode(payload_base64 + '==')
+            payload = json.loads(payload_json)
+            return payload
+        except Exception:
+            return None
 
     def has_permission(self, request, view):
         from .views import BookingsDetail, TutorAvailabilityDetail  # Lazy import
@@ -31,7 +34,7 @@ class IsAdminOrOwnerPermission(BasePermission):
         token = auth_header.split(' ')[1]
         payload = self.decode_jwt(token)
 
-        if payload is None:
+        if not payload:
             raise PermissionDenied("Invalid JWT token")
 
         user_id = payload.get('user_id')
@@ -55,13 +58,24 @@ class IsAdminOrOwnerPermission(BasePermission):
             else:
                 raise PermissionDenied("You do not have permission to modify this booking.")
 
-        elif isinstance(view, TutorAvailabilityDetail):
-            availability = TutorAvailability.objects.get(id=view.kwargs.get('pk'))  # Assuming 'pk' is passed in the URL
-            print(availability.tutor_id, user_id)
+        availability_id = view.kwargs.get('pk')  # Fetch the availability ID from the URL
+        if not availability_id:
+            raise PermissionDenied("Availability ID is missing")
+
+        try:
+            availability = TutorAvailability.objects.get(id=availability_id)
+
+            # Allow tutor if they own the availability
             if availability.tutor_id == user_id:
-                return True  # Allow tutor to update their own availability
-            else:
-                raise PermissionDenied("You do not have permission to modify this availability.")
+                return True
+
+            # Check if the student has a confirmed booking for the given availability
+            booking = Bookings.objects.filter(availability=availability, student_id=user_id, booking_status='confirmed').first()
+            if booking:
+                return True
+
+        except TutorAvailability.DoesNotExist:
+            raise PermissionDenied("The specified availability does not exist")
 
         # If none of the conditions matched, deny access
         raise PermissionDenied("You do not have permission to perform this operation.")

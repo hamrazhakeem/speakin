@@ -1,3 +1,4 @@
+from django.utils import timezone
 import django
 import grpc
 from concurrent import futures
@@ -29,6 +30,28 @@ class PaymentService(payment_service_pb2_grpc.PaymentServiceServicer):
                 context.set_details(f"Error locking credits: {e}")
                 context.set_code(grpc.StatusCode.INTERNAL)
                 return payment_service_pb2.LockCreditsResponse(success=False)
+            
+    def RefundLockedCredits(self, request, context):
+        with connection.cursor():
+            try:
+                # Update the escrow transaction status to 'refunded'
+                escrow_transaction = Escrow.objects.get(
+                    booking_id=request.booking_id,
+                    status='locked'
+                )
+                escrow_transaction.status = 'refunded'
+                escrow_transaction.released_at = timezone.now()
+                escrow_transaction.save()
+
+                return payment_service_pb2.RefundLockedCreditsResponse(success=True)
+            except Escrow.DoesNotExist:
+                context.set_details("Escrow transaction not found")
+                context.set_code(grpc.StatusCode.NOT_FOUND)
+                return payment_service_pb2.RefundLockedCreditsResponse(success=False)
+            except Exception as e:
+                context.set_details(f"Error processing refund: {e}")
+                context.set_code(grpc.StatusCode.INTERNAL)
+                return payment_service_pb2.RefundLockedCreditsResponse(success=False)
 
 def serve():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))

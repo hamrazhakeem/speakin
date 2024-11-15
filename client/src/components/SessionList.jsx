@@ -14,7 +14,6 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
       try {
         const updatedSessions = await Promise.all(
           sessions.map(async (session) => {
-            // Check if session has bookings and get the student_id
             const studentId = session.bookings?.[0]?.student_id;
 
             if (studentId) {
@@ -32,6 +31,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
             return session;
           })
         );
+        console.log(updatedSessions)
         setSessionsWithStudentInfo(updatedSessions);
       } catch (error) {
         console.error('Error fetching student information:', error);
@@ -71,26 +71,62 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     }
   };
 
+  const formatBookingStatus = (status) => {
+    if (!status) return '';
+    
+    if (status === 'canceled_by_tutor') {
+      return 'You have cancelled this session';
+    }
+    
+    // Replace underscores with spaces and capitalize each word
+    return status
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  };
+
   const getStatusStyles = (status) => {
     switch (status) {
       case 'confirmed':
         return 'bg-blue-50 text-blue-600 border border-blue-200';
+      case 'ongoing':
+        return 'bg-purple-50 text-purple-600 border border-purple-200';
       case 'completed':
         return 'bg-green-50 text-green-600 border border-green-200';
-      case 'cancelled':
+      case 'expired':
+        return 'bg-warmgray-50 text-warmgray-600 border border-warmgray-200';
+      case 'canceled_by_tutor':
+      case 'canceled_by_student':
         return 'bg-red-50 text-red-600 border border-red-200';
+      case 'no_show_by_tutor':
+      case 'no_show_by_student':
+        return 'bg-orange-50 text-orange-600 border border-orange-200';
       default:
         return 'bg-gray-50 text-gray-600 border border-gray-200';
     }
   };
 
   const handleCancelSession = async (session) => {
+    if (session.bookings?.length === 0 || session.bookings[0]?.booking_status === 'expired') {
+      try {
+        await axiosInstance.delete(`delete-tutor-availabilities/${session.id}/`);
+        toast.success('Session deleted successfully');
+        fetchTutorAvailability();
+      } catch (error) {
+      const backendMessage = error.response?.data?.message || error.response?.data?.error || 'Error deleting session';
+      toast.error(backendMessage);
+      fetchTutorAvailability();
+      console.error('Error deleting session:', error);      
+    }
+      return;
+    }
+  
     const sessionStartTime = new Date(session.start_time);
     const currentTime = new Date();
-
+  
     const allowedTimeBeforeSessionStart = session.session_type === 'trial' ? 60 : 120;
     const timeDifferenceInMinutes = (sessionStartTime - currentTime) / (1000 * 60);
-
+  
     if (timeDifferenceInMinutes < allowedTimeBeforeSessionStart) {
       toast.error(
         `Cannot cancel ${session.session_type} session within ${
@@ -99,15 +135,27 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
       );
       return;
     }
-
-    try {
-      const response = await axiosInstance.delete(`delete-tutor-availabilities/${session.id}/`);
-      if (response.status === 204) {
-        toast.success('Session cancelled successfully');
+  
+    if (session.bookings[0].booking_status === 'confirmed') {
+      try {
+        const response = await axiosInstance.patch(`update-tutor-availabilities/${session.id}/`, 
+          {
+            booking_status: 'canceled_by_tutor',
+          }
+        );
+        if (response.status === 204) {
+          toast.success('Session cancelled successfully');
+        }
+        fetchTutorAvailability();
+      } catch (error) {
+        const backendMessage = error.response?.data?.message || error.response?.data?.error || 'Error cancelling session';
+        toast.error(backendMessage);
+        console.error('Error cancelling session:', error);      
+        fetchTutorAvailability();
       }
+    } else {
+      toast.error('Cannot cancel session with status other than "confirmed".');
       fetchTutorAvailability();
-    } catch (error) {
-      console.error('Error cancelling session:', error);
     }
   };
 
@@ -130,11 +178,14 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     );
   }
 
+  const isUnbooked = (session) => !session.bookings || session.bookings.length === 0;
+  const getBookingStatus = (session) => session.bookings?.[0]?.booking_status;
+
   return (
     <div className="space-y-6">
       {sessionsWithStudentInfo.map((session) => (
         <div
-          key={session.start_time}
+          key={session.id}
           className="bg-white border rounded-xl p-6 hover:shadow-lg transition-shadow duration-300"
         >
           {/* Header Section */}
@@ -147,9 +198,11 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
               >
                 {session.session_type}
               </span>
-              <span className={`px-3 py-1.5 rounded-full text-sm font-medium capitalize ${getStatusStyles(session.status)}`}>
-                {session.status}
-              </span>
+              {session.bookings && session.bookings[0] && session.bookings[0].booking_status && (
+                <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusStyles(session.bookings[0].booking_status)}`}>
+                  {formatBookingStatus(session.bookings[0].booking_status)}
+                </span>
+              )}
             </div>
             <div className="flex items-center text-gray-700">
               <Clock className="w-5 h-5 mr-2 text-gray-400" />
@@ -167,7 +220,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
             {/* Left Column */}
             <div className="space-y-6">
               {/* Student Details */}
-              {session.bookings && session.studentInfo && (
+              {session.bookings?.length > 0 && session.studentInfo ? (
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="flex items-start space-x-3">
                     <Avatar
@@ -202,15 +255,32 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                     </div>
                   </div>
                 </div>
+              ) : (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="flex items-center justify-center h-full">
+                    <p className="text-gray-600 text-center">
+                      <span className="block text-lg font-medium mb-1">Unbooked</span>
+                      <span className="text-sm">Note: The slot will be removed from listings if it remains unbooked within 3 hours of the scheduled time.</span>
+                    </p>
+                  </div>
+                </div>
               )}
 
-              {/* Credits Info */}
-              <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
-                <CreditCard className="w-5 h-5 text-gray-500" />
-                <span className="font-medium text-gray-900"> 
-                  You will get credited {session.credits_required} Credits upon successful completion 
-                </span>
-              </div>
+              {/* Credits Info - Conditional Rendering */}
+                <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
+                  <CreditCard className="w-5 h-5 text-gray-500" />
+                  <span className="font-medium text-gray-900"> 
+                    This session is valued at {session.credits_required} credits
+                  </span>
+                </div>
+              {getBookingStatus(session) === 'completed' && (
+                <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
+                  <CreditCard className="w-5 h-5 text-gray-500" />
+                  <span className="font-medium text-gray-900"> 
+                    {session.credits_required} Credits have been credited to your account
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Right Column */}
@@ -230,7 +300,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
-                {session.status === 'booked' && (
+                {session.bookings?.length > 0 && session.bookings[0]?.booking_status === 'confirmed' && (
                   <button
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center font-medium transition-colors duration-200"
                     onClick={() => handleJoinSession(session.video_call_link)}
@@ -239,12 +309,15 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                     Join Session
                   </button>
                 )}
+                {/* Cancel Button - Only show if unbooked or status is confirmed */}
+                {(isUnbooked(session) || getBookingStatus(session) === 'confirmed') && (
                   <button
                     className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors duration-200"
                     onClick={() => handleCancelSession(session)}
                   >
                     Cancel
                   </button>
+                )}
               </div>
             </div>
           </div>
