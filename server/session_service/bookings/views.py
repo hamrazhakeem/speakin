@@ -19,6 +19,27 @@ class TutorAvailabilityList(generics.ListCreateAPIView):
     queryset = TutorAvailability.objects.all()
     serializer_class = TutorAvailabilitySerializer
 
+    def get_queryset(self):
+        queryset = TutorAvailability.objects.all()
+        
+        # Annotate each availability with a custom status
+        current_time = timezone.now()
+        
+        for availability in queryset:
+            # Calculate time difference to start time
+            time_to_start = availability.start_time - current_time
+            
+            # Check if within 3 hours and not booked
+            if (time_to_start <= timedelta(hours=3) and 
+                time_to_start > timedelta(hours=0) and 
+                not availability.is_booked and 
+                not availability.bookings.exists()):
+                availability.custom_status = 'expired_unbooked'
+            else:
+                availability.custom_status = 'normal'
+        
+        return queryset
+
     # Override the default to handle the case if the tutor try to create duplicate slot with same time
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

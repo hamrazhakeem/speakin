@@ -24,7 +24,6 @@ class Bookings(models.Model):
         ('confirmed', 'Confirmed'),
         ('ongoing', 'Ongoing'),
         ('completed', 'Completed'),
-        ('expired', 'Expired'),
         ('canceled_by_tutor', 'Canceled by Tutor'),
         ('canceled_by_student', 'Canceled by Student'),
         ('no_show_by_tutor', 'No-show by Tutor'),

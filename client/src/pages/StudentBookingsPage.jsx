@@ -17,7 +17,6 @@ const StudentBookingsPage = () => {
     try {
       // Fetch bookings data first
       const response = await axiosInstance.get(`get-user-bookings/${userId}/`);
-      console.log('Bookings:', response);
 
       // For each booking, fetch corresponding availability and tutor details
       const sessionsWithDetails = await Promise.all(
@@ -25,14 +24,11 @@ const StudentBookingsPage = () => {
           try {
             // Fetch session details from TutorAvailability
             const tutorAvailabilityResponse = await axiosInstance.get(`tutor-availabilities/${session.availability}/`);
-            console.log(`Session details for booking ${session.id}:`, tutorAvailabilityResponse.data);
 
             const tutorUserResponse = await axiosInstance.get(`users/${tutorAvailabilityResponse.data.tutor_id}/`)
-            console.log(`'tutor user details for booking ${session.id}:'`, tutorUserResponse.data, tutorAvailabilityResponse.data.tutor_id)
 
             // Fetch tutor details
             const tutorResponse = await axiosInstance.get(`tutor-details/${tutorAvailabilityResponse.data.tutor_id}/`);
-            console.log(`Tutor details for session ${session.id}:`, tutorResponse.data);
 
             // Combine the session, tutor, and availability details
             return {
@@ -47,9 +43,8 @@ const StudentBookingsPage = () => {
           }
         })
       );
-
+      console.log(sessionsWithDetails)
       // Set combined sessions data
-      console.log(sessionsWithDetails);
       setSessions(sessionsWithDetails);
     } catch (error) {
       console.error("Error fetching student sessions:", error);

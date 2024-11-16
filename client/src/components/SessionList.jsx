@@ -74,6 +74,10 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   const formatBookingStatus = (status) => {
     if (!status) return '';
     
+    if (status === 'expired_unbooked') {
+      return 'Session Expired (Unbooked)';
+    }
+
     if (status === 'canceled_by_tutor') {
       return 'You have cancelled this session';
     }
@@ -93,8 +97,6 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
         return 'bg-purple-50 text-purple-600 border border-purple-200';
       case 'completed':
         return 'bg-green-50 text-green-600 border border-green-200';
-      case 'expired':
-        return 'bg-warmgray-50 text-warmgray-600 border border-warmgray-200';
       case 'canceled_by_tutor':
       case 'canceled_by_student':
         return 'bg-red-50 text-red-600 border border-red-200';
@@ -107,7 +109,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   };
 
   const handleCancelSession = async (session) => {
-    if (session.bookings?.length === 0 || session.bookings[0]?.booking_status === 'expired') {
+    if (session.bookings?.length === 0) {
       try {
         await axiosInstance.delete(`delete-tutor-availabilities/${session.id}/`);
         toast.success('Session deleted successfully');
@@ -255,16 +257,28 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                     </div>
                   </div>
                 </div>
-              ) : (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-center justify-center h-full">
-                    <p className="text-gray-600 text-center">
-                      <span className="block text-lg font-medium mb-1">Unbooked</span>
-                      <span className="text-sm">Note: The slot will be removed from listings if it remains unbooked within 3 hours of the scheduled time.</span>
-                    </p>
-                  </div>
-                </div>
-              )}
+                  ) : (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-gray-600 text-center">
+                          <span className="block text-lg font-medium mb-1">
+                            {session.custom_status === 'expired_unbooked' ? (
+                              <span className="text-yellow-600">Session Expired - No Bookings</span>
+                            ) : (
+                              'Unbooked'
+                            )}
+                          </span>
+                          <span className="text-sm">
+                            {session.custom_status === 'expired_unbooked' ? (
+                              'This session was not booked within 3 hours of start time and is no longer visible to students.'
+                            ) : (
+                              'Note: The slot will be removed from listings if it remains unbooked within 3 hours of the scheduled time.'
+                            )}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
               {/* Credits Info - Conditional Rendering */}
                 <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">

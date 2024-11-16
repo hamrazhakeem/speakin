@@ -50,8 +50,6 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
         return 'bg-purple-50 text-purple-600 border border-purple-200';
       case 'completed':
         return 'bg-green-50 text-green-600 border border-green-200';
-      case 'expired':
-        return 'bg-warmgray-50 text-warmgray-600 border border-warmgray-200';
       case 'canceled_by_tutor':
       case 'canceled_by_student':
         return 'bg-red-50 text-red-600 border border-red-200';
@@ -63,24 +61,42 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
     }
   };
 
-  const handleCancelSession = async (sessionId) => {
+  const handleCancelSession = async (session) => {
+    const sessionStartTime = new Date(session.availabilityDetails.start_time);
+    const currentTime = new Date();
+  
+    const allowedTimeBeforeSessionStart = session.availabilityDetails.session_type === 'trial' ? 60 : 120;
+    const timeDifferenceInMinutes = (sessionStartTime - currentTime) / (1000 * 60);
+  
+    // Prevent cancellation close to session start time
+    if (timeDifferenceInMinutes < allowedTimeBeforeSessionStart) {
+      toast.error(
+        `Cannot cancel ${session.availabilityDetails.session_type} session within ${
+          session.session_type === 'trial' ? '1 hour' : '2 hours'
+        } of start time.`
+      );
+      return;
+    }
+  
     try {
-      const response = await axiosInstance.patch(`update-tutor-availabilities/${sessionId}/`, {
+      const response = await axiosInstance.patch(`update-tutor-availabilities/${session.availability}/`, {
         booking_status: 'canceled_by_student',
       });
   
       if (response.status === 204) {
         toast.success('Session cancelled successfully');
-        fetchStudentSessions();
       }
+      fetchStudentSessions();
     } catch (error) {
       // Extract backend message and display it
-      const backendMessage = error.response?.data?.message || 'Error cancelling session';
+      const backendMessage = error.response?.data?.message || error.response?.data?.error || 'Error cancelling session';
       toast.error(backendMessage);
-      fetchStudentSessions();
       console.error('Error cancelling session:', error);
     }
+    fetchStudentSessions();
+
   };
+  
   
 
   const handleJoinSession = (meetingLink) => {
@@ -223,7 +239,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
                     </button>
                     <button
                       className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors duration-200"
-                      onClick={() => handleCancelSession(session.availability)}
+                      onClick={() => handleCancelSession(session)}
                     >
                       Cancel Session
                     </button>

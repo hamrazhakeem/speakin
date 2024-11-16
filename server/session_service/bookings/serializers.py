@@ -39,10 +39,11 @@ class BookingsSerializer(serializers.ModelSerializer):
 
 class TutorAvailabilitySerializer(serializers.ModelSerializer):
     bookings = BookingsSerializer(many=True, read_only=True)
+    custom_status = serializers.CharField(read_only=True)
 
     class Meta:
         model = TutorAvailability
-        fields = ['id', 'tutor_id', 'session_type', 'language_to_teach', 'start_time', 'end_time', 'credits_required', 'is_booked', 'created_at', 'bookings']
+        fields = ['id', 'tutor_id', 'session_type', 'language_to_teach', 'start_time', 'end_time', 'credits_required', 'is_booked', 'created_at', 'bookings', 'custom_status']
 
     def validate(self, data):
         start_time = data['start_time']
