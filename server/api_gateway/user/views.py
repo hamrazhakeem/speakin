@@ -226,6 +226,19 @@ class UserView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+class TutorDetailsView(APIView):
+    def get(self, request, pk):
+        try:
+            user_service_url = os.getenv('USER_SERVICE_URL') + f'tutor-details/{pk}/'
+            response = requests.get(user_service_url)
+            return Response(response.json(), status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "Failed to connect to user service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+
 class TeachingLanguageChangeRequestView(APIView):
     permission_classes=[IsAuthenticatedWithJWT]
     def get(self, request):

@@ -19,6 +19,7 @@ urlpatterns = [
     path('users/', UserView.as_view()),
     path('users/<int:pk>/', UserView.as_view()),
     path('users/<int:pk>/verify-tutor/', UserView.as_view()),
+    path('tutor-details/<int:pk>/', TutorDetailsView.as_view()),
     path('teaching-language-change-requests/', TeachingLanguageChangeRequestView.as_view()),
     path('teaching-language-change-requests/<int:pk>/', TeachingLanguageChangeRequestView.as_view()),
     path('platform-languages/', PlatformLanguageView.as_view()),
