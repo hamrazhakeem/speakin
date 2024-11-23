@@ -40,7 +40,7 @@ const ForgotPasswordOtpPage = () => {
         }
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}forgot_password_verify_otp/`, { email, otp, cache_key });
+            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}forgot-password-verify-otp/`, { email, otp, cache_key });
             console.log('OTP verified successfully:', response.data);
             toast.success('OTP verified successfully!');
             navigate('/set-new-password', { state: { email, cache_key } });
@@ -57,7 +57,7 @@ const ForgotPasswordOtpPage = () => {
         setLoading(true);
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}resend_forgot_password_otp/`, { email, cache_key });
+            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}forgot-password-resend-otp/`, { email, cache_key });
             console.log('OTP resent successfully:', response.data);
             toast.success('New OTP sent to your email!');
             setTimer(30);

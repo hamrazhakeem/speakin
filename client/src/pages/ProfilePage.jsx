@@ -90,16 +90,16 @@ const ProfilePage = () => {
       setValue("country", response.data.country || "");
 
       // Fetch countries
-      const countriesResponse = await axiosInstance.get(`get_countries/`);
+      const countriesResponse = await axiosInstance.get(`countries/`);
       setCountries(countriesResponse.data);
 
       // Fetch available languages and proficiency levels for speaking
-      const spokenLanguagesResponse = await axiosInstance.get(`get_spoken_languages/`);
+      const spokenLanguagesResponse = await axiosInstance.get(`spoken-languages/`);
       setAvailableLanguages(spokenLanguagesResponse.data.languages);
       setSpokenProficiencyLevels(spokenLanguagesResponse.data.proficiencies);
 
       // Fetch platform languages and learning proficiency levels
-      const platformLanguagesResponse = await axiosInstance.get(`get_platform_languages/`);
+      const platformLanguagesResponse = await axiosInstance.get(`platform-languages/`);
       setPlatformLanguages(platformLanguagesResponse.data.languages);
       setLearningProficiencyLevels(platformLanguagesResponse.data.proficiencies);
       
@@ -231,7 +231,7 @@ const ProfilePage = () => {
       console.log(`${key}: ${value}`);
     }
     try {
-      await axiosInstance.patch(`update_user/${userId}/`, formData);
+      await axiosInstance.patch(`users/${userId}/`, formData);
       setEditMode(false);
       fetchUserData();
     } catch (error) {

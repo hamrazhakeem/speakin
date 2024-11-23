@@ -12,7 +12,7 @@ const useProactiveTokenRefresh = () => {
         if (refreshToken) {
           try {
             console.log('refreshToken before request', refreshToken)
-            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}token_refresh/`, {
+            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}token/refresh/`, {
                 refresh: refreshToken,
               }
               );

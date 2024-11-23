@@ -15,7 +15,7 @@ const AdminProtectedRoute = () => {
   }
 
   if(!isAuthenticated) {
-    return <Navigate to="/admin/signin" />;
+    return <Navigate to="/admin/sign-in" />;
   }
 
   return <Outlet />; 

@@ -129,28 +129,12 @@ def patch_api(service, endpoint, permissions=[AllowAny]):
 def delete_api(service, endpoint, permissions=[AllowAny]):
     return ServiceRouter.create_api_view(service, endpoint, 'DELETE', permissions)
 
-# API Endpoints Configuration
-# User Service Endpoints
-sign_up = post_api('user', 'sign_up/')
-verify_otp = post_api('user', 'verify_otp/')
-sign_in = post_api('user', 'sign_in/')
-google_sign_in = post_api('user', 'google_sign_in/')
-tutor_sign_in = post_api('user', 'tutor_sign_in/')
-token_refresh = post_api('user', 'token/refresh/')
-resend_otp = post_api('user', 'resend_otp/')
-forgot_password = post_api('user', 'forgot_password/')
-forgot_password_verify_otp = post_api('user', 'forgot_password_verify_otp/')
-set_new_password = post_api('user', 'set_new_password/')
-resend_forgot_password_otp = post_api('user', 'resend_forgot_password_otp/')
-admin_signin = post_api('user', 'admin_signin/')
-
 # Data Retrieval Endpoints
 get_countries = get_api('user', 'get_countries/')
 get_platform_languages = get_api('user', 'get_platform_languages/')
 get_spoken_languages = get_api('user', 'get_spoken_languages/')
 
 # Tutor Request Endpoints
-tutor_request = post_api('user', 'tutor_request/')
 edit_teaching_language = post_api('user', 'edit_teaching_language/', permissions=[IsAuthenticatedWithJWT])
 language_change_requests = get_api('user', 'language_change_requests/', permissions=[IsAuthenticatedWithJWT])
 approve_language_change = patch_api('user', 'verify_language_change/<int:id>/', permissions=[IsAuthenticatedWithJWT])

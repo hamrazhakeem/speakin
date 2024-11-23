@@ -34,7 +34,7 @@ const TutorNavbar = () => {
 
   const handleLogout = () => {
     dispatch(clearTokens());
-    navigate('/tutor-signin');
+    navigate('/tutor-sign-in');
   };
 
   const navigationLinks = [
@@ -147,7 +147,7 @@ const TutorNavbar = () => {
               </div>
             ) : (
               <button
-                onClick={() => navigate('/tutor-signin')}
+                onClick={() => navigate('/tutor-sign-in')}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Sign In
@@ -190,7 +190,7 @@ const TutorNavbar = () => {
                 <button 
                   className="w-full mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                   onClick={() => {
-                    navigate('/tutor-signin');
+                    navigate('/tutor-sign-in');
                     setIsMobileMenuOpen(false);
                   }}
                 >

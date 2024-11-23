@@ -18,8 +18,8 @@ const AdminManageUsersPage = () => {
     try {
         setLoading(true);
         const [usersResponse, requestsResponse] = await Promise.all([
-          axiosInstance.get('get_users/'),
-          axiosInstance.get('language_change_requests/') // Add your actual endpoint
+          axiosInstance.get('users/'),
+          axiosInstance.get('teaching-language-change-requests/') // Add your actual endpoint
         ]);
         const users = usersResponse.data;
         const requests = requestsResponse.data;
@@ -64,7 +64,7 @@ const AdminManageUsersPage = () => {
   // Action handler for blocking/unblocking tutors and verifying pending tutors
   const handleAction = async (userId) => {
     try {
-      const response = await axiosInstance.patch(`block_unblock_user/${userId}/`, {
+      const response = await axiosInstance.patch(`users/${userId}/`, {
         user_id: userId,
       });
       console.log('User blocked/unblocked successfully:', response.data);

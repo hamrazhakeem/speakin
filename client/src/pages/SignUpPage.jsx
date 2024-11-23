@@ -16,7 +16,7 @@ const SignUpPage = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {                              
-      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}sign_up/`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}sign-up/`, {
         name: data.name,
         email: data.email,
         password: data.password,

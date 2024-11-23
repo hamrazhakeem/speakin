@@ -79,7 +79,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
     }
   
     try {
-      const response = await axiosInstance.patch(`update-tutor-availabilities/${session.availability}/`, {
+      const response = await axiosInstance.patch(`tutor-availabilities/${session.availability}/`, {
         booking_status: 'canceled_by_student',
       });
   

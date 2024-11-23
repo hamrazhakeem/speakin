@@ -13,11 +13,11 @@ const GoogleLoginButton = () => {
   const location = useLocation();
   const [errorMessage, setErrorMessage] = useState('');
 
-  const isSignUpPage = location.pathname === '/signup';
+  const isSignUpPage = location.pathname === '/sign-up';
 
   const handleSuccess = async (codeResponse) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}google_sign_in/`, { 
+      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}google-sign-in/`, { 
         "code": codeResponse.code 
       });
       const { access, refresh, name, id, credits } = response.data;

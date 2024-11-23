@@ -18,7 +18,7 @@ const AdminVerifyTutorPage = () => {
     if (action === 'approve') {
         setApproveLoading(true); // Set loading for approve button
         try {
-            await axiosInstance.patch(`approve_tutor/${userData.id}/`, {
+            await axiosInstance.patch(`users/${userData.id}/verify-tutor/`, {
                 action: action
             });
             console.log('Approved');
@@ -34,7 +34,7 @@ const AdminVerifyTutorPage = () => {
     } else if (action === 'deny') {
         setDenyLoading(true); // Set loading for deny button
         try {
-            await axiosInstance.delete(`deny_tutor/${userData.id}/`,{
+            await axiosInstance.delete(`users/${userData.id}/verify-tutor/`,{
                 action: action
             });
             console.log('Denied');

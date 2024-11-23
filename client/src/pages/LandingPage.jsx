@@ -20,7 +20,7 @@ const LandingPage = () => {
           </div>
           <h1 className="text-4xl font-bold mt-8">Learn languages effortlessly with expert 1-on-1 tutoring.</h1>
           <p className="text-lg text-gray-600 mt-4">Start today and explore new languages!</p>
-          <button className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg" onClick={() => navigate('/signin')}>Get Started</button>
+          <button className="mt-6 bg-blue-500 text-white px-6 py-3 rounded-lg" onClick={() => navigate('/sign-in')}>Get Started</button>
         </div>
       </section>
 

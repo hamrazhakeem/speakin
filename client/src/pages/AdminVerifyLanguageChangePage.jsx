@@ -19,10 +19,10 @@ const AdminVerifyLanguageChangePage = () => {
     
     try {
       if (action === 'approve') {
-        await axiosInstance.patch(`approve_language_change/${requestData.id}/`);
+        await axiosInstance.patch(`teaching-language-change-requests/${requestData.id}/`);
         toast.success('Language Change Request Approved Successfully');
       } else {
-        await axiosInstance.delete(`deny_language_change/${requestData.id}/`);
+        await axiosInstance.delete(`teaching-language-change-requests/${requestData.id}/`);
         toast.success('Language Change Request Denied Successfully');
       }
       navigate('/admin/manage-users/');

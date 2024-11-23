@@ -23,7 +23,7 @@ const ForgotPassword = () => {
         }
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}forgot_password/`, { email });
+            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}forgot-password/`, { email });
             console.log('OTP sent successfully:', response.data);
             toast.success('OTP sent successfully! Please check your email.');
             navigate('/forgot-password-verify-otp', { state: { email, cache_key: response.data.cache_key } });

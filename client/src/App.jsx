@@ -58,7 +58,7 @@ const App = () => {
         <Route element={<TutorUnprotectedRoute />}>
           <Route path='/become-a-tutor' element={<TutorLandingPage />} />
           <Route path='/tutor-request' element={<TutorRequestPage />} />
-          <Route path='/tutor-signin' element={<TutorSignInPage />} />
+          <Route path='/tutor-sign-in' element={<TutorSignInPage />} />
           <Route path='/application-confirmation' element={<ApplicationConfirmation />} />
         </Route>
 
@@ -73,8 +73,8 @@ const App = () => {
         {/* Student Unprotected routes */}
         <Route element={<StudentUnprotectedRoute/>}>
           <Route path='/' element={<LandingPage />} />
-          <Route path='/signin' element={<SignInPage />} />
-          <Route path='/signup' element={<SignUpPage />} />
+          <Route path='/sign-in' element={<SignInPage />} />
+          <Route path='/sign-up' element={<SignUpPage />} />
           <Route path='/verify-otp' element={<OtpPage />} />
           <Route path='/forgot-password' element={<ForgotPassword />} />
           <Route path='/forgot-password-verify-otp' element={<ForgotPasswordOtpPage />} />
@@ -95,7 +95,7 @@ const App = () => {
 
         {/* Admin Unprotected routes */}
         <Route element={<AdminUnprotectedRoute />}>
-          <Route path='/admin/signin' element={<AdminSignInPage />} />
+          <Route path='/admin/sign-in' element={<AdminSignInPage />} />
         </Route>
 
         {/* Admin Protected routes */}

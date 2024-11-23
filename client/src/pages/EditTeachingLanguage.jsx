@@ -29,7 +29,7 @@ const EditTeachingLanguage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const languagesToTeachResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}get_platform_languages/`);
+        const languagesToTeachResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}platform-languages/`);
         if (!languagesToTeachResponse.ok) throw new Error('Failed to fetch languages to teach');
         const languagesToTeachData = await languagesToTeachResponse.json();
         console.log('languagesToTeachData:', languagesToTeachData);
@@ -109,7 +109,7 @@ const EditTeachingLanguage = () => {
       formData.append("imageUpload", imageFile);
       formData.append("intro_video", videoFile);
 
-      const response = await axiosInstance.post(`edit_teaching_language/`, formData, {
+      const response = await axiosInstance.post(`teaching-language-change-requests/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         }

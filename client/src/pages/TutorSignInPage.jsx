@@ -19,7 +19,7 @@ const SignInPage = () => {
     e.preventDefault();
     setErrorMessage('');
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}tutor_sign_in/`, { email, password });
+      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}tutor-sign-in/`, { email, password });
       const { access, refresh, name, id, credits, required_credits } = response.data;
 
       dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false, isTutor: true, credits: credits, required_credits: required_credits }));

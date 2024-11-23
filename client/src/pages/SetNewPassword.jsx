@@ -16,10 +16,10 @@ const SetNewPassword = () => {
     const onSubmit  = async (data) => {
         setLoading(true);
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}set_new_password/`, { email, newPassword: data.newPassword, cache_key });
+            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}set-new-password/`, { email, newPassword: data.newPassword, cache_key });
             console.log('Password set successfully:', response.data);
             toast.success('Password updated successfully! You can now sign in.');
-            navigate('/signin');
+            navigate('/sign-in');
         } catch (error) {
             console.error(error.response?.data);
         } finally {

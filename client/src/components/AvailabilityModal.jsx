@@ -18,8 +18,8 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
     const fetchData = async () => {
       try {
         const [availabilityResponse, bookingsResponse] = await Promise.all([
-          axiosInstance.get('get-tutor-availabilities/'),
-          axiosInstance.get('get-bookings/')
+          axiosInstance.get('tutor-availabilities/'),
+          axiosInstance.get('bookings/')
         ]);
 
         // Current time for comparison

@@ -24,7 +24,7 @@ const TutorPasswordChangePage = () => {
 
   const onSubmit = async (data) => {
     try {
-      const response = await axiosInstance.post('change_password/', {
+      const response = await axiosInstance.post('change-password/', {
         current_password: data.currentPassword,
         new_password: data.newPassword
       });

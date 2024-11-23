@@ -35,7 +35,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     dispatch(clearTokens());
-    navigate('/signin');
+    navigate('/sign-in');
   };
 
   const navigationLinks = [
@@ -185,7 +185,7 @@ const Navbar = () => {
               </div>
             ) : (
               <button
-                onClick={() => navigate('/signin')}
+                onClick={() => navigate('/sign-in')}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Sign In
@@ -228,7 +228,7 @@ const Navbar = () => {
                 <button 
                   className="w-full mt-4 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
                   onClick={() => {
-                    navigate('/signin');
+                    navigate('/sign-in');
                     setIsMobileMenuOpen(false);
                   }}
                 >

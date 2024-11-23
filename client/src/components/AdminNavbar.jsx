@@ -14,7 +14,7 @@ const AdminNavbar = () => {
   const handleLogout = () => {
     toast.success('Logged out successfully!');
     dispatch(clearTokens());
-    navigate('/admin/signin');
+    navigate('/admin/sign-in');
   };
 
   return (

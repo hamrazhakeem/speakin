@@ -20,7 +20,7 @@ const SignInPage = () => {
     e.preventDefault();
     setErrorMessage('');
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}sign_in/`, { email, password });
+      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}sign-in/`, { email, password });
       const { access, refresh, name, id, credits } = response.data;
 
       dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false, isStudent: true, credits: credits }));
@@ -90,7 +90,7 @@ const SignInPage = () => {
 
           <div className="flex flex-col space-y-2 mt-4">
             <button
-              onClick={() => navigate('/signup')}
+              onClick={() => navigate('/sign-up')}
               className="text-blue-500 border border-blue-500 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200 rounded px-4 py-2 text-sm font-medium"
             >
               Create your SpeakIn ID

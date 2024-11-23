@@ -111,7 +111,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   const handleCancelSession = async (session) => {
     if (session.bookings?.length === 0) {
       try {
-        await axiosInstance.delete(`delete-tutor-availabilities/${session.id}/`);
+        await axiosInstance.delete(`tutor-availabilities/${session.id}/`);
         toast.success('Session deleted successfully');
         fetchTutorAvailability();
       } catch (error) {
@@ -140,7 +140,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   
     if (session.bookings[0].booking_status === 'confirmed') {
       try {
-        const response = await axiosInstance.patch(`update-tutor-availabilities/${session.id}/`, 
+        const response = await axiosInstance.patch(`tutor-availabilities/${session.id}/`, 
           {
             booking_status: 'canceled_by_tutor',
           }

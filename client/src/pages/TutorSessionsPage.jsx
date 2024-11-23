@@ -24,7 +24,7 @@ const TutorSessionsPage = () => {
   // Fetch tutor availability only if tutorId is available
   const fetchTutorAvailability = async () => {
     try {
-      const response = await axiosInstance.get('get-tutor-availabilities/');
+      const response = await axiosInstance.get('tutor-availabilities/');
       const tutorAvailabilities = response.data.filter(slot => slot.tutor_id === userId);
       setSessions(tutorAvailabilities);
       console.log(tutorAvailabilities);

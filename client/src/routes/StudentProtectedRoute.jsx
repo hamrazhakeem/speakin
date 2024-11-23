@@ -6,7 +6,7 @@ const StudentProtectedRoute = () => {
   const { isAuthenticated, isTutor } = useSelector((state) => state.auth);
   
   if (!isAuthenticated) {
-    return <Navigate to="/signin" />;
+    return <Navigate to="/sign-in" />;
   }
 
   if (isTutor) return <Navigate to="/tutor-dashboard" />;

@@ -38,7 +38,7 @@ const TutorRequestPage = () => {
     const fetchData = async () => {
       try {
         // Fetch countries
-        const countriesResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}get_countries/`);
+        const countriesResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}countries/`);
         if (!countriesResponse.ok) {
           throw new Error('Failed to fetch countries');
         }
@@ -47,7 +47,7 @@ const TutorRequestPage = () => {
         console.log('Countries:', countriesData);
   
         // Fetch languages to teach
-        const languagesToTeachResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}get_platform_languages/`);
+        const languagesToTeachResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}platform-languages/`);
         if (!languagesToTeachResponse.ok) {
           throw new Error('Failed to fetch languages to teach');
         }
@@ -55,7 +55,7 @@ const TutorRequestPage = () => {
         setLanguagesToTeach(languagesToTeachData.languages);
   
         // Fetch spoken languages
-        const spokenLanguagesResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}get_spoken_languages/`);
+        const spokenLanguagesResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}spoken-languages/`);
         if (!spokenLanguagesResponse.ok) {
           throw new Error('Failed to fetch languages spoken');
         }
@@ -148,7 +148,7 @@ const TutorRequestPage = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}tutor_request/`, formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}tutor-request/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -449,7 +449,7 @@ const TutorRequestPage = () => {
               <button
                 type="button"
                 className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 transition-colors"
-                onClick={() => navigate('/tutor-signin')}
+                onClick={() => navigate('/tutor-sign-in')}
                 disabled={loading}
               >
                 Cancel

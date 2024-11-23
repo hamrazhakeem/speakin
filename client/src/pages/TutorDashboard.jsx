@@ -78,10 +78,10 @@ const TutorDashboard = () => {
       setCountry(response.data.country || "");
       console.log('Tutor Data:', response.data)
       sessionStorage.setItem('teachingLanguage', response.data.tutor_language_to_teach[0].language);
-      const countriesResponse = await axiosInstance.get(`get_countries/`);
+      const countriesResponse = await axiosInstance.get(`countries/`);
       setCountries(countriesResponse.data); 
 
-      const spokenLanguagesResponse = await axiosInstance.get(`get_spoken_languages/`);
+      const spokenLanguagesResponse = await axiosInstance.get(`spoken-languages/`);
       const languagesWithIds = spokenLanguagesResponse.data.languages.map((lang, index) => {
         if (typeof lang === 'string') {
           return {
@@ -155,7 +155,7 @@ const TutorDashboard = () => {
     }
 
     try {
-      await axiosInstance.patch(`update_user/${userId}/`, formData);
+      await axiosInstance.patch(`users/${userId}/`, formData);
       console.log("Profile updated successfully");
       setEditMode(false); // Exit edit mode
       fetchUserData(); // Refetch user data 

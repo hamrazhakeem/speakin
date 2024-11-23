@@ -13,7 +13,7 @@ const HomePage = () => {
   async function fetchTutorData() {
     try {
       setLoading(true);
-      const response = await axiosInstance.get('get_users/');
+      const response = await axiosInstance.get('users/');
       const tutorUsers = response.data.filter(
         user => user.user_type === "tutor" && user.is_active
       );

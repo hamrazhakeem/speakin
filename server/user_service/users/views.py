@@ -23,7 +23,6 @@ from django.db.models import Q
 from rest_framework.permissions import IsAdminUser
 from .permissions import IsAdminOrUserSelf
 from .utils import get_id_token
-from rest_framework.exceptions import NotFound
 
 logger = logging.getLogger(__name__)
 
@@ -410,7 +409,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class TutorRequestView(generics.RetrieveUpdateDestroyAPIView):
+class TutorRequest(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminUser]
@@ -503,12 +502,12 @@ def admin_signin(request):
         }, status=status.HTTP_200_OK)
     return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-class CountryListView(APIView):
+class CountryList(APIView):
     def get(self, request):
         country_choices = [(country.name, country.alpha_2) for country in countries]
         return Response(country_choices)
 
-class PlatformLanguageListView(APIView):
+class PlatformLanguageList(APIView):
     def get(self, request):
         languages = Language.objects.filter(name__in=['English', 'Chinese', 'Arabic', 'French', 'Spanish', 'Hindi'])
         proficiencies = [{'level': prof.level, 'description': prof.get_level_display()} 
@@ -519,7 +518,7 @@ class PlatformLanguageListView(APIView):
         })
 
  
-class SpokenLanguageListView(APIView):
+class SpokenLanguageList(APIView):
     def get(self, request):
         languages = Language.objects.all()
         allowed_proficiencies = ['B1', 'B2', 'C1', 'C2', 'Native']
@@ -642,7 +641,7 @@ def tutor_request(request):
         print(f"Unexpected error: {str(e)}")  # Log the unexpected error
         return Response({'error': 'An error occurred while processing your request.'}, status=status.HTTP_400_BAD_REQUEST)
 
-class BlockUnblockUserView(APIView):
+class BlockUnblockUser(APIView):
     permission_classes = [IsAdminUser]
     def patch(self, request, id):
         try: 
@@ -694,7 +693,7 @@ def tutor_sign_in(request):
     
     return Response({'detail': 'Invalid email or password.'}, status=status.HTTP_401_UNAUTHORIZED)
 
-class ChangePasswordView(APIView):
+class ChangePassword(APIView):
     def post(self, request):
         print(request.data) 
         serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
@@ -705,7 +704,7 @@ class ChangePasswordView(APIView):
             return Response({"detail": "Password changed successfully"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-class TeachingLanguageChangeRequestCreateView(generics.ListCreateAPIView):
+class TeachingLanguageChangeRequestList(generics.ListCreateAPIView):
     queryset = TeachingLanguageChangeRequest.objects.all()
     serializer_class = TeachingLanguageChangeRequestSerializer
         
@@ -723,19 +722,19 @@ class TeachingLanguageChangeRequestCreateView(generics.ListCreateAPIView):
         # If no existing request, proceed with the creation
         return super().create(request, *args, **kwargs)
 
-class TeachingLanguageChangeRequestView(generics.ListCreateAPIView):
+class TeachingLanguageChangeRequestDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = TeachingLanguageChangeRequest.objects.all()
     serializer_class = TeachingLanguageChangeRequestSerializer
     permission_classes = [IsAdminUser]
 
     @transaction.atomic
-    def patch(self, request, id):
+    def patch(self, request, pk):
         """
         Approve a teaching language change request and update related models.
         """
         try:
             # Get the language change request
-            change_request = get_object_or_404(TeachingLanguageChangeRequest, id=id)
+            change_request = get_object_or_404(TeachingLanguageChangeRequest, id=pk)
             
             # Update TutorLanguageToTeach
             TutorLanguageToTeach.objects.update_or_create(
@@ -782,9 +781,9 @@ class TeachingLanguageChangeRequestView(generics.ListCreateAPIView):
             }, status=status.HTTP_400_BAD_REQUEST)
         
     @transaction.atomic
-    def delete(self, request, id):
+    def delete(self, request, pk):
         try:
-            change_request = get_object_or_404(TeachingLanguageChangeRequest, id=id)
+            change_request = get_object_or_404(TeachingLanguageChangeRequest, id=pk)
             tutor_details = TutorDetails.objects.get(user=change_request.user)
             user = change_request.user
 
@@ -813,7 +812,7 @@ class TeachingLanguageChangeRequestView(generics.ListCreateAPIView):
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
         
-class UserBalanceView(generics.GenericAPIView):
+class UserBalance(generics.GenericAPIView):
     def get(self, request, pk):
         try:
             user = User.objects.get(id=pk)
@@ -821,7 +820,7 @@ class UserBalanceView(generics.GenericAPIView):
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=404)  
         
-class TutorDetailsView(generics.RetrieveAPIView):
+class TutorDetail(generics.RetrieveAPIView):
     queryset = TutorDetails.objects.all()
     serializer_class = TutorDetailsSerializer
 

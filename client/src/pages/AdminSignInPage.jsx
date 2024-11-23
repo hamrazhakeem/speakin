@@ -25,7 +25,7 @@ const AdminSignInPage = () => {
     setLoading(true);
 
     try {
-        const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}admin_signin/`, { email, password });
+        const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}admin/sign-in/`, { email, password });
             toast.success('Sign In successful!');
             console.log('tokens-->', response.data);
             const { access, refresh, name, id } = response.data;
@@ -33,6 +33,7 @@ const AdminSignInPage = () => {
             dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: true }));
             navigate('/admin/manage-users');
     } catch (error) {
+      console.log('error', error)
         toast.error('Sign In failed. Invalid credentials.');
     } finally {
         setLoading(false);
