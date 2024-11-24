@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CreditCard, VideoIcon } from 'lucide-react';
+import { Clock, CreditCard, RotateCw, VideoIcon } from 'lucide-react';
 import EmptyState from './EmptyState';
 import useAxios from '../hooks/useAxios';
 import { toast } from 'react-toastify';
@@ -8,8 +8,20 @@ import Avatar from './Avatar';
 const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   const axiosInstance = useAxios();
   const [sessionsWithStudentInfo, setSessionsWithStudentInfo] = useState([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchTutorAvailability();
+    setTimeout(() => setIsRefreshing(false), 1000); // Ensure animation plays for at least 1 second
+  };
 
   useEffect(() => {
+    if (!sessions || sessions.length === 0) {
+      setSessionsWithStudentInfo([]);
+      return;
+    }
     const fetchStudentInfo = async () => {
       try {
         const updatedSessions = await Promise.all(
@@ -128,7 +140,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
       try {
         await axiosInstance.delete(`tutor-availabilities/${session.id}/`);
         toast.success('Session deleted successfully');
-        fetchTutorAvailability();
+        await fetchTutorAvailability(); // Wait for the fetch to complete
       } catch (error) {
         const backendMessage = error.response?.data?.message || error.response?.data?.error || 'Error deleting session';
         toast.error(backendMessage);
@@ -163,16 +175,16 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
         if (response.status === 204) {
           toast.success('Session cancelled successfully');
         }
-        fetchTutorAvailability();
+        await fetchTutorAvailability(); // Wait for the fetch to complete
       } catch (error) {
         const backendMessage = error.response?.data?.message || error.response?.data?.error || 'Error cancelling session';
         toast.error(backendMessage);
         console.error('Error cancelling session:', error);      
-        fetchTutorAvailability();
+        await fetchTutorAvailability(); // Wait for the fetch to complete
       }
     } else {
       toast.error('Cannot cancel session with status other than "confirmed".');
-      fetchTutorAvailability();
+      await fetchTutorAvailability(); // Wait for the fetch to complete
     }
   };
 
@@ -183,6 +195,8 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   if (!sessionsWithStudentInfo || sessionsWithStudentInfo.length === 0) {
     return (
       <EmptyState
+        handleRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
         title="No Sessions Added"
         description="You haven't added any teaching sessions yet. Add your available time slots to start accepting bookings."
         onAddSession={onAddSession}
@@ -200,6 +214,17 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <button
+          onClick={handleRefresh}
+          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={isRefreshing}
+        >
+          <RotateCw
+            className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`}
+          />
+        </button>
+      </div>
       {sessionsWithStudentInfo.map((session) => (
         <div
           key={session.id}

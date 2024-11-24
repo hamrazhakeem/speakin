@@ -1,5 +1,5 @@
-import React from 'react';
-import { Clock, CreditCard, User, VideoIcon } from 'lucide-react';
+import React, { useState } from 'react';
+import { Clock, CreditCard, RotateCw, User, VideoIcon } from 'lucide-react';
 import EmptyState from './EmptyState';
 import useAxios from '../hooks/useAxios';
 import { toast } from 'react-toastify';
@@ -7,6 +7,13 @@ import Avatar from './Avatar';
 
 const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
   const axiosInstance = useAxios();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchStudentSessions();
+    setTimeout(() => setIsRefreshing(false), 1000); // Ensure animation plays for at least 1 second
+  };
 
   const formatLocalTime = (utcTime) => {
     const date = new Date(utcTime);
@@ -131,6 +138,8 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
   if (!sessions || sessions.length === 0) {
     return (
       <EmptyState
+        handleRefresh={handleRefresh}
+        isRefreshing={isRefreshing}
         title="No Bookings Found"
         description="You haven't booked any slots yet. Browse our tutors to find the perfect match for your learning needs."
         showButton={false} 
@@ -142,6 +151,17 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-end">
+        <button
+          onClick={handleRefresh}
+          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          disabled={isRefreshing}
+        >
+          <RotateCw
+            className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`}
+          />
+        </button>
+      </div>
       {sessions.map((session) => (
         <div
           key={session.id}
