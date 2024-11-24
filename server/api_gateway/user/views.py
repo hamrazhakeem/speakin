@@ -4,7 +4,7 @@ import os
 import requests
 from rest_framework.response import Response
 from rest_framework import status
-from django.core.files.uploadedfile import TemporaryUploadedFile
+from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from .permissions import IsAuthenticatedWithJWT
 
 # Create your views here.
@@ -189,6 +189,7 @@ class UserView(APIView):
             else: 
                 user_service_url = f"{os.getenv('USER_SERVICE_URL')}users/{pk}/"
             response = requests.get(user_service_url)
+            print('response in gateway',response)
             return Response(response.json(), status=response.status_code)
         except requests.exceptions.RequestException as e:
             return Response(
@@ -202,10 +203,14 @@ class UserView(APIView):
                 user_service_url = os.getenv('USER_SERVICE_URL') + f'users/{pk}/verify-tutor/'
             else:
                 user_service_url = os.getenv('USER_SERVICE_URL') + f'users/{pk}/'
+            data_items = list(request.data.items())
+            json_data = {key: value for key, value in data_items if not isinstance(value, (InMemoryUploadedFile))}
+            files_data = {key: (value.name, value, value.content_type) for key, value in data_items if isinstance(value, (InMemoryUploadedFile))}
+            print(json_data, files_data)
             headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
-            response = requests.patch(user_service_url, json=request.data, headers=headers)
+            response = requests.patch(user_service_url, data=json_data, files=files_data, headers=headers)
             return Response(response.json(), status=response.status_code)
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException as e: 
             return Response(
                 {"error": "Failed to connect to user service.", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,

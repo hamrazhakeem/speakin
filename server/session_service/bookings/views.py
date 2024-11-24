@@ -68,6 +68,9 @@ class TutorAvailabilityDetail(generics.RetrieveUpdateDestroyAPIView):
         session = self.get_object()
         booking = session.bookings.filter(booking_status='confirmed').first()
 
+        if session.bookings.filter(booking_status='canceled_by_tutor').first():
+            return Response({"error": "The session was already canceled by the tutor."}, status=status.HTTP_400_BAD_REQUEST)
+
         if not booking:
             return Response({"error": "No confirmed booking found to cancel."}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -95,7 +98,7 @@ class TutorAvailabilityDetail(generics.RetrieveUpdateDestroyAPIView):
             booking.refund_status = True
             booking.save()
 
-            return Response({"message": "Session canceled and credits refunded."}, status=status.HTTP_204_NO_CONTENT)
+            return Response({"message": "Session canceled and credits refunded successfully."}, status=status.HTTP_200_OK)
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

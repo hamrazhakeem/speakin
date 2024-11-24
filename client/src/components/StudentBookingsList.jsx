@@ -72,7 +72,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
     if (timeDifferenceInMinutes < allowedTimeBeforeSessionStart) {
       toast.error(
         `Cannot cancel ${session.availabilityDetails.session_type} session within ${
-          session.session_type === 'trial' ? '1 hour' : '2 hours'
+          session.availabilityDetails.session_type === 'trial' ? '1 hour' : '2 hours'
         } of start time.`
       );
       return;
@@ -88,6 +88,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
       }
       fetchStudentSessions();
     } catch (error) {
+      console.log(error)
       // Extract backend message and display it
       const backendMessage = error.response?.data?.message || error.response?.data?.error || 'Error cancelling session';
       toast.error(backendMessage);

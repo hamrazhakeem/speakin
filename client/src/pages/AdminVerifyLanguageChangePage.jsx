@@ -92,6 +92,21 @@ const AdminVerifyLanguageChangePage = () => {
                     }
                   />
                 )}
+                {requestData.govt_id && (
+                  <InfoItem
+                    label="Govt Id"
+                    value={
+                      <a 
+                        href={requestData.govt_id} 
+                        className="text-blue-500 hover:underline"
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                      >
+                        View Govt Id
+                      </a>
+                    }
+                  />
+                )}
                 {requestData.intro_video && (
                   <InfoItem
                     label="Introduction Video"

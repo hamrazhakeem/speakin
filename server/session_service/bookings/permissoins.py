@@ -70,7 +70,7 @@ class IsAdminOrOwnerPermission(BasePermission):
                 return True
 
             # Check if the student has a confirmed booking for the given availability
-            booking = Bookings.objects.filter(availability=availability, student_id=user_id, booking_status='confirmed').first()
+            booking = Bookings.objects.filter(availability=availability, student_id=user_id).first()
             if booking:
                 return True
 

@@ -17,7 +17,7 @@ const StudentBookingsPage = () => {
     try {
       // Fetch all bookings from the backend
       const response = await axiosInstance.get('bookings/');
-  
+      console.log('responseee', response)
       // Filter bookings for the current student
       const studentBookings = response.data.filter(
         (booking) => booking.student_id === userId
@@ -25,7 +25,7 @@ const StudentBookingsPage = () => {
 
       // For each booking, fetch corresponding availability and tutor details
       const sessionsWithDetails = await Promise.all(
-        studentBookings.data.map(async (session) => {
+        studentBookings.map(async (session) => {
           try {
             // Fetch session details from TutorAvailability
             const tutorAvailabilityResponse = await axiosInstance.get(`tutor-availabilities/${session.availability}/`);

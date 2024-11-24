@@ -62,19 +62,21 @@ const AdminManageUsersPage = () => {
   const languageRequestColumns = ['#', 'Full Name', 'Email', 'Current Language', 'Requested Language', 'Status', 'Action'];
 
   // Action handler for blocking/unblocking tutors and verifying pending tutors
-  const handleAction = async (userId) => {
+  const handleAction = async (userId, action) => {
     try {
       const response = await axiosInstance.patch(`users/${userId}/`, {
         user_id: userId,
+        is_active: action, // Include the action in the payload
       });
-      console.log('User blocked/unblocked successfully:', response.data);
+      console.log(`User ${action}ed successfully:`, response.data);
     } catch (error) {
-      console.error('Error blocking/unblocking user:', error);
-    }  finally {
+      console.error(`Error ${action}ing user:`, error);
+    } finally {
       // Refetch the users after the action is completed
       fetchUsers();
     }
   };
+  
 
   const handleVerify = async (userId) => {
     try {
@@ -151,7 +153,7 @@ const AdminManageUsersPage = () => {
                   action: (
                     <button
                       className={`inline-block w-20 px-3 py-1 rounded text-white ${student.is_active ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-                      onClick={() => handleAction(student.id)}
+                      onClick={() => handleAction(student.id, student.is_active ? false : true)}
                     >
                       {student.is_active ? 'Block' : 'Unblock'}
                     </button>
@@ -174,7 +176,7 @@ const AdminManageUsersPage = () => {
                   action: (
                     <button
                       className={`inline-block w-20 px-3 py-1 rounded text-white ${tutor.is_active ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'}`}
-                      onClick={() => handleAction(tutor.id)}
+                      onClick={() => handleAction(tutor.id, tutor.is_active ? false : true)}
                     >
                       {tutor.is_active ? 'Block' : 'Unblock'}
                     </button>

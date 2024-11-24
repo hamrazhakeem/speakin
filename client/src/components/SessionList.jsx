@@ -82,7 +82,6 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
       return 'You have cancelled this session';
     }
     
-    // Replace underscores with spaces and capitalize each word
     return status
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -103,23 +102,39 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
       case 'no_show_by_tutor':
       case 'no_show_by_student':
         return 'bg-orange-50 text-orange-600 border border-orange-200';
+      case 'listed':
+        return 'bg-teal-50 text-teal-600 border border-teal-200';
+      case 'unlisted':
+        return 'bg-gray-50 text-gray-600 border border-gray-200';
       default:
         return 'bg-gray-50 text-gray-600 border border-gray-200';
     }
   };
 
+  const isSessionListed = (session) => {
+    const currentTime = new Date();
+    const sessionStartTime = new Date(session.start_time);
+    const threeHoursInMs = 3 * 60 * 60 * 1000;
+    
+    return !session.is_booked && (sessionStartTime - currentTime) >= threeHoursInMs;
+  };
+
+  const getListingStatus = (session) => {
+    return isSessionListed(session) ? 'listed' : 'unlisted';
+  };
+
   const handleCancelSession = async (session) => {
-    if (session.bookings?.length === 0) {
+    if (session.is_booked === false) {
       try {
         await axiosInstance.delete(`tutor-availabilities/${session.id}/`);
         toast.success('Session deleted successfully');
         fetchTutorAvailability();
       } catch (error) {
-      const backendMessage = error.response?.data?.message || error.response?.data?.error || 'Error deleting session';
-      toast.error(backendMessage);
-      fetchTutorAvailability();
-      console.error('Error deleting session:', error);      
-    }
+        const backendMessage = error.response?.data?.message || error.response?.data?.error || 'Error deleting session';
+        toast.error(backendMessage);
+        fetchTutorAvailability();
+        console.error('Error deleting session:', error);      
+      }
       return;
     }
   
@@ -190,7 +205,6 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
           key={session.id}
           className="bg-white border rounded-xl p-6 hover:shadow-lg transition-shadow duration-300"
         >
-          {/* Header Section */}
           <div className="flex flex-wrap justify-between items-center mb-6 pb-4 border-b">
             <div className="flex items-center space-x-4">
               <span
@@ -205,6 +219,9 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                   {formatBookingStatus(session.bookings[0].booking_status)}
                 </span>
               )}
+              <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusStyles(getListingStatus(session))}`}>
+                {getListingStatus(session) === 'listed' ? 'Listed' : 'Unlisted'}
+              </span>
             </div>
             <div className="flex items-center text-gray-700">
               <Clock className="w-5 h-5 mr-2 text-gray-400" />
@@ -324,7 +341,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                   </button>
                 )}
                 {/* Cancel Button - Only show if unbooked or status is confirmed */}
-                {(isUnbooked(session) || getBookingStatus(session) === 'confirmed') && (
+                {(isUnbooked(session) || getBookingStatus(session) === 'confirmed' || session.is_booked === false) && (
                   <button
                     className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors duration-200"
                     onClick={() => handleCancelSession(session)}
