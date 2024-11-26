@@ -7,6 +7,7 @@ from rest_framework import status
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
 from .permissions import IsAuthenticatedWithJWT
 
+
 # Create your views here.
 
 class UserSignUpView(APIView):

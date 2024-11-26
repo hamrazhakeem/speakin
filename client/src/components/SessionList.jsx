@@ -4,12 +4,17 @@ import EmptyState from './EmptyState';
 import useAxios from '../hooks/useAxios';
 import { toast } from 'react-toastify';
 import Avatar from './Avatar';
+import { useNavigate } from 'react-router-dom';
+import VideoCall from './VideoCall';
 
 const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
+  const [roomName, setRoomName] = useState('');
+  const [token, setToken] = useState(null);
   const axiosInstance = useAxios();
   const [sessionsWithStudentInfo, setSessionsWithStudentInfo] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -188,8 +193,8 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     }
   };
 
-  const handleJoinSession = (meetingLink) => {
-    window.open(meetingLink, '_blank');
+  const handleJoinSession = async () => {
+    navigate('/video-call-setup')
   };
 
   if (!sessionsWithStudentInfo || sessionsWithStudentInfo.length === 0) {
@@ -359,7 +364,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                 {session.bookings?.length > 0 && session.bookings[0]?.booking_status === 'confirmed' && (
                   <button
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center font-medium transition-colors duration-200"
-                    onClick={() => handleJoinSession(session.video_call_link)}
+                    onClick={handleJoinSession}
                   >
                     <VideoIcon className="w-4 h-4 mr-2" />
                     Join Session

@@ -9,9 +9,15 @@ from django.db import transaction
 from django.conf import settings
 import requests
 from grpc_services.grpc_client import deduct_balance_credits, lock_credits_in_escrow, refund_credits_from_escrow
-from .permissoins import IsAdminOrOwnerPermission
+from .permissions import IsAdminOrOwnerPermission, ValidateRoomNamePermission, decode_jwt
 from django.utils import timezone
 from datetime import timedelta
+from hashlib import sha256
+from django.utils.crypto import get_random_string
+from twilio.jwt.access_token import AccessToken
+from twilio.jwt.access_token.grants import VideoGrant
+from django.conf import settings
+from rest_framework.views import APIView
 
 # Create your views here.
 
@@ -128,6 +134,7 @@ class BookingsList(generics.ListCreateAPIView):
         availability_id = booking.availability.id 
         booking_id = booking.id
         student_id = booking.student_id 
+        tutor_id = booking.availability.tutor_id
         
         tutor_availability = get_object_or_404(TutorAvailability, id=availability_id)
         credits_required = tutor_availability.credits_required
@@ -153,6 +160,15 @@ class BookingsList(generics.ListCreateAPIView):
             deduct_balance_credits(student_id, user_data['balance_credits'])
             raise ValidationError("Failed to lock credits in escrow")
          
+        # Generate a unique and secure room name
+        random_string = get_random_string(12)  # Generate a random 12-character string
+        room_name_hash = sha256(f"{booking_id}-{tutor_id}-{student_id}-{random_string}".encode()).hexdigest()
+        room_name = f"room_{room_name_hash[:16]}"  # Use a shorter part of the hash if needed
+         
+        # Update the booking with the room name
+        booking.video_call_link = room_name  # Now `video_call_link` acts as `room_name`
+        booking.save()
+
         tutor_availability.is_booked = True
         tutor_availability.save()
         
@@ -169,3 +185,101 @@ class BookingsDetail(generics.ListAPIView):
         if student_id:
             queryset = queryset.filter(student_id=student_id)
         return queryset.select_related('availability')
+    
+# class GenerateTwilioTokenView(APIView):
+#     permission_classes = [ValidateRoomNamePermission]
+#     def post(self, request):
+#         # Extract room_name from request
+#         room_name = request.data.get('room_name')
+#         if not room_name:
+#             return Response({"error": "Room name is required"}, status=400)
+
+#         try:
+#             # Look up the booking based on the room_name_hash (or another identifier)
+#             booking = Bookings.objects.get(video_call_link=room_name)
+
+#             # Retrieve the student_id and tutor_id from the booking record
+#             student_id = booking.student_id
+#             tutor_id = booking.availability.tutor_id  # Assuming availability has tutor_id
+
+#             auth_header = request.headers.get('Authorization')
+#             if not auth_header:
+#                 return Response({"error": "Authorization token missing"}, status=401)
+            
+#             # Remove "Bearer " prefix from the token
+#             token = auth_header.replace("Bearer ", "", 1)
+
+#             decoded_token = decode_jwt(token)
+#             user_id = decoded_token.get('user_id')  # Assuming 'user_id' is in the payload
+
+#             if booking.student_id == user_id:
+#                 identity = f"student_{student_id}"
+#             # If the tutor is the one accessing the room, use their ID
+#             elif booking.availability.tutor_id == user_id:
+#                 identity = f"tutor_{tutor_id}"
+#             else:
+#                 return Response({"error": "Unauthorized access"}, status=403)
+
+#         except Bookings.DoesNotExist:
+#             return Response({"error": "Room or booking not found"}, status=404)
+
+#         # Create a Twilio Access Token
+#         token = AccessToken(
+#             settings.TWILIO_ACCOUNT_SID,
+#             settings.TWILIO_API_KEY,
+#             settings.TWILIO_API_SECRET,
+#             identity=identity
+#         )
+
+#         # Create a Video Grant and attach it to the token
+#         video_grant = VideoGrant(room=room_name)
+#         token.add_grant(video_grant)
+
+#         return Response({"token": token.to_jwt()})
+
+class DailyRoomCreateView(APIView):
+    """
+    API Endpoint to create Daily.co rooms dynamically.
+    """
+    permission_classes = [ValidateRoomNamePermission]
+
+    def create_daily_room(self, name=None, properties=None):
+        """
+        Create a room using Daily API.
+        :param name: Optional room name
+        :param properties: Additional room properties like `max_participants`
+        :return: JSON response with room details
+        """
+        DAILY_API_URL = "https://api.daily.co/v1/rooms"
+
+        headers = {
+            "Authorization": f"Bearer {settings.DAILY_API_KEY}",
+            "Content-Type": "application/json",
+        }
+
+        data = {
+            "name": name,  # Name is optional; Daily will auto-generate if not provided
+            "properties": properties or {},
+        }
+
+        response = requests.post(DAILY_API_URL, json=data, headers=headers)
+
+        if response.status_code == 200:
+            return response.json()
+        else:
+            response.raise_for_status()
+
+    def post(self, request):
+        try:
+            room_name = request.data.get("room_name", None)  # Optional
+            
+            # Customize room properties
+            properties = {
+                "max_participants": 2,
+                "enable_prejoin_ui": True,
+            }
+
+            room = self.create_daily_room(name=room_name, properties=properties)
+            return Response({"room": room}, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

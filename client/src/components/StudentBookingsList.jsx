@@ -4,10 +4,12 @@ import EmptyState from './EmptyState';
 import useAxios from '../hooks/useAxios';
 import { toast } from 'react-toastify';
 import Avatar from './Avatar';
+import { useNavigate } from 'react-router-dom';
 
 const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
   const axiosInstance = useAxios();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const navigate = useNavigate();
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -108,7 +110,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
   
 
   const handleJoinSession = (meetingLink) => {
-    window.open(meetingLink, '_blank');
+    navigate('/video-call-setup')
   };
 
   const renderCreditInfo = (session) => {

@@ -39,6 +39,9 @@ import BuyCredits from './pages/BuyCredits';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
 import StudentBookingsPage from './pages/StudentBookingsPage';
+// import VideoCall from './pages/VideoCall';
+import VideoCall from './components/VideoCall';
+import VideoCallSetup from './components/VideoCallSetup';
 
 const App = () => {
   useProactiveTokenRefresh();
@@ -61,6 +64,10 @@ const App = () => {
           <Route path='/tutor-sign-in' element={<TutorSignInPage />} />
           <Route path='/application-confirmation' element={<ApplicationConfirmation />} />
         </Route>
+
+        {/* <Route path='/video-call' element={<VideoCall />} /> */}
+        <Route path='/video-call' element={<VideoCall />} />
+        <Route path='/video-call-setup' element={<VideoCallSetup />} />
 
         {/* Tutor Protected routes */}  
         <Route element={<TutorProtectedRoute />}>
