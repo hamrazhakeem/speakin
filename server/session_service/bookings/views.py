@@ -18,6 +18,7 @@ from twilio.jwt.access_token import AccessToken
 from twilio.jwt.access_token.grants import VideoGrant
 from django.conf import settings
 from rest_framework.views import APIView
+from django.db.models import Q 
 
 # Create your views here.
 
@@ -174,7 +175,7 @@ class BookingsList(generics.ListCreateAPIView):
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-class BookingsDetail(generics.ListAPIView):
+class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Bookings.objects.all()
     serializer_class = BookingsSerializer
     lookup_field = 'student_id'
@@ -245,7 +246,8 @@ class DailyRoomCreateView(APIView):
 
     def create_daily_room(self, name=None, properties=None):
         """
-        Create a room using Daily API.
+        Create or retrieve an existing room using Daily API.
+        If room exists, return existing room details.        
         :param name: Optional room name
         :param properties: Additional room properties like `max_participants`
         :return: JSON response with room details
@@ -257,29 +259,79 @@ class DailyRoomCreateView(APIView):
             "Content-Type": "application/json",
         }
 
+        try:
+            check_response = requests.get(
+                f"{DAILY_API_URL}/{name}",
+                headers=headers
+            )
+
+            if check_response.status_code == 200:
+                # Room exists, return existing room details
+                return check_response.json()
+
+        except requests.exceptions.RequestException:
+            # Room doesn't exist, proceed with creation
+            pass
+
         data = {
             "name": name,  # Name is optional; Daily will auto-generate if not provided
             "properties": properties or {},
+            "privacy": "private"
         }
 
         response = requests.post(DAILY_API_URL, json=data, headers=headers)
 
+        print(response.json())
         if response.status_code == 200:
             return response.json()
         else:
             response.raise_for_status()
 
+    def create_meeting_token(self, room_name):
+        """
+        Generate a secure meeting token for the specified room.
+        """
+        DAILY_API_URL = "https://api.daily.co/v1/meeting-tokens"
+        headers = {
+            "Authorization": f"Bearer {settings.DAILY_API_KEY}",
+            "Content-Type": "application/json",
+        }
+        data = {
+            "properties": {
+                "room_name": room_name, 
+                "is_owner": False,  # User permissions; adjust as needed
+                "exp": int((timezone.now() + timezone.timedelta(hours=1.5)).timestamp()),  # Expiration time
+            }
+        }
+        response = requests.post(DAILY_API_URL, json=data, headers=headers)
+        response.raise_for_status()
+        return response.json()
+
     def post(self, request):
         try:
-            room_name = request.data.get("room_name", None)  # Optional
-            
+            room_name = request.data.get("room_name") 
+            BASE_VIDEO_CALL_URL = "https://speakin.daily.co/"
+            booking = Bookings.objects.get(
+                Q(video_call_link=room_name) | Q(video_call_link=BASE_VIDEO_CALL_URL + room_name),
+            )
+
             # Customize room properties
             properties = {
+                "exp": int(booking.availability.end_time.timestamp()),  # Expiration timestamp
                 "max_participants": 2,
                 "enable_prejoin_ui": True,
             }
 
             room = self.create_daily_room(name=room_name, properties=properties)
-            return Response({"room": room}, status=status.HTTP_200_OK)
+
+            token_response = self.create_meeting_token(room_name)
+            token = token_response.get("token")
+
+            booking.video_call_link = room.get('url')
+            booking.save()
+            return Response({
+                "room": room, 
+                "token": token,  # Include the token in the response
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)

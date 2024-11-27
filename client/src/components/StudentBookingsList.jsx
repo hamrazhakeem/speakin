@@ -104,14 +104,12 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
       console.error('Error cancelling session:', error);
     }
     fetchStudentSessions();
+  };
 
+  const handleJoinSession = (bookingId) => {
+    navigate('/video-call-setup', { state: { bookingId } });
   };
   
-  
-
-  const handleJoinSession = (meetingLink) => {
-    navigate('/video-call-setup')
-  };
 
   const renderCreditInfo = (session) => {
     const isCanceled = session.booking_status === 'canceled_by_tutor' || session.booking_status === 'canceled_by_student';
@@ -255,7 +253,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
                   <>
                     <button
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center font-medium transition-colors duration-200"
-                      onClick={() => handleJoinSession(session.video_call_link)}
+                      onClick={() => handleJoinSession(session.id)}
                     >
                       <VideoIcon className="w-4 h-4 mr-2" />
                       Join Session

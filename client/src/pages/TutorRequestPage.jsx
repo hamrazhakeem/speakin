@@ -419,7 +419,7 @@ const TutorRequestPage = () => {
 
             <div className="space-y-2">
               <label className="font-medium block">Set Hourly Rate:</label>
-              <p className="text-sm text-gray-600">Set hourly rate in Credits, 1 Credit worth ₹75</p>
+              <p className="text-sm text-gray-600">Set hourly rate in Credits, 1 Credit worth ₹150</p>
               <Controller
                 name="hourlyRate"
                 control={control}

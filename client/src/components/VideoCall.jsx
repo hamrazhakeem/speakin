@@ -1,10 +1,20 @@
 import React, { useRef, useEffect } from "react";
 import DailyIframe from "@daily-co/daily-js";
+import { useLocation, useNavigate } from "react-router-dom";
 
-const VideoCall = ({ roomUrl }) => {
+const VideoCall = () => {
   const videoCallFrameRef = useRef(null);
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { roomUrl } = location.state || {};
 
   useEffect(() => {
+    if (!roomUrl) {
+      // Redirect or show error if no room URL
+      navigate('/video-call-setup');
+      return;
+    }
+
     const callFrame = DailyIframe.createFrame(videoCallFrameRef.current, {
       showLeaveButton: true, // Show "Leave" button
       iframeStyle: {

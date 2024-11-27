@@ -240,7 +240,7 @@ def get_signin_url():
     if not frontend_origin:
         raise ValueError("No local frontend origin found in CORS_ALLOWED_ORIGINS")
     
-    return f"{frontend_origin}/tutor-signin/"
+    return f"{frontend_origin}/tutor-sign-in/"
 
 class LoginWithGoogle(APIView):
     def post(self, request):
