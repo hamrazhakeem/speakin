@@ -88,6 +88,18 @@ class BookingsView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         
+    def patch(self, request, pk):
+        try:
+            session_service_url = os.getenv('SESSION_SERVICE_URL') + f'bookings/{pk}/'
+            headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
+            response = requests.patch(session_service_url, json=request.data, headers=headers)
+            return Response(response.json(), status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "Failed to connect to session service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        
 # class GenerateTwilioTokenView(APIView):
 #     permission_classes = [IsAuthenticatedWithJWT]
 

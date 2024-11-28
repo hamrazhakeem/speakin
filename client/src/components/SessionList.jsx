@@ -5,15 +5,11 @@ import useAxios from '../hooks/useAxios';
 import { toast } from 'react-toastify';
 import Avatar from './Avatar';
 import { useNavigate } from 'react-router-dom';
-import VideoCall from './VideoCall';
 
 const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
-  const [roomName, setRoomName] = useState('');
-  const [token, setToken] = useState(null);
   const axiosInstance = useAxios();
   const [sessionsWithStudentInfo, setSessionsWithStudentInfo] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const navigate = useNavigate();
 
   const handleRefresh = async () => {
@@ -193,8 +189,8 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     }
   };
 
-  const handleJoinSession = async () => {
-    navigate('/video-call-setup')
+  const handleJoinSession = (bookingId) => () => {
+    navigate('/video-call-setup', { state: { bookingId } });
   };
 
   if (!sessionsWithStudentInfo || sessionsWithStudentInfo.length === 0) {
@@ -216,6 +212,67 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
 
   const isUnbooked = (session) => !session.bookings || session.bookings.length === 0;
   const getBookingStatus = (session) => session.bookings?.[0]?.booking_status;
+
+  const getRoomNameStatus = (session) => {
+    if (!session.bookings || session.bookings.length === 0) return null;
+  
+    const booking = session.bookings[0];
+    const sessionStartTime = new Date(session.start_time);
+    const sessionEndTime = new Date(session.end_time);
+    const currentTime = new Date();
+    const fiveMinutesBefore = new Date(sessionStartTime.getTime() - 5 * 60000);
+    
+    // Conditions for showing room name
+    const isConfirmedStatus = booking.booking_status === 'confirmed' || 
+                               booking.booking_status === 'ongoing';
+    
+    if (isConfirmedStatus) {
+      // Session is currently happening (between start and end times)
+      if (currentTime >= sessionStartTime && currentTime <= sessionEndTime) {
+        return {
+          type: 'showRoomName',
+          roomName: booking.video_call_link
+        };
+      }
+      
+      // Within 5 minutes before session start
+      if (currentTime >= fiveMinutesBefore && currentTime < sessionStartTime) {
+        return {
+          type: 'showRoomName',
+          roomName: booking.video_call_link
+        };
+      }
+      
+      // More than 5 minutes before session start
+      if (currentTime < fiveMinutesBefore) {
+        const timeDiff = fiveMinutesBefore - currentTime;
+        const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+        const minutes = Math.ceil((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        
+        let timeMessage = 'Room name will be available 5 min before session';
+        if (hours > 0) {
+          timeMessage = `Room name will be available in ${hours}h ${minutes}m`;
+        } else if (minutes > 0) {
+          timeMessage = `Room name will be available in ${minutes} min`;
+        }
+        
+        return {
+          type: 'waitingMessage',
+          timeMessage
+        };
+      }
+    }
+  
+    return null;
+  };
+
+  const cleanRoomName = (roomLink) => {
+    const prefix = "https://speakin.daily.co/";
+    if (roomLink && roomLink.startsWith(prefix)) {
+      return roomLink.slice(prefix.length);
+    }
+    return roomLink;
+  };
 
   return (
     <div className="space-y-6">
@@ -361,10 +418,11 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-3">
-                {session.bookings?.length > 0 && session.bookings[0]?.booking_status === 'confirmed' && (
+              {session.bookings?.length > 0 && 
+                (session.bookings[0]?.booking_status === 'confirmed' || session.bookings[0]?.booking_status === 'ongoing') && (
                   <button
                     className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center font-medium transition-colors duration-200"
-                    onClick={handleJoinSession}
+                    onClick={handleJoinSession(session.bookings[0].id)}
                   >
                     <VideoIcon className="w-4 h-4 mr-2" />
                     Join Session
@@ -376,12 +434,55 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                     className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors duration-200"
                     onClick={() => handleCancelSession(session)}
                   >
-                    Cancel
+                    Cancel Session
                   </button>
                 )}
               </div>
             </div>
           </div>
+          {/* Room Name Notification */}
+          {(() => {
+            const roomNameStatus = getRoomNameStatus(session);
+            
+            if (roomNameStatus) {
+              if (roomNameStatus.type === 'showRoomName') {
+                const cleanedRoomName = cleanRoomName(roomNameStatus.roomName);
+                return (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4 flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-green-800 mb-2">
+                        🔐 Secure Room Name Available
+                      </p>
+                      <div className="flex items-center space-x-2">
+                        <code className="bg-green-100 px-3 py-1 rounded text-green-900 select-all">
+                          {cleanedRoomName}
+                        </code>
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(cleanedRoomName);
+                            toast.success('Room name copied to clipboard!');
+                          }}
+                          className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
+                        >
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              } else if (roomNameStatus.type === 'waitingMessage') {
+                return (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                    <p className="text-blue-800 font-medium">
+                    🕒 {roomNameStatus.timeMessage}
+                    </p>
+                  </div>
+                );
+              }
+            }
+            
+            return null;
+          })()}
         </div>
       ))}
     </div>

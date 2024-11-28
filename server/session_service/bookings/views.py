@@ -178,14 +178,6 @@ class BookingsList(generics.ListCreateAPIView):
 class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Bookings.objects.all()
     serializer_class = BookingsSerializer
-    lookup_field = 'student_id'
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        student_id = self.kwargs.get(self.lookup_field)
-        if student_id:
-            queryset = queryset.filter(student_id=student_id)
-        return queryset.select_related('availability')
     
 # class GenerateTwilioTokenView(APIView):
 #     permission_classes = [ValidateRoomNamePermission]

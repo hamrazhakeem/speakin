@@ -35,13 +35,15 @@ import TutorProtectedRoute from './routes/TutorProtectedRoute';
 import TutorUnprotectedRoute from './routes/TutorUnprotectedRoute';
 import AdminProtectedRoute from './routes/AdminProtectedRoute';
 import AdminUnprotectedRoute from './routes/AdminUnprotectedRoute';
+
 import BuyCredits from './pages/BuyCredits';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 import PaymentCancelPage from './pages/PaymentCancelPage';
 import StudentBookingsPage from './pages/StudentBookingsPage';
-// import VideoCall from './pages/VideoCall';
+
 import VideoCall from './components/VideoCall';
 import VideoCallSetup from './components/VideoCallSetup';
+import MeetingSummary from './pages/MeetingSummary';
 
 const App = () => {
   useProactiveTokenRefresh();
@@ -65,12 +67,12 @@ const App = () => {
           <Route path='/application-confirmation' element={<ApplicationConfirmation />} />
         </Route>
 
-        {/* <Route path='/video-call' element={<VideoCall />} /> */}
         <Route path='/video-call' element={<VideoCall />} />
         <Route path='/video-call-setup' element={<VideoCallSetup />} />
+        <Route path='/meeting-summary' element={<MeetingSummary />} />
 
         {/* Tutor Protected routes */}  
-        <Route element={<TutorProtectedRoute />}>
+        <Route element={<TutorProtectedRoute />}> 
           <Route path='/tutor-dashboard' element={<TutorDashboard />} />
           <Route path='/tutor-password-change' element={<TutorPasswordChangePage />} />
           <Route path='/edit-teaching-language' element={<EditTeachingLanguage />} />

@@ -112,7 +112,7 @@ class ValidateRoomNamePermission(BasePermission):
             booking = Bookings.objects.get(
                 Q(student_id=user_id) | Q(availability__tutor_id=user_id),
                 Q(video_call_link=room_name) | Q(video_call_link=BASE_VIDEO_CALL_URL + room_name),
-                booking_status='confirmed'
+                Q(booking_status='confirmed') | Q(booking_status='ongoing')
             )
 
             return True 
