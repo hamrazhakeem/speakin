@@ -15,13 +15,15 @@ class UserService(user_service_pb2_grpc.UserServiceServicer):
         with connection.cursor():  # Ensure Django DB connection context
             user_id = request.user_id
             credits = request.credits
-
+            print('before incrementing')
             try:
                 user = User.objects.get(id=user_id)
                 user.balance_credits += credits
                 user.save()
+                print('tutor credits incremented', user.balance_credits)
                 return user_service_pb2.AddPurchasedCreditsResponse(success=True)
             except User.DoesNotExist:
+                print('didn"t increment')
                 context.set_details('User not found.')
                 context.set_code(grpc.StatusCode.NOT_FOUND)
                 return user_service_pb2.AddPurchasedCreditsResponse(success=False)

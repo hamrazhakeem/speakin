@@ -17,7 +17,7 @@ const VideoCallSetup = () => {
       setError("Please enter a room name");
       return;
     }
-
+    console.log('bookingiddd', bookingId)
     try {
       const response = await axiosInstance.post("create-daily-room/", {
         room_name: roomName.trim(), 
@@ -31,6 +31,7 @@ const VideoCallSetup = () => {
       navigate('/video-call', { 
         state: { 
           roomUrl: roomUrlWithToken,
+          bookingId: bookingId
         } 
       });
     } catch (error) {
@@ -84,43 +85,37 @@ const VideoCallSetup = () => {
           Join Room
         </button>
 
-        {/* Call Guidelines Section */}
+        {/* Updated Call Guidelines Section */}
         <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-r-md space-y-3">
           <div className="flex items-center">
             <TimerIcon className="h-6 w-6 text-yellow-600 mr-2" />
-            <h4 className="font-semibold text-yellow-800">Important Call Guidelines</h4>
+            <h4 className="font-semibold text-yellow-800">Video Call Guidelines</h4>
           </div>
           <p className="text-sm text-yellow-700">
-            If either participant does not join the video call within 5 minutes 
-            of the scheduled start time, you can:
+            Valid participation time:
           </p>
           <ul className="text-sm text-yellow-700 list-disc list-inside">
-            <li>Exit the room</li>
-            <li>Access the meeting summary page</li>
-            <li>Provide feedback or report the no-show</li>
+            <li>From room name generation</li>
+            <li>Until 5 minutes after scheduled start time</li>
+            <li>Platform tracks participant attendance</li>
           </ul>
         </div>
 
-        {/* Credit Guidelines Section */}
+        {/* Updated Credit Guidelines Section */}
         <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-md space-y-3">
           <div className="flex items-center">
-              <WalletIcon className="h-6 w-6 text-green-600 mr-2" />
-              <h4 className="font-semibold text-green-800">Credit and Compensation Policy</h4>
+            <WalletIcon className="h-6 w-6 text-green-600 mr-2" />
+            <h4 className="font-semibold text-green-800">Automated Credit Policy</h4>
           </div>
-          <p className="text-sm text-green-700">
-              Important: Financial resolution requires prompt and honest no-show reporting:
-          </p>
           <ul className="text-sm text-green-700 list-disc list-inside">
-              <li>You must report the no-show within the meeting summary page</li>
-              <li>Only reported no-shows will be eligible for financial resolution</li>
-              <li>False or misleading reports will be rejected</li>
-              <li>Repeated false reporting may result in account penalties</li>
-              <li>Report must be submitted within the designated time frame</li>
+            <li>Automatic attendance verification</li>
+            <li>Instant credit processing</li>
+            <li>No manual reporting required</li>
           </ul>
           <p className="text-xs text-green-600 italic">
-              Integrity and fairness are fundamental to our platform's trust.
+            Fair compensation through intelligent automation.
           </p>
-      </div>
+        </div>
 
         <div className="text-center text-xs text-gray-400 mt-4 flex items-center justify-center">
           <AlertTriangleIcon className="h-4 w-4 mr-1 text-yellow-500" />

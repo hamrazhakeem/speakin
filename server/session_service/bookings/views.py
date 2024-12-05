@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from django.conf import settings
 import requests
-from grpc_services.grpc_client import deduct_balance_credits, lock_credits_in_escrow, refund_credits_from_escrow
+from grpc_services.grpc_client import deduct_balance_credits, lock_credits_in_escrow, refund_credits_from_escrow, release_credits_from_escrow
 from .permissions import IsAdminOrOwnerPermission, ValidateRoomNamePermission, decode_jwt
 from django.utils import timezone
 from datetime import timedelta
@@ -19,6 +19,7 @@ from twilio.jwt.access_token.grants import VideoGrant
 from django.conf import settings
 from rest_framework.views import APIView
 from django.db.models import Q 
+from django.utils.timezone import now
 
 # Create your views here.
 
@@ -179,6 +180,69 @@ class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Bookings.objects.all()
     serializer_class = BookingsSerializer
     
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
+        booking = self.get_object()
+        current_time = now()
+        start_time = booking.availability.start_time
+
+        # Define the valid 5-minute window (5 minutes before and after start time)
+        valid_time_window_start = start_time - timedelta(minutes=5)
+        valid_time_window_end = start_time + timedelta(minutes=5)
+
+        # Check if the current time is within the valid window for the student
+        if 'student_joined_at' in request.data:
+            if valid_time_window_start <= current_time <= valid_time_window_end:
+                request.data['student_joined_within_5_min'] = True
+
+        # Check if the current time is within the valid window for the tutor
+        if 'tutor_joined_at' in request.data:
+            if valid_time_window_start <= current_time <= valid_time_window_end:
+                request.data['tutor_joined_within_5_min'] = True
+
+        response = super().update(request, *args, **kwargs)
+        booking.refresh_from_db()  # Reload the booking object to ensure it's up to date
+
+        # After update, check conditions and perform actions
+        if 'booking_status' in request.data and request.data['booking_status'] == 'completed':
+            session_type = booking.availability.session_type
+            if booking.student_joined_within_5_min and booking.tutor_joined_within_5_min:
+                
+                if release_credits_from_escrow(session_type, booking_id=booking.id):
+                        booking.booking_status = 'completed'
+                else: 
+                    return Response({"error": "Failed to refund credits from escrow"},
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
+            elif booking.tutor_joined_within_5_min and not booking.student_joined_within_5_min:
+
+                if release_credits_from_escrow(session_type, booking_id=booking.id):
+                        booking.booking_status = 'no_show_by_student'
+                else: 
+                    return Response({"error": "Failed to refund credits from escrow"},
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                    
+            elif not booking.tutor_joined_within_5_min and booking.student_joined_within_5_min:
+
+                # Refund credits from escrow and deduct balance
+                if refund_credits_from_escrow(booking_id=booking.id):
+                    if deduct_balance_credits(
+                            user_id=booking.student_id,
+                            new_balance=booking.availability.credits_required + (booking.availability.credits_required * 10 // 100),
+                            refund_from_escrow=True
+                        ): 
+                        booking.booking_status = 'no_show_by_tutor'
+                        booking.refund_status = True
+                    else:
+                        return Response({"error": "Failed to deduct balance credits"},
+                                        status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                else: 
+                    return Response({"error": "Failed to refund credits from escrow"},
+                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        booking.save()
+        return response
+ 
 # class GenerateTwilioTokenView(APIView):
 #     permission_classes = [ValidateRoomNamePermission]
 #     def post(self, request):

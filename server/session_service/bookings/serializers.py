@@ -5,7 +5,7 @@ from django.db.models import F
 class BookingsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Bookings
-        fields = ['id', 'availability', 'student_id', 'booking_status', 'canceled_at', 'refund_status', 'video_call_link', 'created_at']
+        fields = ['id', 'availability', 'student_id', 'booking_status', 'canceled_at', 'refund_status', 'video_call_link', 'created_at', 'student_joined_within_5_min', 'tutor_joined_within_5_min', 'student_joined_at', 'tutor_joined_at']
 
     def validate(self, data):
         if 'availability' in data:
@@ -14,17 +14,30 @@ class BookingsSerializer(serializers.ModelSerializer):
             session_type = availability.session_type
             start_time = availability.start_time
             end_time = availability.end_time
+            tutor_id = availability.tutor_id
             
             # Check if it's a trial session and if student already completed a trial with this tutor
             if session_type == 'trial':
                 existing_trials = Bookings.objects.filter(
-                    availability__tutor_id=availability.tutor_id,
+                    availability__tutor_id=tutor_id,
                     student_id=student_id,
                     availability__session_type='trial',
                     booking_status='completed'
                 )
                 if existing_trials.exists():
                     raise serializers.ValidationError("You have already completed a trial with this tutor.")
+
+            if session_type == 'standard':
+                completed_trials = Bookings.objects.filter(
+                    availability__tutor_id=tutor_id,
+                    student_id=student_id,
+                    availability__session_type='trial',
+                    booking_status='completed'
+                )
+                if not completed_trials.exists():
+                    raise serializers.ValidationError(
+                        "You must complete a trial session with this tutor before booking a standard session."
+                    )
 
             # Check for time conflicts with other confirmed bookings
             overlapping_bookings = Bookings.objects.filter(

@@ -64,20 +64,25 @@ class CreateCheckoutSession(APIView):
 
 class StripeWebhook(APIView):
     def post(self, request):
-        payload = request.body
-        sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-        
         try:
- 
+            payload = request.body 
+            sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
             event = stripe.Webhook.construct_event(
-                payload, sig_header, os.getenv('STRIPE_WEBHOOK_SECRET')
-            )
+                payload, sig_header, os.getenv('STRIPE_WEBHOOK_SECRET'), # tolerance=300 # Increase to 10 minutes (600 seconds)
+            ) 
+
+        except Exception as e:
+            print('errrrrrrroddd', str(e))
+            return JsonResponse({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except ValueError as e:
             return JsonResponse({'error': 'Invalid payload'}, status=status.HTTP_400_BAD_REQUEST)
         except stripe.error.SignatureVerificationError as e:
             return JsonResponse({'error': 'Invalid signature'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if event['type'] == 'checkout.session.completed':
+        event_type = event['type']
+
+        # Handle other events (checkout session completed)
+        if event_type == 'checkout.session.completed':
             session = event['data']['object']
             handle_checkout_completed(session)
 
@@ -108,7 +113,6 @@ def handle_checkout_completed(session):
     except Exception as e:
         print(f"Error processing payment: {str(e)}")
         raise
-
 
 def refund_transaction(transaction, payment_intent):
     """ Initiates a refund with Stripe and updates the transaction status """

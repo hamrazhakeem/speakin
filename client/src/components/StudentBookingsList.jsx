@@ -37,6 +37,9 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
     if (status === 'canceled_by_student') {
       return 'You have canceled this session';
     }
+    if (status === 'no_show_by_student') {
+      return 'Session Missed: Unable to Attend';
+    }
     return status.replace(/_/g, ' ');
   };
 
@@ -54,21 +57,23 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
   const getStatusStyles = (status) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-blue-50 text-blue-600 border border-blue-200';
+        return 'bg-cyan-50 text-cyan-700 border border-cyan-200';
       case 'ongoing':
-        return 'bg-purple-50 text-purple-600 border border-purple-200';
+        return 'bg-violet-50 text-violet-700 border border-violet-200';
       case 'completed':
-        return 'bg-green-50 text-green-600 border border-green-200';
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
       case 'canceled_by_tutor':
+        return 'bg-rose-50 text-rose-700 border border-rose-200';
       case 'canceled_by_student':
-        return 'bg-red-50 text-red-600 border border-red-200';
+        return 'bg-pink-50 text-pink-700 border border-pink-200';
       case 'no_show_by_tutor':
+        return 'bg-amber-50 text-amber-700 border border-amber-200';
       case 'no_show_by_student':
-        return 'bg-orange-50 text-orange-600 border border-orange-200';
+        return 'bg-orange-50 text-orange-700 border border-orange-200';
       default:
-        return 'bg-gray-50 text-gray-600 border border-gray-200';
+        return 'bg-gray-50 text-gray-700 border border-gray-200';
     }
-  };
+   };
 
   const handleCancelSession = async (session) => {
     const sessionStartTime = new Date(session.availabilityDetails.start_time);
@@ -112,28 +117,38 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
   
 
   const renderCreditInfo = (session) => {
-    const isCanceled = session.booking_status === 'canceled_by_tutor' || session.booking_status === 'canceled_by_student';
-    
+    const isCanceled =
+      session.booking_status === 'canceled_by_tutor' ||
+      session.booking_status === 'canceled_by_student' ||
+      session.booking_status === 'no_show_by_tutor';
+  
+    const creditsRequired = session.availabilityDetails.credits_required;
+    const bonusCredits = Math.floor(creditsRequired * 0.1); // Calculate 10% bonus
+    const totalRefund = creditsRequired + bonusCredits;
+  
     if (isCanceled) {
       return (
         <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
           <CreditCard className="w-5 h-5 text-gray-500" />
           <span className="font-medium text-gray-900">
-            {session.availabilityDetails.credits_required} Credits was refunded to your account
+            {session.booking_status === 'no_show_by_tutor'
+              ? `${totalRefund} Credits refunded to your account (${creditsRequired} Credits + 10% bonus of ${bonusCredits} Credits for inconvenience)`
+              : `${creditsRequired} Credits were refunded to your account`}
           </span>
         </div>
       );
     }
-
+  
     return (
       <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
         <CreditCard className="w-5 h-5 text-gray-500" />
         <span className="font-medium text-gray-900">
-          {session.availabilityDetails.credits_required} Credits Paid
+          {creditsRequired} Credits Paid
         </span>
       </div>
     );
   };
+  
 
   if (!sessions || sessions.length === 0) {
     return (

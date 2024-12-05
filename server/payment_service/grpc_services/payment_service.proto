@@ -3,6 +3,7 @@ syntax = "proto3";
 service PaymentService {
   rpc LockCredits (LockCreditsRequest) returns (LockCreditsResponse);
   rpc RefundLockedCredits (RefundLockedCreditsRequest) returns (RefundLockedCreditsResponse); // New method for refund
+  rpc ReleaseLockedCredits (ReleaseLockedCreditsRequest) returns (ReleaseLockedCreditsResponse);
 }
 
 message LockCreditsRequest {
@@ -22,5 +23,14 @@ message RefundLockedCreditsRequest {
 }
 
 message RefundLockedCreditsResponse {
+  bool success = 1;
+}
+
+message ReleaseLockedCreditsRequest {
+  string session_type = 1;
+  int32 booking_id = 2;
+}
+
+message ReleaseLockedCreditsResponse {
   bool success = 1;
 }

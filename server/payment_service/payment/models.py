@@ -6,6 +6,7 @@ class Transactions(models.Model):
     TRANSACTION_TYPE_CHOICES = [
         ('credit_purchase', 'Credit Purchase'),
         ('subscription', 'Subscription'),
+        ('platform_fee', 'Platform Fee'),  # New transaction type
     ]
 
     STATUS_CHOICES = [
@@ -14,7 +15,7 @@ class Transactions(models.Model):
         ('refunded', 'Refunded'),
     ]
 
-    user_id = models.IntegerField() 
+    user_id = models.IntegerField(null=True) 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     purchased_credits = models.IntegerField(null=True)
     transaction_type = models.CharField(max_length=50, choices=TRANSACTION_TYPE_CHOICES)

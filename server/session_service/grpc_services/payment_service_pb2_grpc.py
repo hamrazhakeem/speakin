@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from grpc_services import payment_service_pb2 as grpc__services_dot_payment__service__pb2
+from grpc_services import payment_service_pb2 as payment__service__pb2
 
 GRPC_GENERATED_VERSION = '1.67.1'
 GRPC_VERSION = grpc.__version__
@@ -18,7 +18,7 @@ except ImportError:
 if _version_not_supported:
     raise RuntimeError(
         f'The grpc package installed is at version {GRPC_VERSION},'
-        + f' but the generated code in grpc_services/payment_service_pb2_grpc.py depends on'
+        + f' but the generated code in payment_service_pb2_grpc.py depends on'
         + f' grpcio>={GRPC_GENERATED_VERSION}.'
         + f' Please upgrade your grpc module to grpcio>={GRPC_GENERATED_VERSION}'
         + f' or downgrade your generated code using grpcio-tools<={GRPC_VERSION}.'
@@ -36,13 +36,18 @@ class PaymentServiceStub(object):
         """
         self.LockCredits = channel.unary_unary(
                 '/PaymentService/LockCredits',
-                request_serializer=grpc__services_dot_payment__service__pb2.LockCreditsRequest.SerializeToString,
-                response_deserializer=grpc__services_dot_payment__service__pb2.LockCreditsResponse.FromString,
+                request_serializer=payment__service__pb2.LockCreditsRequest.SerializeToString,
+                response_deserializer=payment__service__pb2.LockCreditsResponse.FromString,
                 _registered_method=True)
         self.RefundLockedCredits = channel.unary_unary(
                 '/PaymentService/RefundLockedCredits',
-                request_serializer=grpc__services_dot_payment__service__pb2.RefundLockedCreditsRequest.SerializeToString,
-                response_deserializer=grpc__services_dot_payment__service__pb2.RefundLockedCreditsResponse.FromString,
+                request_serializer=payment__service__pb2.RefundLockedCreditsRequest.SerializeToString,
+                response_deserializer=payment__service__pb2.RefundLockedCreditsResponse.FromString,
+                _registered_method=True)
+        self.ReleaseLockedCredits = channel.unary_unary(
+                '/PaymentService/ReleaseLockedCredits',
+                request_serializer=payment__service__pb2.ReleaseLockedCreditsRequest.SerializeToString,
+                response_deserializer=payment__service__pb2.ReleaseLockedCreditsResponse.FromString,
                 _registered_method=True)
 
 
@@ -62,18 +67,29 @@ class PaymentServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def ReleaseLockedCredits(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_PaymentServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
             'LockCredits': grpc.unary_unary_rpc_method_handler(
                     servicer.LockCredits,
-                    request_deserializer=grpc__services_dot_payment__service__pb2.LockCreditsRequest.FromString,
-                    response_serializer=grpc__services_dot_payment__service__pb2.LockCreditsResponse.SerializeToString,
+                    request_deserializer=payment__service__pb2.LockCreditsRequest.FromString,
+                    response_serializer=payment__service__pb2.LockCreditsResponse.SerializeToString,
             ),
             'RefundLockedCredits': grpc.unary_unary_rpc_method_handler(
                     servicer.RefundLockedCredits,
-                    request_deserializer=grpc__services_dot_payment__service__pb2.RefundLockedCreditsRequest.FromString,
-                    response_serializer=grpc__services_dot_payment__service__pb2.RefundLockedCreditsResponse.SerializeToString,
+                    request_deserializer=payment__service__pb2.RefundLockedCreditsRequest.FromString,
+                    response_serializer=payment__service__pb2.RefundLockedCreditsResponse.SerializeToString,
+            ),
+            'ReleaseLockedCredits': grpc.unary_unary_rpc_method_handler(
+                    servicer.ReleaseLockedCredits,
+                    request_deserializer=payment__service__pb2.ReleaseLockedCreditsRequest.FromString,
+                    response_serializer=payment__service__pb2.ReleaseLockedCreditsResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -101,8 +117,8 @@ class PaymentService(object):
             request,
             target,
             '/PaymentService/LockCredits',
-            grpc__services_dot_payment__service__pb2.LockCreditsRequest.SerializeToString,
-            grpc__services_dot_payment__service__pb2.LockCreditsResponse.FromString,
+            payment__service__pb2.LockCreditsRequest.SerializeToString,
+            payment__service__pb2.LockCreditsResponse.FromString,
             options,
             channel_credentials,
             insecure,
@@ -128,8 +144,35 @@ class PaymentService(object):
             request,
             target,
             '/PaymentService/RefundLockedCredits',
-            grpc__services_dot_payment__service__pb2.RefundLockedCreditsRequest.SerializeToString,
-            grpc__services_dot_payment__service__pb2.RefundLockedCreditsResponse.FromString,
+            payment__service__pb2.RefundLockedCreditsRequest.SerializeToString,
+            payment__service__pb2.RefundLockedCreditsResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ReleaseLockedCredits(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/PaymentService/ReleaseLockedCredits',
+            payment__service__pb2.ReleaseLockedCreditsRequest.SerializeToString,
+            payment__service__pb2.ReleaseLockedCreditsResponse.FromString,
             options,
             channel_credentials,
             insecure,

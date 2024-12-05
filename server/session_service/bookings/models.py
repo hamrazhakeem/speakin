@@ -36,6 +36,10 @@ class Bookings(models.Model):
     refund_status = models.BooleanField(default=False)
     video_call_link = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    student_joined_within_5_min = models.BooleanField(default=False)
+    tutor_joined_within_5_min = models.BooleanField(default=False)
+    student_joined_at = models.DateTimeField(null=True, blank=True)
+    tutor_joined_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']

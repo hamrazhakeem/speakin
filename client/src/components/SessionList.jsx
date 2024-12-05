@@ -90,9 +90,13 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     if (status === 'expired_unbooked') {
       return 'Session Expired (Unbooked)';
     }
-
+  
     if (status === 'canceled_by_tutor') {
       return 'You have cancelled this session';
+    }
+    
+    if (status === 'no_show_by_tutor') {
+      return 'Session Missed: Unable to Attend';
     }
     
     return status
@@ -104,25 +108,27 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   const getStatusStyles = (status) => {
     switch (status) {
       case 'confirmed':
-        return 'bg-blue-50 text-blue-600 border border-blue-200';
+        return 'bg-cyan-50 text-cyan-700 border border-cyan-200';
       case 'ongoing':
-        return 'bg-purple-50 text-purple-600 border border-purple-200';
+        return 'bg-violet-50 text-violet-700 border border-violet-200';
       case 'completed':
-        return 'bg-green-50 text-green-600 border border-green-200';
+        return 'bg-emerald-50 text-emerald-700 border border-emerald-200';
       case 'canceled_by_tutor':
+        return 'bg-rose-50 text-rose-700 border border-rose-200';
       case 'canceled_by_student':
-        return 'bg-red-50 text-red-600 border border-red-200';
+        return 'bg-pink-50 text-pink-700 border border-pink-200';
       case 'no_show_by_tutor':
+        return 'bg-amber-50 text-amber-700 border border-amber-200';
       case 'no_show_by_student':
-        return 'bg-orange-50 text-orange-600 border border-orange-200';
+        return 'bg-orange-50 text-orange-700 border border-orange-200';
       case 'listed':
-        return 'bg-teal-50 text-teal-600 border border-teal-200';
+        return 'bg-teal-50 text-teal-700 border border-teal-200';
       case 'unlisted':
-        return 'bg-gray-50 text-gray-600 border border-gray-200';
+        return 'bg-slate-50 text-slate-700 border border-slate-200';
       default:
-        return 'bg-gray-50 text-gray-600 border border-gray-200';
+        return 'bg-gray-50 text-gray-700 border border-gray-200';
     }
-  };
+   };
 
   const isSessionListed = (session) => {
     const currentTime = new Date();
@@ -384,21 +390,34 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                     </div>
                   )}
 
-              {/* Credits Info - Conditional Rendering */}
+                {!(getBookingStatus(session) === 'completed' || getBookingStatus(session) === 'no_show_by_student') && (
                 <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
                   <CreditCard className="w-5 h-5 text-gray-500" />
                   <span className="font-medium text-gray-900"> 
                     This session is valued at {session.credits_required} credits
                   </span>
                 </div>
-              {getBookingStatus(session) === 'completed' && (
+                )}
+
+                {(getBookingStatus(session) === 'completed' || getBookingStatus(session) === 'no_show_by_student') && (
                 <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
                   <CreditCard className="w-5 h-5 text-gray-500" />
                   <span className="font-medium text-gray-900"> 
-                    {session.credits_required} Credits have been credited to your account
+                    {session.session_type === 'standard' ? (
+                      <>
+                      This session was valued at {session.credits_required} credits
+                      <br />
+                      <span className="text-sm text-gray-600">
+                        • 80% ({Math.floor(session.credits_required * 0.8)} credits) credited to your account
+                        • 20% Platform fee: {Math.floor(session.credits_required * 0.2)} credits
+                      </span>
+                      </>
+                    ) : (
+                      `${session.credits_required} Credits have been credited to your account`
+                    )}
                   </span>
                 </div>
-              )}
+                )}
             </div>
 
             {/* Right Column */}
