@@ -65,6 +65,23 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     });
   };
 
+  const isSessionMissed = (session) => {
+    const sessionStartTime = new Date(session.start_time);
+    const currentTime = new Date();
+  
+    // Add 5 minutes to the session start time
+    const fiveMinutesAfterStartTime = new Date(sessionStartTime.getTime() + 5 * 60000);
+  
+    // Check if current time is greater than 5 minutes after start time
+    const isPastFiveMinutes = currentTime > fiveMinutesAfterStartTime;
+  
+    // Check if both student and tutor did not join within 5 minutes
+    const isStudentMissed = !session.bookings[0]?.student_joined_within_5_min;
+    const isTutorMissed = !session.bookings[0]?.tutor_joined_within_5_min;
+  
+    return isPastFiveMinutes && isStudentMissed && isTutorMissed;
+  };
+
   const getSessionDuration = (start, end) => {
     const startTime = new Date(start);
     const endTime = new Date(end);
@@ -84,22 +101,28 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     }
   };
 
-  const formatBookingStatus = (status) => {
-    if (!status) return '';
+  const formatBookingStatus = (session) => {
+    const bookingStatus = session.bookings[0].booking_status;
+
+    if (!bookingStatus) return '';
     
-    if (status === 'expired_unbooked') {
+    if (isSessionMissed(session)) {
+      return 'Session Missed: Both Tutor and Student Did Not Join';
+    }
+    
+    if (bookingStatus === 'expired_unbooked') {
       return 'Session Expired (Unbooked)';
     }
   
-    if (status === 'canceled_by_tutor') {
+    if (bookingStatus === 'canceled_by_tutor') {
       return 'You have cancelled this session';
     }
     
-    if (status === 'no_show_by_tutor') {
+    if (bookingStatus === 'no_show_by_tutor') {
       return 'Session Missed: Unable to Attend';
     }
     
-    return status
+    return bookingStatus
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
@@ -280,6 +303,56 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     return roomLink;
   };
 
+  const renderActionButtons = (session) => {
+    // Hide buttons if session is missed
+    if (isSessionMissed(session)) {
+      return null;
+    }
+
+    return (
+      <div className="flex flex-wrap gap-3">
+      {session.bookings?.length > 0 && 
+        (session.bookings[0]?.booking_status === 'confirmed' || session.bookings[0]?.booking_status === 'ongoing') && (
+          <button
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center font-medium transition-colors duration-200"
+            onClick={handleJoinSession(session.bookings[0].id)}
+          >
+            <VideoIcon className="w-4 h-4 mr-2" />
+            Join Session
+          </button>
+        )}
+        {/* Cancel Button - Only show if unbooked or status is confirmed */}
+        {(isUnbooked(session) || getBookingStatus(session) === 'confirmed' || session.is_booked === false) && (
+          <button
+            className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors duration-200"
+            onClick={() => handleCancelSession(session)}
+          >
+            Cancel Session
+          </button>
+        )}
+      </div>
+    )
+  }
+
+  const determineCustomStatus = (session) => {
+    const currentTime = new Date();
+    const startTime = new Date(session.start_time);
+  
+    // Calculate time difference
+    const timeToStart = startTime - currentTime;
+  
+    // Check if session is within 3 hours, unbooked, and has no bookings
+    if (
+      timeToStart <= 3 * 60 * 60 * 1000 && // Within 3 hours
+      timeToStart > 0 && // Future session
+      !session.is_booked &&
+      (!session.bookings || session.bookings.length === 0)
+    ) {
+      return 'expired_unbooked';
+    }
+    return 'normal';
+  };  
+
   return (
     <div className="space-y-6">
       <div className="flex justify-end">
@@ -309,7 +382,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
               </span>
               {session.bookings && session.bookings[0] && session.bookings[0].booking_status && (
                 <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusStyles(session.bookings[0].booking_status)}`}>
-                  {formatBookingStatus(session.bookings[0].booking_status)}
+                  {formatBookingStatus(session)}
                 </span>
               )}
               <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusStyles(getListingStatus(session))}`}>
@@ -372,14 +445,14 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                       <div className="flex items-center justify-center h-full">
                         <p className="text-gray-600 text-center">
                           <span className="block text-lg font-medium mb-1">
-                            {session.custom_status === 'expired_unbooked' ? (
+                            {determineCustomStatus(session) === 'expired_unbooked' ? (
                               <span className="text-yellow-600">Session Expired - No Bookings</span>
                             ) : (
                               'Unbooked'
                             )}
                           </span>
                           <span className="text-sm">
-                            {session.custom_status === 'expired_unbooked' ? (
+                            {determineCustomStatus(session) === 'expired_unbooked' ? (
                               'This session was not booked within 3 hours of start time and is no longer visible to students.'
                             ) : (
                               'Note: The slot will be removed from listings if it remains unbooked within 3 hours of the scheduled time.'
@@ -390,7 +463,16 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                     </div>
                   )}
 
-                {!(getBookingStatus(session) === 'completed' || getBookingStatus(session) === 'no_show_by_student') && (
+                  {(isSessionMissed(session)) && (
+                    <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
+                      <CreditCard className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium text-gray-900"> 
+                      {session.credits_required} credits have been retained by the platform as per no-show policy
+                      </span>
+                    </div>
+                  )}
+
+                {!(getBookingStatus(session) === 'completed' || isSessionMissed(session)) && (
                 <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
                   <CreditCard className="w-5 h-5 text-gray-500" />
                   <span className="font-medium text-gray-900"> 
@@ -436,27 +518,8 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3">
-              {session.bookings?.length > 0 && 
-                (session.bookings[0]?.booking_status === 'confirmed' || session.bookings[0]?.booking_status === 'ongoing') && (
-                  <button
-                    className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center font-medium transition-colors duration-200"
-                    onClick={handleJoinSession(session.bookings[0].id)}
-                  >
-                    <VideoIcon className="w-4 h-4 mr-2" />
-                    Join Session
-                  </button>
-                )}
-                {/* Cancel Button - Only show if unbooked or status is confirmed */}
-                {(isUnbooked(session) || getBookingStatus(session) === 'confirmed' || session.is_booked === false) && (
-                  <button
-                    className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors duration-200"
-                    onClick={() => handleCancelSession(session)}
-                  >
-                    Cancel Session
-                  </button>
-                )}
-              </div>
+              {renderActionButtons(session)}
+
             </div>
           </div>
           {/* Room Name Notification */}
