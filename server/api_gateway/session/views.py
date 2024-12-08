@@ -4,12 +4,12 @@ import os
 import requests
 from rest_framework.response import Response
 from rest_framework import status
-from .permissions import IsAuthenticatedWithJWT
+from auth.authentication import JWTAuthentication
 
 # Create your views here.
 
 class TutorAvailabilityView(APIView):
-    permission_classes = [IsAuthenticatedWithJWT]
+    authentication_classes = [JWTAuthentication]
     def get(self, request, pk=None):
         try:
             if pk:
@@ -64,7 +64,7 @@ class TutorAvailabilityView(APIView):
             )
     
 class BookingsView(APIView):
-    permission_classes = [IsAuthenticatedWithJWT]
+    authentication_classes = [JWTAuthentication]
     def get(self, request):
         try:
             session_service_url = os.getenv('SESSION_SERVICE_URL') + 'bookings/'
@@ -99,25 +99,9 @@ class BookingsView(APIView):
                 {"error": "Failed to connect to session service.", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-        
-# class GenerateTwilioTokenView(APIView):
-#     permission_classes = [IsAuthenticatedWithJWT]
-
-#     def post(self, request):
-#         try:
-#             user_service_url = os.getenv('SESSION_SERVICE_URL') + 'bookings/generate-twilio-token/'
-#             raw_body = request.body
-#             headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
-#             response = requests.post(user_service_url, data=raw_body, headers={**headers, "Content-Type": "application/json"})
-#             return Response(response.json(), status=response.status_code)
-#         except requests.exceptions.RequestException as e:
-#             return Response( 
-#                 {"error": "Failed to connect to session service.", "details": str(e)},
-#                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             )
 
 class DailyRoomCreateView(APIView):
-    permission_classes = [IsAuthenticatedWithJWT]
+    authentication_classes = [JWTAuthentication]
 
     def post(self, request):
         try:

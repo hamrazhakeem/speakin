@@ -35,7 +35,7 @@ ALLOWED_HOSTS = ['host.docker.internal', '127.0.0.1', 'localhost']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'django.contrib.auth',
+    'django.contrib.auth', 
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -166,8 +166,8 @@ REST_FRAMEWORK = {
 } 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),  # Token validity period
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),    # Refresh token validity
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),  # Token validity period
+    "REFRESH_TOKEN_LIFETIME": timedelta(weeks=1),    # Refresh token validity
     "ROTATE_REFRESH_TOKENS": True,                   # Rotate refresh tokens
     "BLACKLIST_AFTER_ROTATION": True,                 # Blacklist old refresh token
     "UPDATE_LAST_LOGIN": False,                       # Do not update last login on token use

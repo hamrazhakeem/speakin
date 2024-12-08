@@ -5,8 +5,7 @@ import requests
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.files.uploadedfile import InMemoryUploadedFile, TemporaryUploadedFile
-from .permissions import IsAuthenticatedWithJWT
-
+from auth.authentication import JWTAuthentication
 
 # Create your views here.
 
@@ -23,6 +22,7 @@ class UserSignUpView(APIView):
             )
         
 class UserSignInView(APIView):
+
     def post(self, request):
         try:
             user_service_url = os.getenv('USER_SERVICE_URL') + 'sign-in/'
@@ -30,11 +30,12 @@ class UserSignInView(APIView):
             return Response(response.json(), status=response.status_code)
         except requests.exceptions.RequestException as e:
             return Response(
-                {"error": "Failed to connect to user service.", "details": str(e)},
+                {"error": "Failed to connect to user service.", "details": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
 class GoogleSignInView(APIView):
+
     def post(self, request):
         try:
             user_service_url = os.getenv('USER_SERVICE_URL') + 'google-sign-in/'
@@ -47,9 +48,10 @@ class GoogleSignInView(APIView):
             )
         
 class TutorSignInView(APIView):
+
     def post(self, request):
         try:
-            user_service_url = os.getenv('USER_SERVICE_URL') + 'tutor-sign-in/'
+            user_service_url = os.getenv('USER_SERVICE_URL') + 'tutor-sign-in/' 
             response = requests.post(user_service_url, json=request.data)
             return Response(response.json(), status=response.status_code)
         except requests.exceptions.RequestException as e:
@@ -182,7 +184,7 @@ class UserChangePasswordView(APIView):
             )
         
 class UserView(APIView):
-    permission_classes=[IsAuthenticatedWithJWT]
+    authentication_classes = [JWTAuthentication]
     def get(self, request, pk=None):
         try:
             if not pk:
@@ -194,7 +196,7 @@ class UserView(APIView):
             return Response(response.json(), status=response.status_code)
         except requests.exceptions.RequestException as e:
             return Response(
-                {"error": "Failed to connect to user service.", "details": str(e)},
+                {"error": "Failed to connect to user service.", "details": str(e)}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
@@ -246,7 +248,7 @@ class TutorDetailsView(APIView):
 
 
 class TeachingLanguageChangeRequestView(APIView):
-    permission_classes=[IsAuthenticatedWithJWT]
+    permission_classes=[JWTAuthentication]
     def get(self, request):
         try:
             user_service_url = os.getenv('USER_SERVICE_URL') + 'teaching-language-change-requests/'

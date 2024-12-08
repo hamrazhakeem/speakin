@@ -13,6 +13,7 @@ class IsAdminOrUserSelf(BasePermission):
     """
 
     def has_permission(self, request, view):
+        print('user service works')
         if request.method == 'GET':
             return True
         # Extract user ID from URL, assumed to be passed as `id`

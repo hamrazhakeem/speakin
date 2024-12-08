@@ -4,12 +4,12 @@ import os
 import requests
 from rest_framework.response import Response
 from rest_framework import status
-from .permissions import IsAuthenticatedWithJWT
+from auth.authentication import JWTAuthentication
 
 # Create your views here.
 
 class CreateCheckoutSessionView(APIView):
-    permission_classes=[IsAuthenticatedWithJWT]
+    authentication_classes=[JWTAuthentication]
     def post(self, request):
         try:
             payment_service_url = os.getenv('PAYMENT_SERVICE_URL') + 'create-checkout-session/'
