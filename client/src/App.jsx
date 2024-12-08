@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import useProactiveTokenRefresh from './hooks/useProactiveTokenRefresh';
+import useProactiveTokenRefresh from './hooks/AuthProvider';
 
 import LandingPage from './pages/LandingPage';
 import SignInPage from './pages/SigninPage';
@@ -46,7 +46,6 @@ import VideoCallSetup from './components/VideoCallSetup';
 import MeetingSummary from './pages/MeetingSummary';
 
 const App = () => {
-  useProactiveTokenRefresh();
   return (
     <Router>
       <ToastContainer
