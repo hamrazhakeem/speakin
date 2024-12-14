@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Star, Globe, IdCard, GraduationCap, CreditCard } from 'lucide-react';
+import { Star, Globe, IdCard, GraduationCap, CreditCard, MessageCircle } from 'lucide-react';
 import Avatar from '../components/Avatar';
 import AvailabilityModal from './AvailabilityModal';
+import { useNavigate } from 'react-router-dom';
 
 const TutorCard = ({ name, profileImage, tutorDetails, languageSpoken, languageToTeach, country, tutor_id }) => {
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
 
   const rating = tutorDetails?.rating || 4.0;
   const totalReviews = tutorDetails?.total_reviews || 0;
@@ -49,6 +51,11 @@ const TutorCard = ({ name, profileImage, tutorDetails, languageSpoken, languageT
     setShowModal(false);
   };
 
+  const handleNavigate = () => {
+    console.log('tutoridddd', tutor_id)
+    navigate('/messages', { state: { tutor_id: tutor_id } });
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
       {/* Main Card Content */}
@@ -68,16 +75,31 @@ const TutorCard = ({ name, profileImage, tutorDetails, languageSpoken, languageT
             </div>
           </div>
 
-          {/* Right Side: Price and Book Button */}
-          <div className="flex flex-col items-end gap-2 sm:mt-0">
+          {/* Right Side: Price and Action Buttons */}
+          <div className="flex flex-col items-end space-y-2">
+            {/* Price Display */}
             <div className="flex items-center space-x-1">
               <span className="font-bold text-lg">{tutorDetails?.required_credits || 0}</span>
               <CreditCard className="w-5 h-5 text-yellow-500" />
               <span className="text-gray-600">/hour</span>
             </div>
-            <button onClick={handleCheckAvailability} className="mt-4 bg-blue-500 text-white py-2 px-4 rounded">
-                Book
-            </button>
+
+            {/* Action Buttons Container */}
+            <div className="flex flex-col sm:flex-row gap-2 w-full justify-end">
+              <button 
+                onClick={handleCheckAvailability} 
+                className="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2"
+              >
+                <span>Book</span>
+              </button>
+              <button
+                className="w-full sm:w-auto bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors flex items-center justify-center space-x-2"
+                onClick={handleNavigate}
+              >
+                <MessageCircle className="w-4 h-4 mr-1" />
+                <span>Message</span>
+              </button>
+            </div>
             {showModal && <AvailabilityModal tutorId={tutor_id} onClose={handleCloseModal} />}
           </div>
         </div>

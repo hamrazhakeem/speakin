@@ -8,10 +8,8 @@ COPY requirements.txt /app/
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-# RUN pip install django-redis
-
 COPY . /app/
 
-ENV DJANGO_SETTINGS_MODULE=api_gateway.settings
+ENV DJANGO_SETTINGS_MODULE=message_service.settings
 
-CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8080"]
+CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8003"]

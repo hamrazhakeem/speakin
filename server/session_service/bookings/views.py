@@ -27,27 +27,6 @@ class TutorAvailabilityList(generics.ListCreateAPIView):
     queryset = TutorAvailability.objects.all()
     serializer_class = TutorAvailabilitySerializer
 
-    def get_queryset(self):
-        queryset = TutorAvailability.objects.all()
-        
-        # Annotate each availability with a custom status
-        current_time = timezone.now()
-        
-        for availability in queryset:
-            # Calculate time difference to start time
-            time_to_start = availability.start_time - current_time
-            
-            # Check if within 3 hours and not booked
-            if (time_to_start <= timedelta(hours=3) and 
-                time_to_start > timedelta(hours=0) and 
-                not availability.is_booked and 
-                not availability.bookings.exists()):
-                availability.custom_status = 'expired_unbooked'
-            else:
-                availability.custom_status = 'normal'
-        
-        return queryset
-
     # Override the default to handle the case if the tutor try to create duplicate slot with same time
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -242,57 +221,6 @@ class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
 
         booking.save()
         return response
- 
-# class GenerateTwilioTokenView(APIView):
-#     permission_classes = [ValidateRoomNamePermission]
-#     def post(self, request):
-#         # Extract room_name from request
-#         room_name = request.data.get('room_name')
-#         if not room_name:
-#             return Response({"error": "Room name is required"}, status=400)
-
-#         try:
-#             # Look up the booking based on the room_name_hash (or another identifier)
-#             booking = Bookings.objects.get(video_call_link=room_name)
-
-#             # Retrieve the student_id and tutor_id from the booking record
-#             student_id = booking.student_id
-#             tutor_id = booking.availability.tutor_id  # Assuming availability has tutor_id
-
-#             auth_header = request.headers.get('Authorization')
-#             if not auth_header:
-#                 return Response({"error": "Authorization token missing"}, status=401)
-            
-#             # Remove "Bearer " prefix from the token
-#             token = auth_header.replace("Bearer ", "", 1)
-
-#             decoded_token = decode_jwt(token)
-#             user_id = decoded_token.get('user_id')  # Assuming 'user_id' is in the payload
-
-#             if booking.student_id == user_id:
-#                 identity = f"student_{student_id}"
-#             # If the tutor is the one accessing the room, use their ID
-#             elif booking.availability.tutor_id == user_id:
-#                 identity = f"tutor_{tutor_id}"
-#             else:
-#                 return Response({"error": "Unauthorized access"}, status=403)
-
-#         except Bookings.DoesNotExist:
-#             return Response({"error": "Room or booking not found"}, status=404)
-
-#         # Create a Twilio Access Token
-#         token = AccessToken(
-#             settings.TWILIO_ACCOUNT_SID,
-#             settings.TWILIO_API_KEY,
-#             settings.TWILIO_API_SECRET,
-#             identity=identity
-#         )
-
-#         # Create a Video Grant and attach it to the token
-#         video_grant = VideoGrant(room=room_name)
-#         token.add_grant(video_grant)
-
-#         return Response({"token": token.to_jwt()})
 
 class DailyRoomCreateView(APIView):
     """

@@ -2,17 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Bell, User, Menu, X, CreditCard, LogOut, Settings, Plus } from 'lucide-react';
+import { Bell, User, Menu, X, CreditCard, LogOut, Settings, Plus, MessageCircle } from 'lucide-react';
 import { clearTokens, updateCredits } from '../redux/authSlice';
 import useAxios from '../hooks/useAxios';
+import Avatar from './Avatar';
 
 const TutorNavbar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { isAuthenticated, userId, credits } = useSelector((state) => state.auth);
+  const { isAuthenticated, userId, credits, userName } = useSelector((state) => state.auth);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const axiosInstance = useAxios();
+  const [profileImage, setProfileImage] = useState(null);
 
   useEffect(() => {
     const fetchUserCredits = async () => {
@@ -22,6 +24,7 @@ const TutorNavbar = () => {
         if (response.data.balance_credits !== credits) {
           dispatch(updateCredits(response.data.balance_credits));
         }
+        setProfileImage(response.data.profile_image)
       } catch (error) {
         console.error('Error fetching user credits:', error);
       }
@@ -82,6 +85,14 @@ const TutorNavbar = () => {
                   </div>
                 </div>
 
+                {/* Messages */}
+                <button
+                  onClick={() => navigate('/messages')}
+                  className="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                </button>
+
                 {/* Notifications */}
                 <button
                   onClick={() => navigate('/notifications')}
@@ -96,7 +107,11 @@ const TutorNavbar = () => {
                     onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                     className="p-2 text-gray-600 hover:text-gray-900 rounded-full hover:bg-gray-100 transition-colors"
                   >
-                    <User className="h-5 w-5" />
+                    <Avatar
+                      src={profileImage} 
+                      name={userName || ''} 
+                      size={36} 
+                    />
                   </button>
 
                   {/* Dropdown Menu */}
@@ -161,11 +176,17 @@ const TutorNavbar = () => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100 transition-colors"
             >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+            {isMobileMenuOpen ? (
+              <X className="h-6 w-6" />
+            ) : isAuthenticated ? (
+              <Avatar 
+                src={profileImage} 
+                name={userName || ''} 
+                size={36} 
+              />
+            ) : (
+              <Menu className="h-6 w-6" />
+            )}
             </button>
           </div>
         </div>
@@ -214,6 +235,16 @@ const TutorNavbar = () => {
                 >
                   <User className="mr-2 h-4 w-4" />
                   Profile
+                </button>
+                <button
+                  className="w-full flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                  onClick={() => {
+                    navigate('/messages');
+                    setIsMobileMenuOpen(false);
+                  }}
+                >
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  Messages
                 </button>
                 <button
                   className="w-full flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"

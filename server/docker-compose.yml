@@ -53,6 +53,19 @@ services:
     networks:
       - microservice_network
 
+  message_service:
+    container_name: message_service
+    build:
+      context: ./message_service
+    volumes:
+      - ./message_service:/app
+    ports:
+      - "8003:8003"
+    depends_on:
+      - message_service_db
+    networks:
+      - microservice_network
+
   user_service_db:
     image: postgres:13
     container_name: user_service_db
@@ -95,11 +108,27 @@ services:
     ports:
       - "5434:5432"
 
+  message_service_db:
+    image: postgres:13
+    container_name: message_service_db
+    environment:
+      POSTGRES_DB: ${MESSAGE_DB_NAME}
+      POSTGRES_USER: ${MESSAGE_DB_USER}
+      POSTGRES_PASSWORD: ${MESSAGE_DB_PASSWORD}
+    volumes:
+      - message_db_data:/var/lib/postgresql/data
+    networks:
+      - microservice_network
+    ports:
+      - "5435:5432"
+
   redis:
     image: redis:alpine
     container_name: redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis_data:/data
     networks:
       - microservice_network
 
@@ -121,6 +150,8 @@ volumes:
   user_db_data:
   payment_db_data:
   session_db_data:
+  message_db_data:
+  redis_data:
 
 networks:
   microservice_network:

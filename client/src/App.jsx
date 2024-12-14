@@ -44,6 +44,7 @@ import StudentBookingsPage from './pages/StudentBookingsPage';
 import VideoCall from './components/VideoCall';
 import VideoCallSetup from './components/VideoCallSetup';
 import MeetingSummary from './pages/MeetingSummary';
+import MessagePage from './pages/MessagePage';
 
 const App = () => {
   return (
@@ -69,6 +70,7 @@ const App = () => {
         <Route path='/video-call' element={<VideoCall />} />
         <Route path='/video-call-setup' element={<VideoCallSetup />} />
         <Route path='/meeting-summary' element={<MeetingSummary />} />
+        <Route path='/messages' element={<MessagePage />} />
 
         {/* Tutor Protected routes */}  
         <Route element={<TutorProtectedRoute />}> 

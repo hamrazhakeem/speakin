@@ -5,7 +5,7 @@ const Footer = () => {
     <footer className="bg-gray-100 py-6 w-full h-32 flex items-center">
       <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center h-full">
         <span className="text-sm text-gray-500 dark:text-gray-400 mb-4 md:mb-0">
-          Copyright © 2024 SpeakIn Inc. All rights reserved
+          &copy; 2024 SpeakIn. All rights reserved.
         </span>
         <div className="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-6">
           <a href="#" className="text-gray-600 hover:text-gray-900">Contact SpeakIn</a>

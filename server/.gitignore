@@ -7,6 +7,7 @@ api_env
 user_service_env
 payment_service_env
 session_service_env
+message_service_env
 
 tutor_govt_id_images
 profile_images

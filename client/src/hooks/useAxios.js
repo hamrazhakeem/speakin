@@ -28,7 +28,6 @@ const useAxios = () => {
 
   instance.interceptors.response.use(
     (response) => {
-      console.log('response in use axios', response)
       return response; // Pass through the successful response
     },
     (error) => {
@@ -36,7 +35,6 @@ const useAxios = () => {
         dispatch(clearTokens());
         toast.error("Your account has been deactivated. Please contact the support for more info.");
       }
-      console.log('error', error)
       return Promise.reject(error); // Forward the error for further handling
     }
   );

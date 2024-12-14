@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+.git/
+Dockerfile
+docker-compose.yml
+message_service_env

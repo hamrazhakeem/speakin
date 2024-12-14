@@ -41,7 +41,7 @@ const AuthProvider = ({ children }) => {
 
     refreshTokens();
 
-    const interval = setInterval(refreshTokens, 10 * 60 * 1000); // 5 minutes
+    const interval = setInterval(refreshTokens, 10 * 60 * 1000); // 10 minutes
 
     // Cleanup interval on component unmount
     return () => clearInterval(interval);
