@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useForm } from "react-hook-form";
-import TutorNavbar from "../components/TutorNavbar";
 import Footer from "../components/Footer";
 import useAxios from "../hooks/useAxios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import Navbar from "../components/Navbar";
 
 const TutorPasswordChangePage = () => {
   const axiosInstance = useAxios();
@@ -64,7 +64,7 @@ const TutorPasswordChangePage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <TutorNavbar />
+      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">

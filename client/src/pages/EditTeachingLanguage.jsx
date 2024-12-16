@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
 import { FaArrowLeft, FaTrash } from 'react-icons/fa';
 import Footer from "../components/Footer";
-import TutorNavbar from "../components/TutorNavbar";
+import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import useAxios from '../hooks/useAxios';
@@ -135,7 +135,7 @@ const EditTeachingLanguage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <TutorNavbar />
+      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">

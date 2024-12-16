@@ -248,7 +248,7 @@ class TutorDetailsView(APIView):
 
 
 class TeachingLanguageChangeRequestView(APIView):
-    permission_classes=[JWTAuthentication]
+    authentication_classes=[JWTAuthentication]
     def get(self, request):
         try:
             user_service_url = os.getenv('USER_SERVICE_URL') + 'teaching-language-change-requests/'

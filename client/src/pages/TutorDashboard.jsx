@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Footer from "../components/Footer";
-import TutorNavbar from "../components/TutorNavbar";
 import { FaEdit, FaStar, FaTrash } from 'react-icons/fa';
 import useAxios from "../hooks/useAxios";
 import { useSelector } from "react-redux";
@@ -10,6 +9,7 @@ import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { updateRequiredCredits } from "../redux/authSlice";
 import Avatar from "../components/Avatar";
+import Navbar from "../components/Navbar";
 
 const Modal = ({ isOpen, onClose, onProceed, children }) => {
   if (!isOpen) return null;
@@ -224,7 +224,7 @@ const TutorDashboard = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <TutorNavbar />
+      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">

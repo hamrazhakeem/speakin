@@ -1,32 +1,39 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
-from django.core.exceptions import PermissionDenied
+from .models import Message
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        # token = self.scope['query_string'].decode().split('=')[-1]  # Extract token after '?token='
-        # print('token', token)
-        # if not token:
-        #     await self.close()  # Close the connection if no token is provided
-        #     return
-        
         try:
-            # Decode the token and extract user ID
-            # user_id = get_user_id.get_user_id(token)
             user = self.scope['user']
-
-            print('user', user)
             chat_with_user = self.scope['url_route']['kwargs']['chat_id']
             user_ids = [int(user.id), int(chat_with_user)]
             user_ids = sorted(user_ids)
-            self.room_group_name = f"chat_{user_ids[0]}--{user_ids[1]}"
+            self.private_chat_room = f"chat_{user_ids[0]}--{user_ids[1]}"
+
+            # Notify both users about the new conversation
+            await self.channel_layer.group_send(
+                f"user_{chat_with_user}",
+                {
+                    "type": "new_conversation",
+                    "user_id": user.id
+                }
+            )
+            
+            await self.channel_layer.group_send(
+                f"user_{user.id}",
+                {
+                    "type": "new_conversation",
+                    "user_id": chat_with_user
+                }
+            )
+
             await self.channel_layer.group_add(
-                self.room_group_name,
+                self.private_chat_room,
                 self.channel_name
             )
- 
-            # Accept the connection
+
             await self.accept()
 
         except Exception as e:
@@ -34,61 +41,53 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
 
     async def receive(self, text_data=None, bytes_data=None):
-        data = json.loads(text_data)
-        message = data['message']
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'chat_message',
-                'message': message
-            }
-        )
+        try:
+            data = json.loads(text_data)
+            message_content = data['message']
+            recipient_id = int(self.scope['url_route']['kwargs']['chat_id'])
+            sender_id = self.scope['user'].id 
+
+            # Save the message to the database
+            await self.save_message(sender_id, recipient_id, message_content)
+
+            # Send the message to the private chat
+            await self.channel_layer.group_send(
+                self.private_chat_room,
+                {
+                    'type': 'chat_message',
+                    'message': message_content,
+                    'sender_id': sender_id
+                }
+            )
+        except Exception as e:
+            print(f"Error in receive: {str(e)}")
 
     async def disconnect(self, code):
         self.channel_layer.group_discard(
-            self.room_group_name,
+            self.private_chat_room,
             self.channel_name
         )
 
     async def chat_message(self, event):
         message = event['message']
+        sender_id = event['sender_id'] 
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': message,
+            'sender_id': sender_id
         }))
 
+    async def new_conversation(self, event):
+        """Handle new conversation notifications"""
+        await self.send(text_data=json.dumps({
+            "type": "new_conversation",
+            "user_id": event["user_id"]
+        }))
 
-# class ChatConsumer(AsyncWebsocketConsumer):
-#     async def connect(self):
-#         self.chat_id = self.scope['url_route']['kwargs']['chat_id']
-#         self.room_group_name = f'chat_{self.chat_id}'
-
-#         await self.channel_layer.group_add(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-
-#         await self.accept()
-
-#     async def disconnect(self, close_code):
-#         await self.channel_layer.group_discard(
-#             self.room_group_name,
-#             self.channel_name
-#         )
-
-#     async def receive(self, text_data):
-#         data = json.loads(text_data)
-#         message = data['message']
-
-#         await self.channel_layer.group_send(
-#             self.room_group_name,
-#             {
-#                 'type': 'chat_message',
-#                 'message': message
-#             }
-#         )
-
-#     async def chat_message(self, event):
-#         message = event['message']
-#         await self.send(text_data=json.dumps({
-#             'message': message
-#         }))
+    @sync_to_async
+    def save_message(self, sender_id, recipient_id, content):
+        """Save the message to the database."""
+        Message.objects.create(
+            sender_id=sender_id,
+            recipient_id=recipient_id,
+            content=content
+        )

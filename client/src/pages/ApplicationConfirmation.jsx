@@ -1,15 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import TutorNavbar from '../components/TutorNavbar';
 import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 const ApplicationConfirmation = () => {
   const navigate = useNavigate();
 
   return (
     <div className="flex flex-col min-h-screen">
-      <TutorNavbar />
+      <Navbar />
       <main className="flex-1 flex justify-center items-center p-4 mt-16 md:mt-24 mb-10">
         <div className="w-full max-w-md text-center">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">Application Submitted</h1>

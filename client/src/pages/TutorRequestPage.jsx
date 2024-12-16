@@ -1,10 +1,10 @@
 import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import TutorNavbar from '../components/TutorNavbar';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Navbar from '../components/Navbar';
 
 const TutorRequestPage = () => {
   const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm({
@@ -171,7 +171,7 @@ const TutorRequestPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <TutorNavbar />
+      <Navbar />
       <main className="flex-1 flex justify-center items-center p-4 mt-16 md:mt-24 mb-10">
         <div className="w-full max-w-2xl bg-white shadow-md rounded-lg p-6 md:p-8">
           <h1 className="text-2xl md:text-3xl font-bold mb-4 text-center">Tutor Request</h1>

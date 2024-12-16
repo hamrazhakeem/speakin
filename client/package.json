@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@daily-co/daily-js": "^0.73.0",
+    "@heroicons/react": "^2.2.0",
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.2.7",
     "@stripe/stripe-js": "^4.9.0",
@@ -20,7 +21,9 @@
     "axios": "^1.7.7",
     "date-fns": "^4.1.0",
     "date-fns-tz": "^3.2.0",
+    "emoji-picker-react": "^4.12.0",
     "framer-motion": "^11.11.11",
+    "heroicons": "^2.2.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.446.0",
     "prop-types": "^15.8.1",

@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Plus, Filter } from 'lucide-react';
-import TutorNavbar from "../components/TutorNavbar";
 import Footer from "../components/Footer";
 import { useNavigate } from 'react-router-dom';
 import SessionCreationModal from '../components/SessionCreationModal';
@@ -8,6 +7,7 @@ import { useEffect } from 'react';
 import useAxios from '../hooks/useAxios';
 import { useSelector } from 'react-redux';
 import SessionsList from '../components/SessionList';
+import Navbar from '../components/Navbar';
 
 const TutorSessionsPage = () => {
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ const TutorSessionsPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
-      <TutorNavbar />
+      <Navbar />
       <main className="flex-grow container mx-auto px-4 py-8 mt-20">
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
           <div className="p-8">

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
-import TutorNavbar from '../components/TutorNavbar';
 import { useDispatch } from 'react-redux';
 import { setTokens } from '../redux/authSlice';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Navbar from '../components/Navbar';
 
 const SignInPage = () => {
   const [email, setEmail] = useState('');
@@ -39,7 +39,7 @@ const SignInPage = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <TutorNavbar />
+      <Navbar />
       <main className="flex-1 flex justify-center items-center p-4 mt-16 md:mt-24 mb-10">
         <div className="w-full max-w-md text-center">
           <h1 className="text-2xl md:text-3xl font-bold mb-2">SpeakIn ID</h1>

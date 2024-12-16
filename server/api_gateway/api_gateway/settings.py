@@ -80,7 +80,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'api_gateway.wsgi.application'
-# ASGI_APPLICATION = 'api_gateway.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

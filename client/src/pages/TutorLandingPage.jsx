@@ -1,13 +1,13 @@
 import React from 'react';
-import TutorNavbar from '../components/TutorNavbar';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 const TutorLandingPage = () => {
   const navigate = useNavigate();
   return (
     <div>
-      <TutorNavbar />
+      <Navbar />
       <div className='p-8'>
         <section className="hero bg-white text-center py-16">
           <div className="container mx-auto px-4">
