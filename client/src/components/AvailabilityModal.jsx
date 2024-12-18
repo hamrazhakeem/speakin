@@ -4,6 +4,7 @@ import { format, toDate } from 'date-fns';
 import { useSelector, useDispatch } from 'react-redux';
 import { toast } from 'react-toastify';
 import { updateCredits } from '../redux/authSlice';
+import { X, Clock, Calendar, CreditCard } from 'lucide-react'; // Import icons
 
 const AvailabilityModal = ({ tutorId, onClose }) => {
   const axiosInstance = useAxios();
@@ -117,72 +118,90 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center px-4 sm:px-0">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl p-6 max-h-[80vh]">
-        <div className="flex justify-end">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center px-4 sm:px-0">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl p-6 max-h-[90vh] relative">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Available Sessions</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="p-2 text-gray-500 hover:text-gray-700 rounded-full hover:bg-gray-100 transition-colors"
           >
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path d="M6 18L18 6M6 6l12 12"></path>
-            </svg>
+            <X className="h-5 w-5" />
           </button>
         </div>
-        <h2 className="text-2xl font-bold mb-4">Tutor Availability</h2>
-  
+
         {loading ? (
-          <p className="text-gray-500">Loading...</p>
+          <div className="flex items-center justify-center h-40">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
         ) : error ? (
-          <p className="text-red-500">{error}</p>
+          <div className="p-4 bg-red-50 rounded-xl text-red-600">
+            <p>{error}</p>
+          </div>
         ) : availability.length === 0 ? (
-          <p className="text-gray-500">No available slots.</p>
+          <div className="text-center py-8">
+            <div className="text-gray-400 mb-3">
+              <Calendar className="h-12 w-12 mx-auto" />
+            </div>
+            <p className="text-gray-600 font-medium">No available slots at the moment.</p>
+            <p className="text-gray-500 text-sm mt-1">Please check back later.</p>
+          </div>
         ) : (
-          <ul className="space-y-4 overflow-y-auto max-h-[60vh] pr-2">
+          <div className="overflow-y-auto max-h-[calc(90vh-120px)] pr-2 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             {availability.map((slot) => {
               const statusDisplay = getStatusDisplay(slot);
               return (
-                <li
+                <div
                   key={slot.id}
-                  className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow duration-300"
+                  className="bg-white border border-gray-200 rounded-xl p-4 hover:border-gray-300 transition-all duration-200"
                 >
-                  <div className="flex justify-between items-center mb-2">
-                    <p className="text-gray-700 font-medium">
-                      Type: {slot.session_type.charAt(0).toUpperCase() + slot.session_type.slice(1)}
-                    </p>
-                    <p className={`font-medium ${statusDisplay.color}`}>
-                      Status: {statusDisplay.text}
-                    </p>
+                  {/* Session Type Badge */}
+                  <div className="flex justify-between items-start mb-3">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium 
+                      ${slot.session_type === 'trial' ? 
+                        'bg-purple-50 text-purple-700' : 
+                        'bg-blue-50 text-blue-700'}`}
+                    >
+                      {slot.session_type.charAt(0).toUpperCase() + slot.session_type.slice(1)} Session
+                    </span>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium
+                      ${statusDisplay.color === 'text-green-500' ? 'bg-green-50 text-green-700' :
+                        statusDisplay.color === 'text-blue-500' ? 'bg-blue-50 text-blue-700' :
+                        'bg-red-50 text-red-700'}`}
+                    >
+                      {statusDisplay.text}
+                    </span>
                   </div>
-                  <p className="text-gray-600">
-                    Start: {format(toDate(slot.start_time), 'h:mm a - MMM d, yyyy')}
-                  </p>
-                  <p className="text-gray-600">
-                    End: {format(toDate(slot.end_time), 'h:mm a - MMM d, yyyy')}
-                  </p>
-                  <p className="text-gray-600">
-                    Duration: {slot.session_type === 'trial' ? '20 minutes' : '60 minutes'}
-                  </p>
+
+                  {/* Time Details */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center text-gray-600">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      <span>{format(toDate(slot.start_time), 'MMMM d, yyyy')}</span>
+                    </div>
+                    <div className="flex items-center text-gray-600">
+                      <Clock className="h-4 w-4 mr-2" />
+                      <span>
+                        {format(toDate(slot.start_time), 'h:mm a')} - {format(toDate(slot.end_time), 'h:mm a')}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Book Button */}
                   {slot.is_booked === false && !slot.bookedByYou && (
                     <button
-                      className="mt-4 bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded"
+                      className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
                       onClick={() => handleBooking(slot.id, slot.credits_required)}
                     >
+                      <CreditCard className="h-4 w-4" />
                       Book for {slot.credits_required} credits
                     </button>
                   )}
-                </li>
+                </div>
               );
             })}
-          </ul>
+          </div>
         )}
       </div>
     </div>

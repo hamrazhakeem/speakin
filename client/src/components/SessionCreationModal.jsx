@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar as Info, X } from 'lucide-react';
+import { Calendar as Info, X, Clock, AlertCircle } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import useAxios from '../hooks/useAxios';
 import { toast } from 'react-toastify';
@@ -66,32 +66,31 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
   };
 
   const handleSubmit = async () => {
-    const time24 = convertTo24Hour(selectedTime);
+    if (!selectedDate || !selectedTime) {
+      toast.error('Please select both date and time');
+      return;
+    }
 
-    // Create the start datetime object by combining selected date and time
+    const time24 = convertTo24Hour(selectedTime);
     const startDateTime = new Date(`${selectedDate}T${time24}:00`);
-  
-    // Calculate the end datetime based on session type (trial or full session)
     const endDateTime = new Date(startDateTime.getTime() + (sessionType === 'trial' ? 20 : 60) * 60 * 1000);
     
     const sessionData = {
       tutor_id: userId,
       session_type: sessionType,
       language_to_teach: teachingLanguage,
-      start_time: startDateTime.toISOString(), // Start time in ISO 8601 format
+      start_time: startDateTime.toISOString(),
       end_time: endDateTime.toISOString(),  
       credits_required: sessionType === 'trial' ? Math.round(tutorCredits * 0.25) : tutorCredits,
     };
 
     try {
-      console.log(sessionData)
       const response = await axiosInstance.post('tutor-availabilities/', sessionData);
-      console.log('Session created:', response.data);
-      fetchTutorAvailability(); // Trigger the fetch to refresh sessions
-      onClose(); // Close the modal or form
+      toast.success('Session created successfully');
+      fetchTutorAvailability();
+      onClose();
     } catch (error) {
-      // Check if it's a 409 conflict error and handle it gracefully
-      if (error.response && error.response.status === 409) {
+      if (error.response?.status === 409) {
         toast.error("A slot with this time range already exists. Please choose a different time.");
       } else {
         toast.error("An unexpected error occurred. Please try again.");
@@ -103,51 +102,64 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg w-full max-w-2xl">
-        <div className="flex justify-between items-center p-6 border-b">
-          <h2 className="text-xl font-semibold text-gray-900">
+      <div className="bg-white rounded-2xl w-full max-w-2xl">
+        {/* Modal Header */}
+        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+          <h2 className="text-2xl font-semibold text-gray-900">
             {step === 1 ? 'Select Session Type' : 'Choose Date & Time'}
           </h2>
           <button 
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-gray-500 hover:text-gray-700 transition-colors p-2 hover:bg-gray-100 rounded-lg"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
+        {/* Modal Content */}
         <div className="p-6">
-          {step === 1 && (
+          {step === 1 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Trial Session Card */}
               <div 
                 onClick={() => handleSessionTypeSelect('trial')}
-                className="border rounded-lg p-6 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
+                className="group border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all space-y-4"
               >
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Trial Session</h3>
-                <p className="text-gray-600 mb-4">20 minutes introduction session</p>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Info className="w-4 h-4" />
-                  <span>Students pay 25% ({Math.round(tutorCredits * 0.25)} credits)</span>
+                <div className="p-3 bg-blue-50 text-blue-600 rounded-lg w-fit group-hover:bg-blue-100 transition-colors">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Trial Session</h3>
+                  <p className="text-gray-600 mb-4">20 minutes introduction session</p>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Info className="w-4 h-4" />
+                    <span>{Math.round(tutorCredits * 0.25)} credits</span>
+                  </div>
                 </div>
               </div>
 
+              {/* Standard Session Card */}
               <div 
                 onClick={() => handleSessionTypeSelect('standard')}
-                className="border rounded-lg p-6 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all"
+                className="group border border-gray-200 rounded-xl p-6 cursor-pointer hover:border-blue-500 hover:shadow-md transition-all space-y-4"
               >
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Standard Session</h3>
-                <p className="text-gray-600 mb-4">1 hour regular session</p>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Info className="w-4 h-4" />
-                  <span>Full price ({tutorCredits} credits)</span>
+                <div className="p-3 bg-green-50 text-green-600 rounded-lg w-fit group-hover:bg-green-100 transition-colors">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Standard Session</h3>
+                  <p className="text-gray-600 mb-4">1 hour regular session</p>
+                  <div className="flex items-center gap-2 text-gray-600">
+                    <Info className="w-4 h-4" />
+                    <span>{tutorCredits} credits</span>
+                  </div>
                 </div>
               </div>
             </div>
-          )}
-
-        {step === 2 && (
+          ) : (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Date Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Date
@@ -157,21 +169,22 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
                     min={today}
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                   />
                 </div>
 
+                {/* Time Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Time
                   </label>
-                  <div className="h-64 overflow-y-auto border rounded-lg">
+                  <div className="h-64 overflow-y-auto border border-gray-200 rounded-xl">
                     {generateTimeSlots(sessionType === 'trial' ? 20 : 60).length > 0 ? (
                       generateTimeSlots(sessionType === 'trial' ? 20 : 60).map((slot) => (
                         <button
                           key={slot.display}
                           onClick={() => setSelectedTime(slot.display)}
-                          className={`w-full text-left px-4 py-2 hover:bg-gray-50 ${
+                          className={`w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors ${
                             selectedTime === slot.display ? 'bg-blue-50 text-blue-700' : ''
                           }`}
                         >
@@ -179,14 +192,16 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
                         </button>
                       ))
                     ) : (
-                      <div className="px-4 py-2 text-gray-600">
-                        No available time slots for the selected date.
+                      <div className="p-4 text-gray-600 flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5" />
+                        <span>No available time slots for the selected date.</span>
                       </div>
                     )}
                   </div>
                 </div>
               </div>
 
+              {/* Action Buttons */}
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   onClick={() => setStep(1)}
@@ -197,7 +212,7 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
                 <button
                   onClick={handleSubmit}
                   disabled={!selectedDate || !selectedTime}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   Create Session
                 </button>

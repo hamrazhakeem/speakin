@@ -4,6 +4,7 @@ import AdminSidebar from '../components/AdminSidebar';
 import AdminTable from '../components/AdminTable';
 import useAxios from '../hooks/useAxios';
 import { useNavigate } from 'react-router-dom';
+import { Bars3Icon } from '@heroicons/react/24/outline';
   
 const AdminManageUsersPage = () => {
   const axiosInstance = useAxios();
@@ -13,6 +14,7 @@ const AdminManageUsersPage = () => {
   const [languageChangeRequests, setLanguageChangeRequests] = useState([]);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);  // Page loading state
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -108,34 +110,27 @@ const AdminManageUsersPage = () => {
   };
 
   return (
-      <div className="flex flex-col h-screen bg-gray-100">
-          <AdminNavbar />
-          <div className="flex flex-1 overflow-hidden">
-              <AdminSidebar items={sidebarItems} />
-              <div className="flex-1 p-8 overflow-y-auto">
-          {/* Show loading spinner when page is loading */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+      <AdminNavbar>
+        <button 
+          className="lg:hidden p-2 text-white hover:text-gray-300"
+          onClick={() => setIsSidebarOpen(true)}
+        >
+          <Bars3Icon className="h-6 w-6" />
+        </button>
+      </AdminNavbar>
+      
+      <div className="flex flex-1 overflow-hidden">
+        <AdminSidebar 
+          items={sidebarItems} 
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+        />
+        
+        <div className="flex-1 p-4 lg:p-8 overflow-y-auto">
           {loading ? (
             <div className="flex justify-center items-center h-full">
-              <svg
-                className="animate-spin h-8 w-8 text-blue-600"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                ></path>
-              </svg>
+              <div className="w-10 h-10 border-4 border-white/20 border-t-red-500 rounded-full animate-spin" />
             </div>
           ) : (
             <>

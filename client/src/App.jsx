@@ -1,12 +1,12 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import useProactiveTokenRefresh from './hooks/AuthProvider';
 
 import LandingPage from './pages/LandingPage';
+import AboutUs from './pages/AboutUs';
+import HowItWorks from './pages/HowItWorks';
 import SignInPage from './pages/SigninPage';
 import SignUpPage from './pages/SignUpPage';
 import OtpPage from './pages/OtpPage';
-import LanguagePreferences from './pages/LanguagePreferences';
 import HomePage from './pages/HomePage';
 import ForgotPassword from './pages/ForgotPassword';
 import ForgotPasswordOtpPage from './pages/ForgotPasswordOtpPage';
@@ -45,10 +45,12 @@ import VideoCall from './components/VideoCall';
 import VideoCallSetup from './components/VideoCallSetup';
 import MeetingSummary from './pages/MeetingSummary';
 import MessagePage from './pages/MessagePage';
+import ScrollToTop from './components/ScrollToTop';
 
 const App = () => {
   return (
     <Router>
+      <ScrollToTop />
       <ToastContainer
         position='top-center'
         pauseOnHover={false}
@@ -83,6 +85,8 @@ const App = () => {
         {/* Student Unprotected routes */}
         <Route element={<StudentUnprotectedRoute/>}>
           <Route path='/' element={<LandingPage />} />
+          <Route path='/about-us' element={<AboutUs />} />
+          <Route path='/how-it-works' element={<HowItWorks />} />
           <Route path='/sign-in' element={<SignInPage />} />
           <Route path='/sign-up' element={<SignUpPage />} />
           <Route path='/verify-otp' element={<OtpPage />} />
@@ -93,7 +97,6 @@ const App = () => {
 
         {/* Student Protected routes */}
         <Route element={<StudentProtectedRoute />}>
-          <Route path='/language-preferences' element={<LanguagePreferences />} />
           <Route path='/home' element={<HomePage />} />
           <Route path='/profile' element={<ProfilePage />} />
           <Route path='/student-password-change' element={<StudentPasswordChangePage />} />

@@ -21,17 +21,37 @@ const TutorCard = ({ name, profileImage, tutorDetails, languageSpoken, languageT
   const handleVideoClick = () => {
     setIsVideoPlaying(true);
     if (tutorDetails?.intro_video) {
+      const container = document.createElement('div');
+      container.classList.add('fixed', 'top-0', 'left-0', 'w-screen', 'h-screen', 'z-50', 'bg-black', 'flex', 'flex-col');
+      
+      const closeButton = document.createElement('button');
+      closeButton.innerHTML = '✕';
+      closeButton.classList.add(
+        'absolute', 'top-4', 'right-4', 'text-white', 'text-2xl', 
+        'w-10', 'h-10', 'flex', 'items-center', 'justify-center',
+        'bg-gray-800', 'rounded-full', 'hover:bg-gray-700',
+        'transition-colors', 'z-50'
+      );
+
       const videoElement = document.createElement('video');
       videoElement.src = tutorDetails.intro_video;
       videoElement.controls = true;
-      videoElement.classList.add('fixed', 'top-0', 'left-0', 'w-screen', 'h-screen', 'z-50');
-      document.body.appendChild(videoElement);
-      videoElement.requestFullscreen();
+      videoElement.classList.add('w-full', 'h-full', 'object-contain');
 
-      videoElement.addEventListener('ended', () => {
-        document.body.removeChild(videoElement);
+      const cleanup = () => {
+        document.body.removeChild(container);
         setIsVideoPlaying(false);
-      });
+        document.exitFullscreen().catch(() => {});
+      };
+
+      closeButton.onclick = cleanup;
+      videoElement.addEventListener('ended', cleanup);
+
+      container.appendChild(closeButton);
+      container.appendChild(videoElement);
+      document.body.appendChild(container);
+      
+      videoElement.requestFullscreen().catch(() => {});
     }
   };
 
@@ -57,86 +77,86 @@ const TutorCard = ({ name, profileImage, tutorDetails, languageSpoken, languageT
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
-      {/* Main Card Content */}
-      <div className="p-4">
-        {/* Top Section: Avatar, Name, Rating, and Price */}
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          {/* Left Side: Avatar and Basic Info */}
-          <div className="flex items-center space-x-4">
-            <Avatar src={profileImage} name={speakinName || name} size={64} />
-            <div>
-              <h3 className="text-lg font-semibold">{speakinName}</h3>
-              <div className="flex items-center space-x-1 mt-1">
-                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="text-sm font-medium">{rating}</span>
-                <span className="text-sm text-gray-500">({totalReviews})</span>
+    <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+      <div className="p-6 flex flex-col gap-4">
+        {/* Priority 1: Core Info */}
+        <div className="flex items-start gap-4">
+          <Avatar src={profileImage} name={speakinName || name} size={56} />
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold text-gray-900">{speakinName}</h3>
+            
+            {/* Improved Rating Design */}
+            <div className="flex items-center mt-2 space-x-2">
+              <div className="flex items-center px-2.5 py-1 bg-yellow-50 rounded-full">
+                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                <span className="ml-1 text-sm font-medium text-yellow-700">{rating}</span>
               </div>
+              <span className="text-sm text-gray-500">({totalReviews} reviews)</span>
+            </div>
+
+            {/* Credits Section */}
+            <div className="mt-2 flex items-center text-lg font-bold text-gray-900">
+              <CreditCard className="w-5 h-5 text-blue-600 mr-1" />
+              {tutorDetails?.required_credits || 0}
+              <span className="text-sm text-gray-600 ml-1">/hour</span>
             </div>
           </div>
-
-          {/* Right Side: Price and Action Buttons */}
-          <div className="flex flex-col items-end space-y-2">
-            {/* Price Display */}
-            <div className="flex items-center space-x-1">
-              <span className="font-bold text-lg">{tutorDetails?.required_credits || 0}</span>
-              <CreditCard className="w-5 h-5 text-yellow-500" />
-              <span className="text-gray-600">/hour</span>
-            </div>
-
-            {/* Action Buttons Container */}
-            <div className="flex flex-col sm:flex-row gap-2 w-full justify-end">
-              <button 
-                onClick={handleCheckAvailability} 
-                className="w-full sm:w-auto bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 transition-colors flex items-center justify-center space-x-2"
-              >
-                <span>Book</span>
-              </button>
-              <button
-                className="w-full sm:w-auto bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors flex items-center justify-center space-x-2"
-                onClick={handleNavigate}
-              >
-                <MessageCircle className="w-4 h-4 mr-1" />
-                <span>Message</span>
-              </button>
-            </div>
-            {showModal && <AvailabilityModal tutorId={tutor_id} onClose={handleCloseModal} />}
+                    {/* Right side: Action buttons for larger screens */}
+          <div className="hidden sm:flex flex-col gap-2 min-w-[120px]">
+            <button 
+              onClick={handleCheckAvailability}
+              className="w-full px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Book Session
+            </button>
+            <button
+              onClick={handleNavigate}
+              className="w-full px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+            >
+              <MessageCircle className="w-4 h-4 mr-1" />
+              Message
+            </button>
           </div>
         </div>
 
-        {/* Teaching Languages Section */}
-        <div className="mt-4 space-y-2">
+        
+
+        {/* Priority 2: Country - Improved Design */}
+        <div className="flex items-center">
+          <div className="inline-flex items-center px-3 py-1.5 bg-gray-50 rounded-full text-sm text-gray-600">
+            <Globe className="w-4 h-4 text-gray-500 mr-1.5" />
+            <span className="font-medium">{country || 'Location not specified'}</span>
+          </div>
+        </div>
+
+        {/* Priority 3: Teaching Languages */}
+        <div className="flex flex-wrap gap-2">
           {languageToTeach?.map((teachLang, index) => {
             const verification = getTeachingVerification(teachLang);
             return (
-              <div key={index} className="flex flex-wrap items-center gap-2">
-                <div className="flex items-center space-x-2 text-gray-600">
-                  <Globe className="w-4 h-4" />
-                  <span className="text-sm">{teachLang.language}</span>
-                </div>
-                <div className={`flex items-center space-x-1 px-2 py-0.5 rounded-full ${verification.bgColor}`}>
+              <div key={index} className="inline-flex items-center">
+                <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-l-full text-sm">
+                  {teachLang.language}
+                </span>
+                <span className={`px-3 py-1 rounded-r-full text-sm flex items-center ${verification.bgColor}`}>
                   {verification.icon}
-                  <span className="text-xs">{verification.text}</span>
-                </div>
+                  <span className="ml-1">{verification.text}</span>
+                </span>
               </div>
             );
           })}
         </div>
 
-        {/* Location and Languages */}
-        <div className="mt-3 text-sm text-gray-500">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="font-medium">📍 {country || 'Location not specified'}</span>
-            <span className="hidden sm:inline">•</span>
-            <span className="w-full sm:w-auto">Speaks {spokenLanguages}</span>
+        {/* Priority 4: Languages Spoken */}
+        <div className="text-sm text-gray-600">
+          <div>
+            <span className="font-medium">Speaks:</span> {spokenLanguages}
           </div>
         </div>
 
-        {/* Expandable Description */}
-        <div className="mt-3">
-          <p className={`text-sm text-gray-700 ${!isExpanded && 'line-clamp-2'}`}>
-            {tutorDetails?.about || 'No description available'}
-          </p>
+        {/* Priority 5: About/Description */}
+        <div className={`text-sm text-gray-700 ${!isExpanded && 'line-clamp-2'}`}>
+          {tutorDetails?.about || 'No description available'}
           {tutorDetails?.about && tutorDetails.about.length > 100 && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
@@ -146,85 +166,43 @@ const TutorCard = ({ name, profileImage, tutorDetails, languageSpoken, languageT
             </button>
           )}
         </div>
-      </div>
 
-      {/* Video Preview Section */}
-      {tutorDetails?.intro_video && !isVideoPlaying && (
-        <div
-          className="w-full h-32 sm:h-48 bg-gray-100 cursor-pointer group relative"
-          onClick={handleVideoClick}
-        >
-          <svg 
-            className="w-full h-full" 
-            viewBox="0 0 1280 720" 
-            preserveAspectRatio="xMidYMid slice"
-            xmlns="http://www.w3.org/2000/svg"
+        {/* Priority 6: Video Preview */}
+        {tutorDetails?.intro_video && !isVideoPlaying && (
+          <button onClick={handleVideoClick} className="w-full">
+            <div className="w-full flex items-center gap-2 px-4 py-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
+              <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="text-left">
+                <div className="font-medium text-gray-900">Watch Introduction Video</div>
+                <div className="text-sm text-gray-500">Learn more about your tutor</div>
+              </div>
+            </div>
+          </button>
+        )}
+
+        {/* Mobile-only action buttons at bottom */}
+        <div className="flex flex-col gap-2 mt-2 sm:hidden">
+          <button 
+            onClick={handleCheckAvailability}
+            className="w-full px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {/* Background with gradient */}
-            <defs>
-              <linearGradient id="backgroundGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#4F46E5" stopOpacity="1" />
-                <stop offset="100%" stopColor="#7C3AED" stopOpacity="1" />
-              </linearGradient>
-              {/* Overlay gradient */}
-              <linearGradient id="overlayGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="rgba(0,0,0,0)" />
-                <stop offset="100%" stopColor="rgba(0,0,0,0.5)" />
-              </linearGradient>
-              {/* Circle pattern */}
-              <pattern id="circlePattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
-                <circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.2)"/>
-              </pattern>
-            </defs>
-
-            {/* Main background */}
-            <rect width="1280" height="720" fill="url(#backgroundGradient)"/>
-            
-            {/* Decorative pattern */}
-            <rect width="1280" height="720" fill="url(#circlePattern)"/>
-
-            {/* Abstract shapes */}
-            <circle cx="1100" cy="160" r="280" fill="rgba(255,255,255,0.1)"/>
-            <circle cx="180" cy="600" r="200" fill="rgba(255,255,255,0.1)"/>
-
-            {/* Main content area */}
-            <g transform="translate(640,360)">
-              {/* Chat bubbles suggesting conversation */}
-              <g transform="translate(-200,-50)">
-                {/* Left bubble */}
-                <rect x="-120" y="-30" width="200" height="60" rx="30" fill="rgba(255,255,255,0.9)"/>
-                <text x="-30" y="10" fontFamily="Arial" fontSize="24" fill="#4F46E5" textAnchor="middle">
-                  Hello!
-                </text>
-              </g>
-              <g transform="translate(200,50)">
-                {/* Right bubble */}
-                <rect x="-80" y="-30" width="200" height="60" rx="30" fill="rgba(255,255,255,0.9)"/>
-                <text x="20" y="10" fontFamily="Arial" fontSize="24" fill="#4F46E5" textAnchor="middle">
-                  ¡Hola!
-                </text>
-              </g>
-            </g>
-
-            {/* Play button */}
-            <g transform="translate(640,360)">
-              <circle r="50" fill="white"/>
-              <path d="M-15,-25 L35,0 L-15,25 Z" fill="#4F46E5"/>
-            </g>
-
-            {/* Bottom overlay */}
-            <rect width="1280" height="200" y="520" fill="url(#overlayGradient)"/>
-
-            {/* Text overlay */}
-            <text x="50" y="660" fontFamily="Arial" fontSize="32" fill="white" fontWeight="bold">
-              Meet Your Tutor
-            </text>
-            <text x="50" y="695" fontFamily="Arial" fontSize="24" fill="rgba(255,255,255,0.8)">
-              Watch introduction video
-            </text>
-          </svg>
+            Book 
+          </button>
+          <button
+            onClick={handleNavigate}
+            className="w-full px-4 py-3 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+          >
+            <MessageCircle className="w-4 h-4 mr-1" />
+            Message
+          </button>
         </div>
-      )}
+      </div>
+      {showModal && <AvailabilityModal tutorId={tutor_id} onClose={handleCloseModal} />}
     </div>
   );
 };

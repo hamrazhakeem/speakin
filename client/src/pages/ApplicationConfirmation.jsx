@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { ClipboardCheck, Clock, Mail, ArrowLeft } from 'lucide-react';
 
 const ApplicationConfirmation = () => {
   const navigate = useNavigate();
@@ -10,37 +11,104 @@ const ApplicationConfirmation = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-1 flex justify-center items-center p-4 mt-16 md:mt-24 mb-10">
-        <div className="w-full max-w-md text-center">
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">Application Submitted</h1>
-          <p className="text-gray-600 mb-6 text-sm md:text-base">
-            Thank you for applying to be a tutor with SpeakIn!
-          </p>
-          <div className="bg-white shadow-md rounded-lg p-6 mb-6">
-            <p className="text-gray-700 mb-4">
-              Your application is currently under review. You will receive an notification to the provided email regarding the status of your application within three business days.
-            </p>
-            <div className="flex items-center justify-center text-sm text-gray-500">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Application Status: Under Review</span>
+      <main className="flex-1 bg-gray-50">
+        <div className="max-w-3xl mx-auto px-4 py-16 sm:px-6 sm:py-24">
+          <div className="bg-white shadow-lg rounded-2xl p-8">
+            {/* Header Section */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ClipboardCheck className="w-8 h-8 text-blue-600" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900">Application Submitted</h1>
+              <p className="mt-2 text-gray-600">
+                Thank you for applying to be a tutor with SpeakIn
+              </p>
+            </div>
+
+            {/* Status Section */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-blue-600" />
+                  <span className="font-medium text-gray-900">Current Status</span>
+                </div>
+                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+                  Under Review
+                </span>
+              </div>
+              <p className="text-gray-600 text-sm leading-relaxed">
+                Our team will carefully review your application. This process typically takes up to three business days. 
+                You will receive updates about your application status via email.
+              </p>
+            </div>
+
+            {/* Next Steps */}
+            <div className="space-y-6 mb-8">
+              <h2 className="text-lg font-medium text-gray-900">What happens next?</h2>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-medium">1</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Application Review</h3>
+                    <p className="text-sm text-gray-600">Our team will review your qualifications and documents</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-medium">2</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Email Notification</h3>
+                    <p className="text-sm text-gray-600">You'll receive an email about your application status</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-medium">3</span>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-gray-900">Platform Access</h3>
+                    <p className="text-sm text-gray-600">If approved, you'll get access to set up your tutor profile</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-4">
+              <button
+                onClick={() => navigate('/become-a-tutor')}
+                className="w-full bg-blue-600 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-blue-700 transition duration-200"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Return to Home
+              </button>
+
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                <Mail className="w-4 h-4" />
+                <span>Check your email for updates</span>
+              </div>
+            </div>
+
+            {/* Support Section */}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <p className="text-center text-sm text-gray-600">
+                Have questions about your application?{' '}
+                <Link to="/support" className="text-blue-600 hover:text-blue-800 font-medium">
+                  Contact Support
+                </Link>
+              </p>
             </div>
           </div>
-          <button
-            onClick={() => navigate('/become-a-tutor')}
-            className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition-colors duration-200"
-          >
-            Return to Home
-          </button>
-          <p className="mt-4 text-sm text-gray-500">
-            Need help? <Link to={'/contact'} className="text-blue-500 hover:underline">Contact Support</Link>
-          </p>
         </div>
       </main>
       <Footer />
     </div>
   );
-}
+};
 
 export default ApplicationConfirmation;

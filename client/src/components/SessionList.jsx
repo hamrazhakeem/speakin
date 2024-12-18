@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CreditCard, RotateCw, VideoIcon } from 'lucide-react';
+import { Clock, CreditCard, RotateCw, VideoIcon, Filter } from 'lucide-react';
 import EmptyState from './EmptyState';
 import useAxios from '../hooks/useAxios';
 import { toast } from 'react-toastify';
@@ -11,6 +11,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   const [sessionsWithStudentInfo, setSessionsWithStudentInfo] = useState([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
+  const [selectedStatus, setSelectedStatus] = useState('all');
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -309,30 +310,41 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
       return null;
     }
 
+    const sessionStartTime = new Date(session.start_time);
+    const currentTime = new Date();
+    const fiveMinutesBefore = new Date(sessionStartTime.getTime() - 5 * 60000);
+    const showJoinButton = currentTime >= fiveMinutesBefore;
+
     return (
-      <div className="flex flex-wrap gap-3">
-      {session.bookings?.length > 0 && 
-        (session.bookings[0]?.booking_status === 'confirmed' || session.bookings[0]?.booking_status === 'ongoing') && (
-          <button
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 rounded-lg flex items-center justify-center font-medium transition-colors duration-200"
-            onClick={handleJoinSession(session.bookings[0].id)}
-          >
-            <VideoIcon className="w-4 h-4 mr-2" />
-            Join Session
-          </button>
+      <div className="flex flex-col gap-3">
+        {session.bookings?.length > 0 && 
+          (session.bookings[0]?.booking_status === 'confirmed' || session.bookings[0]?.booking_status === 'ongoing') && 
+          showJoinButton && (
+            <button
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl flex items-center justify-center gap-2 font-medium transition-colors duration-200"
+              onClick={handleJoinSession(session.bookings[0].id)}
+            >
+              <VideoIcon className="w-4 h-4" />
+              Join Session
+            </button>
         )}
         {/* Cancel Button - Only show if unbooked or status is confirmed */}
         {(isUnbooked(session) || getBookingStatus(session) === 'confirmed' || session.is_booked === false) && (
           <button
-            className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2.5 rounded-lg font-medium transition-colors duration-200"
+            className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-3 rounded-xl font-medium transition-colors duration-200"
             onClick={() => handleCancelSession(session)}
           >
             Cancel Session
           </button>
         )}
+        {session.bookings?.[0]?.booking_status === 'completed' && (
+          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-medium transition-colors duration-200">
+            View Review
+          </button>
+        )}
       </div>
-    )
-  }
+    );
+  };
 
   const determineCustomStatus = (session) => {
     const currentTime = new Date();
@@ -353,95 +365,182 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     return 'normal';
   };  
 
+  // Define all possible session statuses
+  const sessionStatuses = [
+    { value: 'all', label: 'All Sessions' },
+    { value: 'confirmed', label: 'Confirmed' },
+    { value: 'ongoing', label: 'Ongoing' },
+    { value: 'completed', label: 'Completed' },
+    { value: 'canceled_by_tutor', label: 'Canceled by Me' },
+    { value: 'canceled_by_student', label: 'Canceled by Student' },
+    { value: 'no_show_by_tutor', label: 'No Show by Me' },
+    { value: 'no_show_by_student', label: 'No Show by Student' },
+    { value: 'listed', label: 'Listed' },
+    { value: 'unlisted', label: 'Unlisted' }
+  ];
+
+  // Filter sessions based on selected status
+  const filteredSessions = sessions.filter(session => {
+    if (selectedStatus === 'all') return true;
+    if (selectedStatus === 'listed') return isSessionListed(session);
+    if (selectedStatus === 'unlisted') return !isSessionListed(session);
+    return session.bookings?.[0]?.booking_status === selectedStatus;
+  });
+
   return (
     <div className="space-y-6">
-      <div className="flex justify-end">
-        <button
-          onClick={handleRefresh}
-          className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          disabled={isRefreshing}
-        >
-          <RotateCw
-            className={`w-5 h-5 text-gray-600 ${isRefreshing ? 'animate-spin' : ''}`}
-          />
-        </button>
-      </div>
-      {sessionsWithStudentInfo.map((session) => (
-        <div
-          key={session.id}
-          className="bg-white border rounded-xl p-6 hover:shadow-lg transition-shadow duration-300"
-        >
-          <div className="flex flex-wrap justify-between items-center mb-6 pb-4 border-b">
-            <div className="flex items-center space-x-4">
-              <span
-                className={`px-3 py-1.5 rounded-full text-sm font-medium capitalize ${getSessionTypeStyles(
-                  session.session_type
-                )}`}
-              >
-                {session.session_type}
-              </span>
-              {session.bookings && session.bookings[0] && session.bookings[0].booking_status && (
-                <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusStyles(session.bookings[0].booking_status)}`}>
-                  {formatBookingStatus(session)}
-                </span>
-              )}
-              <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusStyles(getListingStatus(session))}`}>
-                {getListingStatus(session) === 'listed' ? 'Listed' : 'Unlisted'}
-              </span>
-            </div>
-            <div className="flex items-center text-gray-700">
-              <Clock className="w-5 h-5 mr-2 text-gray-400" />
-              <div>
-                <p className="font-medium">{formatLocalTime(session.start_time)}</p>
-                <p className="text-sm text-gray-500">
-                  Duration: {getSessionDuration(session.start_time, session.end_time)}
-                </p>
-              </div>
-            </div>
+      {/* Header with Filter and Stats */}
+      <div className="flex flex-col gap-6">
+        {/* Filter Controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div className="flex items-center gap-4">
+            <h2 className="text-xl font-semibold text-gray-900">Teaching Sessions</h2>
+            <button
+              onClick={handleRefresh}
+              className="bg-blue-50 text-blue-600 p-2 rounded-lg hover:bg-blue-100 transition-colors"
+              disabled={isRefreshing}
+            >
+              <RotateCw className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
           </div>
 
-          {/* Content Grid */}
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              {/* Student Details */}
-              {session.bookings?.length > 0 && session.studentInfo ? (
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex items-start space-x-3">
-                    <Avatar
-                      src={session.studentInfo.profile_image}
-                      name={session.studentInfo.name || ''}
-                      size={48}
-                    />
-                    <div className="flex-1">
-                      <p className="font-semibold text-gray-900">
-                        Student: {session.studentInfo.name}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {session.studentInfo.country || 'Country not specified'}
-                      </p>
-                      <div className="mt-3">
-                        <p className="text-sm font-medium text-gray-700">Languages spoken:</p>
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {session.studentInfo?.language_spoken && session.studentInfo.language_spoken.length > 0 ? (
-                            session.studentInfo.language_spoken.map((lang, index) => (
-                              <span
-                                key={index}
-                                className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-white border border-gray-200 text-gray-700"
-                              >
-                                {lang.language} - {lang.proficiency}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-gray-500 text-xs">Not Specified</span>
-                          )}
+          {/* Status Filter */}
+          <div className="relative min-w-[200px]">
+            <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
+            <select
+              value={selectedStatus}
+              onChange={(e) => setSelectedStatus(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 
+                bg-white text-gray-900 
+                focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
+                transition-colors shadow-sm appearance-none cursor-pointer"
+            >
+              {sessionStatuses.map(status => (
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
+              ))}
+            </select>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <svg className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Status Summary */}
+        <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+            {sessionStatuses.slice(1).map(status => {
+              const count = sessions.filter(session => {
+                if (status.value === 'listed') return isSessionListed(session);
+                if (status.value === 'unlisted') return !isSessionListed(session);
+                return session.bookings?.[0]?.booking_status === status.value;
+              }).length;
+              return (
+                <div 
+                  key={status.value}
+                  className="flex flex-col items-center p-3 rounded-lg bg-gray-50"
+                >
+                  <span className="text-2xl font-semibold text-gray-900">{count}</span>
+                  <span className="text-sm text-gray-600 text-center">{status.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Sessions Grid */}
+      {!filteredSessions || filteredSessions.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <Filter className="h-12 w-12 mx-auto" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No sessions found
+          </h3>
+          <p className="text-gray-600">
+            {sessions.length === 0 
+              ? "You haven't created any sessions yet. Click 'Add New Session' to get started."
+              : "Try selecting a different status filter to see more sessions."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-6">
+          {filteredSessions.map((session) => (
+            <div
+              key={session.id}
+              className="bg-white border border-gray-200 rounded-xl p-4 sm:p-6 hover:shadow-lg transition-all duration-300 relative overflow-hidden"
+            >
+              <div className="flex flex-wrap justify-start items-center mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-gray-100 gap-2">
+                <span
+                  className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium capitalize ${getSessionTypeStyles(
+                    session.session_type
+                  )}`}
+                >
+                  {session.session_type}
+                </span>
+                {session.bookings && session.bookings[0] && session.bookings[0].booking_status && (
+                  <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusStyles(session.bookings[0].booking_status)}`}>
+                    {formatBookingStatus(session)}
+                  </span>
+                )}
+                <span className={`px-3 py-1.5 rounded-full text-sm font-medium ${getStatusStyles(getListingStatus(session))}`}>
+                  {getListingStatus(session) === 'listed' ? 'Listed' : 'Unlisted'}
+                </span>
+              </div>
+
+              <div className="flex items-center text-gray-700 text-sm sm:text-base">
+                <Clock className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-gray-400" />
+                <div>
+                  <p className="font-medium">{formatLocalTime(session.start_time)}</p>
+                  <p className="text-xs sm:text-sm text-gray-500">
+                    Duration: {getSessionDuration(session.start_time, session.end_time)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mt-4">
+                <div className="space-y-4 sm:space-y-6">
+                  {session.bookings?.length > 0 && session.studentInfo ? (
+                    <div className="bg-gray-50 rounded-xl p-3 sm:p-5 border border-gray-100">
+                      <div className="flex items-start space-x-2 sm:space-x-3">
+                        <Avatar
+                          src={session.studentInfo.profile_image}
+                          name={session.studentInfo.name || ''}
+                          size={40}
+                        />
+                        <div className="flex-1">
+                          <p className="font-semibold text-gray-900 text-sm sm:text-base">
+                            Student: {session.studentInfo.name}
+                          </p>
+                          <p className="text-xs sm:text-sm text-gray-500">
+                            {session.studentInfo.country || 'Country not specified'}
+                          </p>
+                          <div className="mt-2 sm:mt-3">
+                            <p className="text-xs sm:text-sm font-medium text-gray-700">Languages spoken:</p>
+                            <div className="mt-1 sm:mt-2 flex flex-wrap gap-1 sm:gap-2">
+                              {session.studentInfo?.language_spoken && session.studentInfo.language_spoken.length > 0 ? (
+                                session.studentInfo.language_spoken.map((lang, index) => (
+                                  <span
+                                    key={index}
+                                    className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-white border border-gray-200 text-gray-700"
+                                  >
+                                    {lang.language} - {lang.proficiency}
+                                  </span>
+                                ))
+                              ) : (
+                                <span className="text-gray-500 text-xs">Not Specified</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
                   ) : (
-                    <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="bg-gray-50 rounded-xl p-5 border border-gray-100 hover:border-gray-200 transition-colors">
                       <div className="flex items-center justify-center h-full">
                         <p className="text-gray-600 text-center">
                           <span className="block text-lg font-medium mb-1">
@@ -472,101 +571,90 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                     </div>
                   )}
 
-                {!(getBookingStatus(session) === 'completed' || isSessionMissed(session)) && (
-                <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
-                  <CreditCard className="w-5 h-5 text-gray-500" />
-                  <span className="font-medium text-gray-900"> 
-                    This session is valued at {session.credits_required} credits
-                  </span>
-                </div>
-                )}
-
-                {(getBookingStatus(session) === 'completed' || getBookingStatus(session) === 'no_show_by_student') && (
-                <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
-                  <CreditCard className="w-5 h-5 text-gray-500" />
-                  <span className="font-medium text-gray-900"> 
-                    {session.session_type === 'standard' ? (
-                      <>
-                      This session was valued at {session.credits_required} credits
-                      <br />
-                      <span className="text-sm text-gray-600">
-                        • 80% ({Math.floor(session.credits_required * 0.8)} credits) credited to your account
-                        • 20% Platform fee: {Math.floor(session.credits_required * 0.2)} credits
+                  {(getBookingStatus(session) === 'completed' || getBookingStatus(session) === 'no_show_by_student') && (
+                    <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
+                      <CreditCard className="w-5 h-5 text-gray-500" />
+                      <span className="font-medium text-gray-900"> 
+                        {session.session_type === 'standard' ? (
+                          <>
+                          This session was valued at {session.credits_required} credits
+                          <br />
+                          <span className="text-sm text-gray-600">
+                            • 80% ({Math.floor(session.credits_required * 0.8)} credits) credited to your account
+                            • 20% Platform fee: {Math.floor(session.credits_required * 0.2)} credits
+                          </span>
+                          </>
+                        ) : (
+                          `${session.credits_required} Credits have been credited to your account`
+                        )}
                       </span>
-                      </>
-                    ) : (
-                      `${session.credits_required} Credits have been credited to your account`
-                    )}
-                  </span>
+                    </div>
+                  )}
                 </div>
-                )}
-            </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              {/* Session Language */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-start space-x-3">
-                  <span className="text-xl">🌐</span>
-                  <div>
-                    <p className="font-medium text-gray-900">Language to Teach</p>
-                    <p className="mt-1 text-gray-700">
-                      {session.language_to_teach || 'Not specified'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              {renderActionButtons(session)}
-
-            </div>
-          </div>
-          {/* Room Name Notification */}
-          {(() => {
-            const roomNameStatus = getRoomNameStatus(session);
-            
-            if (roomNameStatus) {
-              if (roomNameStatus.type === 'showRoomName') {
-                const cleanedRoomName = cleanRoomName(roomNameStatus.roomName);
-                return (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-green-800 mb-2">
-                        🔐 Secure Room Name Available
-                      </p>
-                      <div className="flex items-center space-x-2">
-                        <code className="bg-green-100 px-3 py-1 rounded text-green-900 select-all">
-                          {cleanedRoomName}
-                        </code>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(cleanedRoomName);
-                            toast.success('Room name copied to clipboard!');
-                          }}
-                          className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
-                        >
-                          Copy
-                        </button>
+                <div className="space-y-6">
+                  <div className="bg-gray-50 rounded-xl p-6">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-xl">🌐</span>
+                      <div>
+                        <p className="font-medium text-gray-900">Language to Teach</p>
+                        <p className="mt-1 text-gray-700">
+                          {session.language_to_teach || 'Not specified'}
+                        </p>
                       </div>
                     </div>
                   </div>
-                );
-              } else if (roomNameStatus.type === 'waitingMessage') {
-                return (
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                    <p className="text-blue-800 font-medium">
-                    🕒 {roomNameStatus.timeMessage}
-                    </p>
-                  </div>
-                );
-              }
-            }
-            
-            return null;
-          })()}
+
+                  {renderActionButtons(session)}
+                </div>
+              </div>
+
+              {(() => {
+                const roomNameStatus = getRoomNameStatus(session);
+              
+                if (roomNameStatus) {
+                  if (roomNameStatus.type === 'showRoomName') {
+                    const cleanedRoomName = cleanRoomName(roomNameStatus.roomName);
+                    return (
+                      <div className="mt-4 bg-green-50 border border-green-200 rounded-lg p-3 sm:p-4 text-sm sm:text-base">
+                        <div>
+                          <p className="font-semibold text-green-800 mb-2">
+                            🔐 Secure Room Name Available
+                          </p>
+                          <div className="flex items-center space-x-2">
+                            <code className="bg-green-100 px-3 py-1 rounded text-green-900 select-all">
+                              {cleanedRoomName}
+                            </code>
+                            <button 
+                              onClick={() => {
+                                navigator.clipboard.writeText(cleanedRoomName);
+                                toast.success('Room name copied to clipboard!');
+                              }}
+                              className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
+                            >
+                              Copy
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  } else if (roomNameStatus.type === 'waitingMessage') {
+                    return (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+                        <p className="text-blue-800 font-medium">
+                        🕒 {roomNameStatus.timeMessage}
+                        </p>
+                      </div>
+                    );
+                  }
+                }
+                
+                return null;
+              })()}
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 };

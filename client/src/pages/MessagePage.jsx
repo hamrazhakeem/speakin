@@ -49,6 +49,7 @@ const MessagePage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const axiosInstance = useAxios();
   const { userId, accessToken } = useSelector((state) => state.auth);
@@ -336,6 +337,14 @@ const MessagePage = () => {
     setShowEmojiPicker(!showEmojiPicker);
   };
 
+  // Add this function to filter users based on search query
+  const filteredChatUsers = chatUsers.filter(user => {
+    const userName = user.user_type === 'student' 
+      ? user.name.toLowerCase()
+      : user.tutor_details.speakin_name.toLowerCase();
+    return userName.includes(searchQuery.toLowerCase());
+  });
+
   return (
     <div className="flex flex-col h-screen overflow-hidden"> {/* Added overflow-hidden */}
       <Navbar />
@@ -353,10 +362,22 @@ const MessagePage = () => {
             <div className="relative">
               <input
                 type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search conversations..."
                 className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
               <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="mr-1 text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
@@ -370,13 +391,13 @@ const MessagePage = () => {
               <div className="flex items-center justify-center h-32">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               </div>
-            ) : error ? (
-              <div className="p-4 text-center text-red-500">{error}</div>
-            ) : chatUsers.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">No conversations yet</div>
+            ) : filteredChatUsers.length === 0 ? (
+              <div className="p-4 text-center text-gray-500">
+                {chatUsers.length === 0 ? 'No conversations yet' : 'No matching conversations found'}
+              </div>
             ) : (
               <div className="space-y-1">
-                {chatUsers.map((user) => (
+                {filteredChatUsers.map((user) => (
                   <div
                     key={user.id}
                     onClick={() => handleUserSelect(user)}

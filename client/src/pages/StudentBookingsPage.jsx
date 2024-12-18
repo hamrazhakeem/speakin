@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Filter } from 'lucide-react';
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { useNavigate } from 'react-router-dom';
@@ -61,38 +60,47 @@ const StudentBookingsPage = () => {
   }, [userId]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Navbar />
-      <main className="flex-grow container mx-auto px-4 py-8 mt-20">
-        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-          <div className="p-8">
-            <div className="flex justify-between items-center mb-8">
-              <h1 className="text-4xl font-bold text-gray-800">My Bookings</h1>
-            </div>
+      <main className="container mx-auto px-4 py-8 mt-20">
+        {/* Profile Header Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Your Bookings</h1>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Manage your session bookings and upcoming classes
+          </p>
+        </div>
 
-            <nav className="flex space-x-6 mb-8 border-b pb-4">
-              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors" onClick={() => navigate('/profile')}>Profile</button>
-              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors" onClick={() => navigate('/student-password-change')}>Security</button>
-              <button className="text-green-600 font-semibold text-lg hover:text-green-800 transition-colors" onClick={() => navigate('/bookings')}>Bookings</button>
-              <button className="text-gray-600 text-lg hover:text-green-600 transition-colors">Refer a friend</button>
-            </nav>
+        {/* Navigation Tabs */}
+        <nav className="max-w-4xl mx-auto mb-8 flex space-x-1 rounded-xl bg-blue-50 p-1">
+          {[
+            { label: 'Profile', path: '/profile' },
+            { label: 'Security', path: '/student-password-change' },
+            { label: 'Bookings', path: '/bookings', active: true },
+            { label: 'Refer a friend', path: '/refer' }
+          ].map((tab) => (
+            <button
+              key={tab.label}
+              onClick={() => navigate(tab.path)}
+              className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200
+                ${tab.active 
+                  ? 'bg-white text-blue-600 shadow-sm' 
+                  : 'text-gray-600 hover:text-blue-600'}`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
 
-            <div className="mb-6 flex justify-between items-center">
-              <div className="flex space-x-4">
-                <button className="flex items-center px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
-                  <Filter className="w-4 h-4 mr-2" />
-                  Filter
-                </button>
-                <select className="px-4 py-2 bg-gray-100 rounded-lg border-none focus:ring-2 focus:ring-green-500">
-                  <option value="all">All Sessions</option>
-                  <option value="upcoming">Upcoming</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
-                </select>
-              </div>
-            </div>
+        {/* Main Content */}
+        <div className="max-w-6xl mx-auto">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-lg transition-shadow duration-200">
 
-          <StudentBookingsList sessions={sessions} fetchStudentSessions={fetchStudentSessions} />
+            {/* Bookings List */}
+            <StudentBookingsList 
+              sessions={sessions} 
+              fetchStudentSessions={fetchStudentSessions} 
+            />
           </div>
         </div>
       </main>
