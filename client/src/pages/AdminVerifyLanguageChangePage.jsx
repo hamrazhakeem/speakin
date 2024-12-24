@@ -3,7 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import AdminNavbar from '../components/AdminNavbar';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import useAxios from '../hooks/useAxios';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
+import Avatar from '../components/Avatar';
+import { ArrowLeft } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const AdminVerifyLanguageChangePage = () => {
   const location = useLocation();
@@ -14,11 +17,12 @@ const AdminVerifyLanguageChangePage = () => {
   const [denyLoading, setDenyLoading] = useState(false);
 
   const handleAction = async (action) => {
-    const loadingState = action === 'approve' ? setApproveLoading : setDenyLoading;
-    loadingState(true);
+    const isApprove = action === 'approve';
+    const loadingSetter = isApprove ? setApproveLoading : setDenyLoading;
     
+    loadingSetter(true);
     try {
-      if (action === 'approve') {
+      if (isApprove) {
         await axiosInstance.patch(`teaching-language-change-requests/${requestData.id}/`);
         toast.success('Language Change Request Approved Successfully');
       } else {
@@ -27,194 +31,221 @@ const AdminVerifyLanguageChangePage = () => {
       }
       navigate('/admin/manage-users/');
     } catch (error) {
-      console.error(`Error ${action}ing language change request:`, error);
-      toast.error(`Failed to ${action} Language Change Request`);
+      console.error(`Error ${isApprove ? 'approving' : 'denying'} language change request:`, error);
+      toast.error(`Failed to ${isApprove ? 'approve' : 'deny'} Language Change Request`);
     } finally {
-      loadingState(false);
+      loadingSetter(false);
     }
   };
 
+  const Section = ({ title, children }) => (
+    <div className="bg-black border border-zinc-800 rounded-lg overflow-hidden mb-6">
+      <div className="px-6 py-4 border-b border-zinc-800">
+        <h2 className="text-lg font-semibold text-white">{title}</h2>
+      </div>
+      <div className="p-6 space-y-4">
+        {children}
+      </div>
+    </div>
+  );
+
+  const InfoItem = ({ label, value, type = "text" }) => (
+    <div className="flex flex-col space-y-1">
+      <span className="text-sm font-medium text-zinc-400">{label}</span>
+      {type === "link" ? (
+        <a 
+          href={value} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-blue-500 hover:text-blue-400 transition-colors"
+        >
+          View {label}
+        </a>
+      ) : type === "status" ? (
+        <div className="flex items-start">
+          <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            value === 'Active' 
+              ? 'bg-emerald-500/20 text-emerald-400' 
+              : 'bg-red-500/20 text-red-400'
+          }`}>
+            {value}
+          </span>
+        </div>
+      ) : (
+        <span className="text-white">{value}</span>
+      )}
+    </div>
+  );
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-zinc-950">
       <AdminNavbar />
-      <main className="flex-1 flex justify-center items-center p-4 mt-16 md:mt-24 mb-10">
-        <div className="w-full max-w-5xl bg-white shadow-lg rounded-lg p-6 md:p-8">
-          <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">
-            Verify Tutor Language Change Request
-          </h1>
+      
+      <div className="max-w-5xl mx-auto px-4 py-8 pt-24">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <button
+              onClick={() => navigate('/admin/manage-users')}
+              className="flex items-center text-zinc-400 hover:text-white mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Users
+            </button>
+            <h1 className="text-2xl font-bold text-white">Verify Language Change Request</h1>
+            <p className="text-zinc-400 mt-1">Review and verify tutor's language change request</p>
+          </div>
+          
+          {requestData && (
+            <div className="flex items-center space-x-3">
+              <Avatar 
+                src={requestData.user?.avatar}
+                name={requestData.full_name}
+                size={48}
+              />
+              <div>
+                <h2 className="text-white font-medium">{requestData.full_name}</h2>
+                <p className="text-sm text-zinc-400">{requestData.user?.email}</p>
+              </div>
+            </div>
+          )}
+        </div>
 
-          {requestData ? (
-            <div className="space-y-8">
-              <Section title="Tutor Information">
-                <InfoItem label="Full Name" value={requestData.full_name} />
-                <InfoItem label="Email" value={requestData.user?.email} />
-                <InfoItem label="Account Status" 
-                  value={
-                    <span className={`px-2 py-1 rounded ${requestData.user?.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {requestData.user?.is_active ? 'Active' : 'Inactive'}
-                    </span>
-                  } 
-                />
-              </Section>
+        {requestData ? (
+          <div className="space-y-6">
+            <Section title="Tutor Information">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <InfoItem label="Full Name" value={requestData.full_name} />
+                  <InfoItem label="Email" value={requestData.user?.email} />
+                  <InfoItem 
+                    label="Account Status" 
+                    value={requestData.user?.is_active ? 'Active' : 'Inactive'}
+                    type="status"
+                  />
+                  <InfoItem 
+                    label="About" 
+                    value={requestData.about} 
+                  />
+                </div>
+              </div>
+            </Section>
 
-              <Section title="Language Change Details">
+            <Section title="Language Change Details">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <InfoItem 
                   label="Current Language" 
-                  value={requestData.tutor_language_to_teach?.[0]?.language || 'N/A'} 
+                  value={
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white">
+                        {requestData.tutor_language_to_teach?.[0]?.language || 'N/A'}
+                      </span>
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        requestData.tutor_language_to_teach?.[0]?.is_native 
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {requestData.tutor_language_to_teach?.[0]?.is_native ? 'Native' : 'Non-Native'}
+                      </span>
+                    </div>
+                  }
                 />
                 <InfoItem 
                   label="New Language" 
-                  value={requestData.new_language} 
+                  value={
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white">
+                        {requestData.new_language}
+                      </span>
+                      <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        requestData.is_native 
+                          ? 'bg-emerald-500/20 text-emerald-400'
+                          : 'bg-blue-500/20 text-blue-400'
+                      }`}>
+                        {requestData.is_native ? 'Native Speaker' : 'Non-Native Speaker'}
+                      </span>
+                    </div>
+                  }
                 />
                 <InfoItem 
-                  label="Native Speaker" 
-                  value={requestData.is_native ? 'Yes' : 'No'} 
+                  label="Change Type" 
+                  value={
+                    <span className="inline-flex px-2.5 py-1 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300">
+                      {requestData.is_native ? 'Native Speaker Verification' : 'Language Certificate Verification'}
+                    </span>
+                  }
                 />
-              </Section>
+              </div>
+            </Section>
 
-              <Section title="Verification Documents">
-                <InfoItem 
-                  label="About" 
-                  value={requestData.about} 
-                />
+            <Section title="Verification Documents">
+              <div className="space-y-4">
                 {requestData.certificate && (
                   <InfoItem
                     label="Language Certificate"
-                    value={
-                      <a 
-                        href={requestData.certificate} 
-                        className="text-blue-500 hover:underline"
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                      >
-                        View Certificate
-                      </a>
-                    }
+                    value={requestData.certificate}
+                    type="link"
                   />
                 )}
                 {requestData.govt_id && (
                   <InfoItem
-                    label="Govt Id"
-                    value={
-                      <a 
-                        href={requestData.govt_id} 
-                        className="text-blue-500 hover:underline"
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                      >
-                        View Govt Id
-                      </a>
-                    }
+                    label="Government ID"
+                    value={requestData.govt_id}
+                    type="link"
                   />
                 )}
                 {requestData.intro_video && (
                   <InfoItem
                     label="Introduction Video"
-                    value={
-                      <a 
-                        href={requestData.intro_video} 
-                        className="text-blue-500 hover:underline"
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                      >
-                        View Introduction Video
-                      </a>
-                    }
+                    value={requestData.intro_video}
+                    type="link"
                   />
                 )}
-              </Section>
-
-              <div className="flex justify-center space-x-4 mt-10">
-                <button
-                  className="px-6 py-2 bg-red-500 text-white flex items-center rounded hover:bg-red-600 transition-colors"
-                  onClick={() => handleAction('deny')}
-                  disabled={denyLoading}
-                >
-                  {denyLoading ? (
-                    <svg
-                      className="animate-spin h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                  ) : (
-                    <>
-                      <FaTimesCircle className="mr-2" /> Deny
-                    </>
-                  )}
-                </button>
-
-                <button
-                  className="px-6 py-2 bg-green-500 text-white flex items-center rounded hover:bg-green-600 transition-colors"
-                  onClick={() => handleAction('approve')}
-                  disabled={approveLoading}
-                >
-                  {approveLoading ? (
-                    <svg
-                      className="animate-spin h-5 w-5 text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                      ></path>
-                    </svg>
-                  ) : (
-                    <>
-                      <FaCheckCircle className="mr-2" /> Approve
-                    </>
-                  )}
-                </button>
               </div>
+            </Section>
+
+            <div className="flex justify-end space-x-4 mt-8">
+              <button
+                className="px-6 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors flex items-center disabled:opacity-50"
+                onClick={() => handleAction('deny')}
+                disabled={denyLoading}
+              >
+                {denyLoading ? (
+                  <div className="flex items-center">
+                    <LoadingSpinner size="sm" className="text-white" />
+                  </div>
+                ) : (
+                  <>
+                    <FaTimesCircle className="mr-2" /> Deny
+                  </>
+                )}
+              </button>
+
+              <button
+                className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center disabled:opacity-50"
+                onClick={() => handleAction('approve')}
+                disabled={approveLoading}
+              >
+                {approveLoading ? (
+                  <div className="flex items-center">
+                    <LoadingSpinner size="sm" className="text-white" />
+                  </div>
+                ) : (
+                  <>
+                    <FaCheckCircle className="mr-2" /> Approve
+                  </>
+                )}
+              </button>
             </div>
-          ) : (
-            <p className="text-center text-gray-600">No request data available.</p>
-          )}
-        </div>
-      </main>
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-zinc-400">No request data available.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
-
-const Section = ({ title, children }) => (
-  <div className="border-b pb-4">
-    <h2 className="text-xl font-semibold mb-4 border-b-2 border-gray-200 pb-2">{title}</h2>
-    <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-      {children}
-    </div>
-  </div>
-);
-
-const InfoItem = ({ label, value }) => (
-  <div className="flex flex-col sm:flex-row sm:justify-between py-2 bg-white border rounded-lg p-4 shadow-sm mb-4">
-    <span className="font-medium">{label}:</span>
-    <span className="text-gray-700">{value}</span>
-  </div>
-);
 
 export default AdminVerifyLanguageChangePage;

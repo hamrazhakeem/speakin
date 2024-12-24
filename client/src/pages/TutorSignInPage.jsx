@@ -4,16 +4,17 @@ import Footer from '../components/Footer';
 import { useDispatch } from 'react-redux';
 import { setTokens } from '../redux/authSlice';
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import { ChevronRight, User, GraduationCap, Eye, EyeOff } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const TutorSignInPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -24,6 +25,7 @@ const TutorSignInPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMessage('');
+    setIsLoading(true);
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}tutor-sign-in/`, { email, password });
       const { access, refresh, name, id, credits, required_credits } = response.data;
@@ -45,6 +47,8 @@ const TutorSignInPage = () => {
       const message = error.response?.data?.detail || 'Login failed. Please try again.';
       setErrorMessage(message);
       console.error('Login failed', message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -110,19 +114,28 @@ const TutorSignInPage = () => {
                 </button>
               </div>
 
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-12 py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-xl font-medium transition-colors duration-200 flex items-center justify-center group"
+              >
+                {isLoading ? (
+                  <div className="h-5 flex items-center">
+                    <LoadingSpinner size="sm"/>
+                  </div>
+                ) : (
+                  <>
+                    Sign In
+                    <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </>
+                )}
+              </button>
+
               {errorMessage && (
                 <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
                   {errorMessage}
                 </div>
               )}
-
-              <button
-                type="submit"
-                className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors duration-200 flex items-center justify-center group"
-              >
-                Sign In
-                <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
             </form>
 
             {/* Footer Links */}

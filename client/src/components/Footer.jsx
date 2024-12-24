@@ -11,6 +11,9 @@ const Footer = () => {
       links: [
         { name: "About Us", path: "/about-us" },
         { name: "How it Works", path: "/how-it-works" },
+        { name: "FAQ", path: "/faq" },
+        { name: "Terms and Conditions", path: "/terms-and-conditions" },
+        { name: "Privacy Policy", path: "/privacy-policy" },
       ]
     },
     {

@@ -1,32 +1,78 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, Shield, Timer } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const ForgotPasswordOtpPage = () => {
-    const [otp, setOtp] = useState(['', '', '', '', '', '']); // Array for 6 digits
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const [timer, setTimer] = useState(30);
-    const [showTimer, setShowTimer] = useState(true);
     const location = useLocation();
     const navigate = useNavigate();
-
     const { email, cache_key } = location.state || {};
+
+    const [otp, setOtp] = useState(['', '', '', '', '', '']);
+    const [error, setError] = useState('');
+    const [verifyLoading, setVerifyLoading] = useState(false);
+    const [resendLoading, setResendLoading] = useState(false);
+    const [timer, setTimer] = useState(() => {
+        // Check if user is coming from forgot-password page
+        const prevPath = localStorage.getItem('prevPath');
+        const currentPath = location.pathname;
+        
+        if (prevPath !== currentPath) {
+            localStorage.setItem('prevPath', currentPath);
+            localStorage.setItem('otpTimerEnd', (Date.now() + 30 * 1000).toString());
+            return 30;
+        }
+
+        const endTime = localStorage.getItem('otpTimerEnd');
+        if (endTime) {
+            const remaining = Math.round((parseInt(endTime) - Date.now()) / 1000);
+            return remaining > 0 ? remaining : 0;
+        }
+        return 30;
+    });
+    const [showTimer, setShowTimer] = useState(timer > 0);
+
+    useEffect(() => {
+        if (!email || !cache_key) {
+            navigate('/forgot-password');
+            return;
+        }
+    }, [email, cache_key, navigate]);
 
     useEffect(() => {
         if (timer > 0) {
+            // Store end time in localStorage
+            localStorage.setItem('otpTimerEnd', (Date.now() + timer * 1000).toString());
+
             const interval = setInterval(() => {
-                setTimer((prevTimer) => prevTimer - 1);
+                setTimer((prevTimer) => {
+                    const newTimer = prevTimer - 1;
+                    if (newTimer === 0) {
+                        localStorage.removeItem('otpTimerEnd');
+                        setShowTimer(false);
+                    }
+                    return newTimer;
+                });
             }, 1000);
-            return () => clearInterval(interval);
+            return () => {
+                clearInterval(interval);
+            };
         } else {
             setShowTimer(false);
+            localStorage.removeItem('otpTimerEnd');
         }
     }, [timer]);
+
+    // Clean up when component unmounts
+    useEffect(() => {
+        return () => {
+            localStorage.removeItem('prevPath');
+        };
+    }, []);
 
     const handleOtpChange = (index, value, e) => {
         // Handle pasting
@@ -78,12 +124,12 @@ const ForgotPasswordOtpPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        setLoading(true);
+        setVerifyLoading(true);
 
         const otpString = otp.join('');
         if (otpString.length !== 6) {
             setError('Please enter the complete 6-digit OTP.');
-            setLoading(false);
+            setVerifyLoading(false);
             return;
         }
 
@@ -98,13 +144,13 @@ const ForgotPasswordOtpPage = () => {
             console.error(error.response?.data);
             setError(error.response?.data?.message || 'Invalid OTP. Please try again.');
         } finally {
-            setLoading(false);
+            setVerifyLoading(false);
         }
     };
 
     const handleResendOtp = async () => {
         setError('');
-        setLoading(true);
+        setResendLoading(true);
 
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}forgot-password-resend-otp/`, 
@@ -114,12 +160,13 @@ const ForgotPasswordOtpPage = () => {
             toast.success('New OTP sent to your email!');
             setTimer(30);
             setShowTimer(true);
+            localStorage.setItem('otpTimerEnd', (Date.now() + 30 * 1000).toString());
             setOtp(['', '', '', '', '', '']); // Clear OTP fields
         } catch (error) {
             console.error(error.response?.data);
             setError(error.response?.data?.message || 'Failed to resend OTP. Please try again.');
         } finally {
-            setLoading(false);
+            setResendLoading(false);
         }
     };
 
@@ -173,22 +220,16 @@ const ForgotPasswordOtpPage = () => {
                                 ))}
                             </div>
 
-                            {/* Error Message */}
-                            {error && (
-                                <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-start">
-                                    <span className="shrink-0 mr-2">⚠️</span>
-                                    {error}
-                                </div>
-                            )}
-
                             {/* Submit Button */}
                             <button
                                 type="submit"
-                                disabled={loading}
-                                className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={verifyLoading}
+                                className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
                             >
-                                {loading ? (
-                                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                {verifyLoading ? (
+                                    <div className="h-5 flex items-center">
+                                        <LoadingSpinner size="sm"/>
+                                    </div>
                                 ) : (
                                     <>
                                         Verify OTP
@@ -196,6 +237,14 @@ const ForgotPasswordOtpPage = () => {
                                     </>
                                 )}
                             </button>
+
+                            {/* Error Message */}
+                            {error && (
+                                <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-start">
+                                    <span className="shrink-0 mr-2">⚠️</span>
+                                    {error}
+                                </div>
+                            )}
                         </form>
 
                         {/* Resend OTP Section */}
@@ -206,13 +255,19 @@ const ForgotPasswordOtpPage = () => {
                                     Resend OTP in {timer} seconds
                                 </div>
                             ) : (
-                                <button
-                                    onClick={handleResendOtp}
-                                    disabled={loading}
-                                    className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Resend OTP
-                                </button>
+                                <div className="flex justify-center">
+                                    <button
+                                        onClick={handleResendOtp}
+                                        disabled={resendLoading}
+                                        className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+                                    >
+                                        {resendLoading ? (
+                                            <LoadingSpinner size="sm" className="text-blue-600" />
+                                        ) : (
+                                            'Resend OTP'
+                                        )}
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package user_service;
+
+service UserService {
+    rpc UpdateUserCredits(UpdateUserCreditsRequest) returns (UpdateUserCreditsResponse);
+}
+
+message UpdateUserCreditsRequest {
+    int32 user_id = 1;
+    int32 credits = 2;
+    bool is_deduction = 3;
+    bool refund_from_escrow = 4;
+}
+
+message UpdateUserCreditsResponse {
+    bool success = 1;
+}

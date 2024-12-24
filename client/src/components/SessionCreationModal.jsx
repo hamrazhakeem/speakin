@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Calendar as Info, X, Clock, AlertCircle } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import useAxios from '../hooks/useAxios';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailability, teachingLanguage }) => {
   const [step, setStep] = useState(1);

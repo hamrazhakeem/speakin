@@ -111,13 +111,23 @@ class UserEmailStatusSerializer(serializers.ModelSerializer):
 class TeachingLanguageChangeRequestSerializer(serializers.ModelSerializer):
     user = UserEmailStatusSerializer(read_only=True)
     tutor_language_to_teach = TutorLanguageToTeachSerializer(many=True, source='user.tutor_language_to_teach', read_only=True)
-    new_language = serializers.SlugRelatedField(slug_field='name', queryset=Language.objects.all())
-        
-    class Meta: 
-        model = TeachingLanguageChangeRequest 
+    new_language = serializers.SlugRelatedField(
+        slug_field='name', 
+        queryset=Language.objects.all()
+    )
+    
+    class Meta:
+        model = TeachingLanguageChangeRequest
         fields = ['id', 'new_language', 'is_native', 'certificate', 'govt_id', 'intro_video',  
                  'full_name', 'about', 'status', 'user', 'tutor_language_to_teach']
         read_only_fields = ['status']
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        # Convert Language object to string in representation
+        if instance.new_language:
+            representation['new_language'] = instance.new_language.name
+        return representation
 
     def to_internal_value(self, data):
         # Handle new_language field as a string (language name) and convert it to the corresponding language ID

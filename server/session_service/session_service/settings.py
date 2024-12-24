@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -133,9 +134,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 USER_SERVICE_URL = os.getenv('USER_SERVICE_URL')
 PAYMENT_SERVICE_URL = os.getenv('PAYMENT_SERVICE_URL')
-
-TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
-TWILIO_API_KEY = os.getenv('TWILIO_API_KEY')
-TWILIO_API_SECRET = os.getenv('TWILIO_API_SECRET')
 
 DAILY_API_KEY = os.getenv('DAILY_API_KEY')

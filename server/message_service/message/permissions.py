@@ -1,25 +1,8 @@
 from rest_framework.permissions import BasePermission
 from rest_framework.exceptions import PermissionDenied
-import base64
-import json
+from .utils import decode_jwt
 
 class IsOwner(BasePermission):
-    def decode_jwt(self, token):
-        """Decodes the JWT and returns the payload."""
-        parts = token.split('.')
-        if len(parts) != 3:
-            return None
-
-        payload_base64 = parts[1]
-        # Add padding if necessary
-        padding = len(payload_base64) % 4
-        if padding:
-            payload_base64 += '=' * (4 - padding)
-            
-        payload_json = base64.urlsafe_b64decode(payload_base64)
-        payload = json.loads(payload_json)
-        return payload
-
     def has_permission(self, request, view):
         auth_header = request.headers.get('Authorization')
         print('auth_header',auth_header)

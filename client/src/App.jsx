@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ToastContainer } from 'react-toastify';
+import { Toaster } from 'react-hot-toast';
 
 import LandingPage from './pages/LandingPage';
 import AboutUs from './pages/AboutUs';
 import HowItWorks from './pages/HowItWorks';
-import SignInPage from './pages/SigninPage';
+import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import OtpPage from './pages/OtpPage';
 import HomePage from './pages/HomePage';
@@ -13,6 +13,10 @@ import ForgotPasswordOtpPage from './pages/ForgotPasswordOtpPage';
 import SetNewPassword from './pages/SetNewPassword';
 import ProfilePage from './pages/ProfilePage';
 import StudentPasswordChangePage from './pages/StudentPasswordChangePage';
+import BuyCredits from './pages/BuyCredits';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentCancelPage from './pages/PaymentCancelPage';
+import StudentBookingsPage from './pages/StudentBookingsPage';
 
 import TutorLandingPage from './pages/TutorLandingPage';
 import TutorSignInPage from './pages/TutorSignInPage';
@@ -29,99 +33,93 @@ import ApplicationConfirmation from './pages/ApplicationConfirmation';
 import AdminVerifyTutorPage from './pages/AdminVerifyTutorPage';
 import AdminVerifyLanguageChangePage from './pages/AdminVerifyLanguageChangePage';
 
-import StudentUnprotectedRoute from './routes/StudentUnprotectedRoute';
-import StudentProtectedRoute from './routes/StudentProtectedRoute';
-import TutorProtectedRoute from './routes/TutorProtectedRoute';
-import TutorUnprotectedRoute from './routes/TutorUnprotectedRoute';
-import AdminProtectedRoute from './routes/AdminProtectedRoute';
-import AdminUnprotectedRoute from './routes/AdminUnprotectedRoute';
-
-import BuyCredits from './pages/BuyCredits';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
-import PaymentCancelPage from './pages/PaymentCancelPage';
-import StudentBookingsPage from './pages/StudentBookingsPage';
-
-import VideoCall from './components/VideoCall';
-import VideoCallSetup from './components/VideoCallSetup';
+import VideoCall from './pages/VideoCall';
+import VideoCallSetup from './pages/VideoCallSetup';
 import MeetingSummary from './pages/MeetingSummary';
 import MessagePage from './pages/MessagePage';
-import ScrollToTop from './components/ScrollToTop';
+import Withdraw from './pages/Withdraw';
+import StripeRefresh from './pages/StripeRefresh';
+
+import StudentRoute from './routes/StudentRoute';
+import TutorRoute from './routes/TutorRoute';
+import AdminRoute from './routes/AdminRoute';
+import ProtectedRoute from './routes/ProtectedRoute';
+import PublicRoute from './routes/PublicRoute';
+
+import ScrollToTop from './components/utils/ScrollToTop';
+import FAQPage from './pages/FAQPage';
+import TermsAndConditionsPage from './pages/TermsAndConditionsPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 
 const App = () => {
   return (
     <Router>
-      <ScrollToTop />
-      <ToastContainer
-        position='top-center'
-        pauseOnHover={false}
-        hideProgressBar={true}
-        closeOnClick={true}
-        closeButton={false}
-        autoClose={1500}
-      />
+          <ScrollToTop />
+          <Toaster />
+          <Routes>
+            {/* Student Protected routes */}
+            <Route element={<StudentRoute />}>
+              <Route path='/home' element={<HomePage />} />
+              <Route path='/profile' element={<ProfilePage />} />
+              <Route path='/student-password-change' element={<StudentPasswordChangePage />} />
+              <Route path='/buy-credits' element={<BuyCredits />} />
+              <Route path='/payment/success' element={<PaymentSuccessPage />} />
+              <Route path='/payment/cancel' element={<PaymentCancelPage />} />
+              <Route path='/bookings' element={<StudentBookingsPage />} />
+            </Route>
 
-      <Routes>
-        {/* Tutor Unprotected routes */}
-        <Route element={<TutorUnprotectedRoute />}>
-          <Route path='/become-a-tutor' element={<TutorLandingPage />} />
-          <Route path='/tutor-request' element={<TutorRequestPage />} />
-          <Route path='/tutor-sign-in' element={<TutorSignInPage />} />
-          <Route path='/application-confirmation' element={<ApplicationConfirmation />} />
-        </Route>
+            {/* Tutor Protected routes */}  
+              <Route element={<TutorRoute />}> 
+              <Route path='/tutor-dashboard' element={<TutorDashboard />} />
+              <Route path='/tutor-password-change' element={<TutorPasswordChangePage />} />
+              <Route path='/edit-teaching-language' element={<EditTeachingLanguage />} />
+              <Route path='/tutor-sessions' element={<TutorSessionsPage />} />
+            </Route>
 
-        <Route path='/video-call' element={<VideoCall />} />
-        <Route path='/video-call-setup' element={<VideoCallSetup />} />
-        <Route path='/meeting-summary' element={<MeetingSummary />} />
-        <Route path='/messages' element={<MessagePage />} />
+            {/* Admin Protected routes */}
+            <Route element={<AdminRoute />}>
+              <Route path='/admin/dashboard' element={<AdminDashboardPage />} />
+              <Route path='/admin/manage-users' element={<AdminManageUsersPage />} />
+              <Route path='/admin/verify-tutor/:userId' element={<AdminVerifyTutorPage />} />
+              <Route path='/admin/verify-language-change/:requestId' element={<AdminVerifyLanguageChangePage />} />
+            </Route>
 
-        {/* Tutor Protected routes */}  
-        <Route element={<TutorProtectedRoute />}> 
-          <Route path='/tutor-dashboard' element={<TutorDashboard />} />
-          <Route path='/tutor-password-change' element={<TutorPasswordChangePage />} />
-          <Route path='/edit-teaching-language' element={<EditTeachingLanguage />} />
-          <Route path='/tutor-sessions' element={<TutorSessionsPage />} />
-        </Route>
+            {/* Common Protected routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path='/video-call' element={<VideoCall />} />
+              <Route path='/video-call-setup' element={<VideoCallSetup />} />
+              <Route path='/meeting-summary' element={<MeetingSummary />} />
+              <Route path='/messages' element={<MessagePage />} />
+              <Route path='/withdraw' element={<Withdraw />} />
+              <Route path='/stripe/refresh' element={<StripeRefresh />} />
+            </Route>
 
-        {/* Student Unprotected routes */}
-        <Route element={<StudentUnprotectedRoute/>}>
-          <Route path='/' element={<LandingPage />} />
-          <Route path='/about-us' element={<AboutUs />} />
-          <Route path='/how-it-works' element={<HowItWorks />} />
-          <Route path='/sign-in' element={<SignInPage />} />
-          <Route path='/sign-up' element={<SignUpPage />} />
-          <Route path='/verify-otp' element={<OtpPage />} />
-          <Route path='/forgot-password' element={<ForgotPassword />} />
-          <Route path='/forgot-password-verify-otp' element={<ForgotPasswordOtpPage />} />
-          <Route path='/set-new-password' element={<SetNewPassword />} />
-        </Route>
+            {/* Public routes */}
+            <Route element={<PublicRoute />}>
+              <Route path='/' element={<LandingPage />} />
+              <Route path='/sign-in' element={<SignInPage />} />
+              <Route path='/sign-up' element={<SignUpPage />} />
+              <Route path='/verify-otp' element={<OtpPage />} />
+              <Route path='/become-a-tutor' element={<TutorLandingPage />} />
+              <Route path='/tutor-sign-in' element={<TutorSignInPage />} />
+              <Route path='/tutor-request' element={<TutorRequestPage />} />
+              <Route path='/application-confirmation' element={<ApplicationConfirmation />} />
+              <Route path='/forgot-password' element={<ForgotPassword />} />
+              <Route path='/forgot-password-verify-otp' element={<ForgotPasswordOtpPage />} />
+              <Route path='/set-new-password' element={<SetNewPassword />} />
+              <Route path='/admin/sign-in' element={<AdminSignInPage />} />
+            </Route>
 
-        {/* Student Protected routes */}
-        <Route element={<StudentProtectedRoute />}>
-          <Route path='/home' element={<HomePage />} />
-          <Route path='/profile' element={<ProfilePage />} />
-          <Route path='/student-password-change' element={<StudentPasswordChangePage />} />
-          <Route path='/buy-credits' element={<BuyCredits />} />
-          <Route path='/payment/success' element={<PaymentSuccessPage />} />
-          <Route path='/payment/cancel' element={<PaymentCancelPage />} />
-          <Route path='/bookings' element={<StudentBookingsPage />} />
-        </Route>
+            {/* Routes that don't need protection */}
+            <Route path='/about-us' element={<AboutUs />} />
+            <Route path='/how-it-works' element={<HowItWorks />} />
+            <Route path='/faq' element={<FAQPage />} />
+            <Route path='/terms-and-conditions' element={<TermsAndConditionsPage />} />
+            <Route path='/privacy-policy' element={<PrivacyPolicyPage />} />
 
-        {/* Admin Unprotected routes */}
-        <Route element={<AdminUnprotectedRoute />}>
-          <Route path='/admin/sign-in' element={<AdminSignInPage />} />
-        </Route>
-
-        {/* Admin Protected routes */}
-        <Route element={<AdminProtectedRoute />}>
-          <Route path='/admin/dashboard' element={<AdminDashboardPage />} />
-          <Route path='/admin/manage-users' element={<AdminManageUsersPage />} />
-          <Route path='/admin/verify-tutor/:userId' element={<AdminVerifyTutorPage />} />
-          <Route path='/admin/verify-language-change/:requestId' element={<AdminVerifyLanguageChangePage />} />
-        </Route>
-
-        {/* Default route for unmatched paths */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+            {/* Default route for unmatched paths */}
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
     </Router>
   );
 };

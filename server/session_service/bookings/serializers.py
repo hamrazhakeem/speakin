@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import TutorAvailability, Bookings
-from django.db.models import F
 
 class BookingsSerializer(serializers.ModelSerializer):
     class Meta:

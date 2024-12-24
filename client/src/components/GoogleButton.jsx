@@ -5,13 +5,12 @@ import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setTokens } from '../redux/authSlice';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 const GoogleLoginButton = () => {
     const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const [errorMessage, setErrorMessage] = useState('');
 
   const isSignUpPage = location.pathname === '/sign-up';
 
@@ -26,7 +25,7 @@ const GoogleLoginButton = () => {
       navigate('/home');
     } catch (error) {
         const message = error.response?.data?.detail || 'Login failed. Please try again.';
-        setErrorMessage(message);
+        toast.error(message);
     }
   };
 
@@ -67,7 +66,6 @@ const GoogleLoginButton = () => {
           {isSignUpPage ? 'Sign up with Google' : 'Sign in with Google'}
         </span>
       </button>
-            {errorMessage && <p className="text-red-500 mt-2">{errorMessage}</p>}
     </div>
   );
 };

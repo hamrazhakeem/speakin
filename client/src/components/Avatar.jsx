@@ -1,6 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import LoadingSpinner from './ui/LoadingSpinner';
 
-const Avatar = ({ src, name, size = 64 }) => {
+const Avatar = ({ src, name, size = 64, isNavbar = false, isUploading = false }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!src);
+
+  useEffect(() => {
+    if (src) {
+      setIsLoading(true);
+      const img = new Image();
+      img.src = src;
+      img.onload = () => {
+        setImageLoaded(true);
+        setIsLoading(false);
+      };
+      img.onerror = () => {
+        setImageError(true);
+        setIsLoading(false);
+      };
+    }
+    
+    return () => {
+      setImageLoaded(false);
+      setImageError(false);
+      setIsLoading(!!src);
+    };
+  }, [src]);
+
   const getInitials = (name) => {
     return name
       ?.split(' ')
@@ -21,36 +48,50 @@ const Avatar = ({ src, name, size = 64 }) => {
       'bg-indigo-500',
     ];
     
-    // Use the name to consistently get the same color for the same user
     const index = name?.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) || 0;
     return colors[index % colors.length];
   };
 
-  if (src) {
+  // Show loading spinner when image is loading or uploading
+  if ((isLoading && isNavbar) || isUploading) {
     return (
-      <img
-        src={src}
-        alt={name}
-        className="rounded-full object-cover"
+      <div 
+        className={`${isNavbar ? 'bg-white/10' : 'bg-gray-100'} rounded-full flex items-center justify-center`}
         style={{ width: size, height: size }}
-        onError={(e) => {
-          e.target.onerror = null; // Prevent infinite loop
-          e.target.src = ''; // Clear the src to show the backup avatar
-          e.target.classList.add('hidden');
-          e.target.nextSibling?.classList.remove('hidden');
-        }}
-      />
+      >
+        <LoadingSpinner 
+          size={isNavbar ? "sm" : "md"} 
+          className={isNavbar ? "text-white" : "text-blue-600"} 
+        />
+      </div>
     );
   }
 
+  // Only show initials if there's no image or if image failed to load
+  if (!src || imageError) {
+    return (
+      <div 
+        className={`${getRandomColor(name)} rounded-full flex items-center justify-center`}
+        style={{ width: size, height: size }}
+      >
+        <span className="text-white font-medium" style={{ fontSize: size * 0.4 }}>
+          {getInitials(name)}
+        </span>
+      </div>
+    );
+  }
+
+  // Show image with loading state
   return (
-    <div 
-      className={`${getRandomColor(name)} rounded-full flex items-center justify-center`}
-      style={{ width: size, height: size }}
-    >
-      <span className="text-white font-medium" style={{ fontSize: size * 0.4 }}>
-        {getInitials(name)}
-      </span>
+    <div className="relative" style={{ width: size, height: size }}>
+      <img
+        src={src}
+        alt={name}
+        className={`w-full h-full rounded-full object-cover transition-opacity duration-200 ${
+          imageLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        onError={() => setImageError(true)}
+      />
     </div>
   );
 };

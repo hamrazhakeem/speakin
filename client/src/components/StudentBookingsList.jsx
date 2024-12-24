@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { Clock, CreditCard, RotateCw, VideoIcon, Filter } from 'lucide-react';
+import { Clock, CreditCard, RotateCw, VideoIcon, Filter, ChevronDown, ChevronUp, AlertCircle, Calendar } from 'lucide-react';
 import EmptyState from './EmptyState';
 import useAxios from '../hooks/useAxios';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import Avatar from './Avatar';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from './ui/LoadingSpinner';
 
 const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
   const axiosInstance = useAxios();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [showRules, setShowRules] = useState(false);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -119,13 +121,11 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
     }
   
     try {
-      const response = await axiosInstance.patch(`tutor-availabilities/${session.availability}/`, {
+      await axiosInstance.patch(`tutor-availabilities/${session.availability}/`, {
         booking_status: 'canceled_by_student',
       });
   
-      if (response.status === 204) {
-        toast.success('Session cancelled successfully');
-      }
+      toast.success('Session cancelled successfully');
       fetchStudentSessions();
     } catch (error) {
       console.log(error)
@@ -259,8 +259,35 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
     return roomLink;
   };
 
+  // Show loading state when sessions is null (initial load)
+  if (sessions === null) {
+    return (
+      <div className="min-h-[400px] flex flex-col items-center justify-center p-8">
+        <LoadingSpinner size="lg" className="text-blue-600" />
+      </div>
+    );
+  }
+
+  // Show empty state only when we have confirmed there are no sessions
+  if (sessions.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-gray-400 mb-4">
+          <Calendar className="h-12 w-12 mx-auto" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          No bookings found
+        </h3>
+        <p className="text-gray-600">
+          You haven't booked any sessions yet. Browse available tutors to get started!
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-4">
           <h2 className="text-2xl font-semibold text-gray-900">Session Details</h2>
@@ -313,6 +340,69 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
           })}
         </div>
       </div>
+
+      <button
+        onClick={() => setShowRules(!showRules)}
+        className="flex items-center gap-2 px-4 py-3 bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-colors w-full"
+      >
+        <AlertCircle className="w-5 h-5" />
+        <span className="flex-1 text-left font-medium">Important Session Rules - Please Read</span>
+        {showRules ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+      </button>
+
+        {/* Rules section at the bottom */}
+        {showRules && (
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mt-6">
+          <div className="flex items-start space-x-4 mb-4">
+            <div className="p-2 bg-amber-50 rounded-lg">
+              <Clock className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Session Rules and Policies
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    You can join your session starting <span className="font-medium">5 minutes before</span> the scheduled start time.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    If you don't join within <span className="font-medium">5 minutes after</span> the session start time, it will be marked as a "no-show" and credits will not be refunded.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    If both you and the tutor fail to join within the first 5 minutes, the session credits will be retained by the platform.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    For tutor no-shows, you'll receive a <span className="font-medium">full refund plus 10% bonus credits</span> as compensation.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    Trial sessions cannot be canceled within <span className="font-medium">1 hour</span> of the start time. Standard sessions cannot be canceled within <span className="font-medium">2 hours</span> of the start time.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    If the tutor cancels the session, you will receive a <span className="font-medium">full refund</span> of your credits.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {!filteredSessions || filteredSessions.length === 0 ? (
         <EmptyState

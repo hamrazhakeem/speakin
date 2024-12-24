@@ -2,26 +2,166 @@
 <html>
 <head>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #D9534F; color: white; padding: 10px; text-align: center; }
-        .content { padding: 20px; background-color: #f9f9f9; }
-        .highlight { font-size: 18px; font-weight: bold; color: #D9534F; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+            padding: 24px;
+            text-align: center;
+            border-radius: 16px 16px 0 0;
+        }
+        .content {
+            padding: 32px;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .highlight-container {
+            background-color: #fef2f2;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: center;
+            border: 1px solid #fee2e2;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #dc2626;
+            color: white;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 8px 0;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+            text-decoration: none;
+            border-radius: 9999px;
+            font-weight: 600;
+            margin-top: 16px;
+            text-align: center;
+        }
+        .requirements-box {
+            background-color: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        .requirements-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .requirements-list li {
+            margin-bottom: 12px;
+            color: #4b5563;
+        }
+        .improvement-section {
+            background-color: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        .improvement-section h3 {
+            color: #1e40af;
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+        .support-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .support-link:hover {
+            text-decoration: underline;
+        }
+        .info-card {
+            background-color: #fff7ed;
+            border: 1px solid #ffedd5;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+        .info-card-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>SpeakIn Tutor Application Update</h1>
+            <h1 class="logo">SpeakIn</h1>
         </div>
         <div class="content">
+            <div class="highlight-container">
+                <div class="status-badge">Not Approved</div>
+                <h2 style="margin: 16px 0; color: #dc2626;">Application Status Update</h2>
+                <p style="margin: 0; color: #991b1b;">Your tutor application requires additional review</p>
+            </div>
+
             <p>Dear {{tutor_name}},</p>
-            <p>We regret to inform you that your application to become a tutor on SpeakIn has been <span class="highlight">denied</span>.</p>
-            <p>Following a detailed review, we found that your application did not meet some of the essential requirements. This may be due to documentation, submitted certificates, your introduction video, or other qualifications that did not align fully with our platform standards for tutors.</p>
-            <p>If you believe there may have been an oversight or if you wish to provide additional details, you are welcome to reapply. For a successful reapplication, we encourage you to review your application and update any documents or information that might further support your application to join our platform as a tutor.</p>
-            <p>If you have any questions or need further assistance, please feel free to contact us at <a href="mailto:support@speakin.com">support@speakin.com</a>.</p>
-            <p>We appreciate your interest in contributing to SpeakIn, and we wish you success in your future endeavors.</p>
-            <p>Best regards,<br>The SpeakIn Team</p>
+            
+            <p>Thank you for your interest in becoming a tutor on SpeakIn. After careful review of your application, we regret to inform you that we are unable to approve your application at this time.</p>
+
+            <div class="requirements-box">
+                <h3 style="margin-top: 0;">Common Reasons for Non-Approval:</h3>
+                <ul class="requirements-list">
+                    <li>Insufficient teaching qualifications or certifications</li>
+                    <li>Incomplete or unclear documentation</li>
+                    <li>Quality of introduction video</li>
+                    <li>Language proficiency requirements not met</li>
+                    <li>Missing or invalid identification documents</li>
+                </ul>
+            </div>
+
+            <div class="improvement-section">
+                <h3>How to Improve Your Application</h3>
+                <ul class="requirements-list" style="color: #1e40af;">
+                    <li>Review and update your teaching certifications</li>
+                    <li>Ensure all required documents are clearly legible</li>
+                    <li>Record a new introduction video focusing on your teaching experience</li>
+                    <li>Provide additional proof of language proficiency</li>
+                    <li>Submit valid identification documents</li>
+                </ul>
+            </div>
+
+            <div class="info-card">
+                <div class="info-card-icon">💡</div>
+                <h3 style="margin: 0 0 8px 0; color: #9a3412;">Want to Reapply?</h3>
+                <p style="margin: 0; color: #9a3412;">
+                    You're welcome to submit a new application after addressing the areas that need improvement. 
+                    We encourage you to review our tutor requirements thoroughly before reapplying.
+                </p>
+            </div>
+
+            <p style="margin-top: 32px;">Need clarification or assistance? Our support team is here to help:</p>
+            <a href="mailto:support@speakin.com" class="support-link">support@speakin.com</a>
+            
+            <p style="margin-top: 32px;">Best regards,<br>The SpeakIn Team</p>
         </div>
     </div>
 </body>

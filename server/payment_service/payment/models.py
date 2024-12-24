@@ -2,17 +2,28 @@ from django.db import models
 
 # Create your models here.
 
+class StripeAccount(models.Model):
+    user_id = models.IntegerField(unique=True)
+    stripe_account_id = models.CharField(max_length=100)
+    is_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Stripe account for user {self.user_id}"
+
 class Transactions(models.Model):
     TRANSACTION_TYPE_CHOICES = [
         ('credit_purchase', 'Credit Purchase'),
         ('subscription', 'Subscription'),
-        ('platform_fee', 'Platform Fee'),  # New transaction type
+        ('platform_fee', 'Platform Fee'),  
+        ('withdrawal', 'Withdrawal'),
     ]
 
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('completed', 'Completed'),
         ('refunded', 'Refunded'),
+        ('failed', 'Failed'),
     ]
 
     user_id = models.IntegerField(null=True) 

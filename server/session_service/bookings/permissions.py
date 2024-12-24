@@ -1,28 +1,13 @@
-import base64
-import json
 from rest_framework.exceptions import PermissionDenied
 from .models import Bookings, TutorAvailability
 from rest_framework.permissions import BasePermission
 from .models import Bookings
 from django.db.models import Q 
-
-def decode_jwt(token):
-    """Decodes the JWT and returns the payload."""
-    try:
-        parts = token.split('.')
-        if len(parts) != 3:
-            return None  # Invalid JWT format
-
-        payload_base64 = parts[1]
-        payload_json = base64.urlsafe_b64decode(payload_base64 + '==')
-        payload = json.loads(payload_json)
-        return payload
-    except Exception:
-        return None
+from .utils import decode_jwt
 
 class IsAdminOrOwnerPermission(BasePermission):
     def has_permission(self, request, view):
-        from .views import BookingsDetail, TutorAvailabilityDetail  # Lazy import
+        from .views import BookingsDetail  # Lazy import
 
         # Skip checks for GET requests
         if request.method == 'GET':
@@ -121,37 +106,3 @@ class ValidateRoomNamePermission(BasePermission):
             raise PermissionDenied("Invalid booking or unauthorized access")
         except Exception as e:
             raise PermissionDenied(str(e))
-
-            # Get room_name from request
-            # room_name = request.data.get("room_name")
-            # if not room_name:
-            #     raise ValidationError("Room name is required.")
-
-            # Extract the original tutor_id and student_id from the room name hash
-        #     try:
-        #         # Assuming the original data used to generate the room name is still accessible
-        #         # You could store these values and match them to check who is authorized for this room
-        #         # Or, you could use a DB lookup to fetch the booking details.
-        #         # room_name_hash = room_name.replace("room_", "")  # Strip 'room_' prefix
-        #         # Use the room name hash to look up the corresponding booking record and get the tutor_id, student_id
-        #         # e.g., fetch room details from DB, assuming room_name_hash links to a booking object
-        #         booking = Bookings.objects.get(video_call_link=room_name)
-        #         room_tutor_id = booking.availability.tutor_id
-        #         room_student_id = booking.student_id
-        #         booking_status = booking.booking_status  # e.g., 'confirmed', 'canceled_by_student', etc.
-        #     except Bookings.DoesNotExist:
-        #         raise PermissionDenied("Room name not found in database.")
-
-        #     # If booking status is not confirmed, deny access
-        #     if booking_status != 'confirmed':
-        #         raise PermissionDenied("This room is no longer available. The booking status is not confirmed.")
-
-        #     # Validate room_name based on user role
-        #     if room_tutor_id != user_id and room_student_id != user_id:
-        #         raise PermissionDenied("You are not authorized for this room.")
-
-        #     # If all checks pass
-        #     return True
-        
-        # except Exception as e:
-        #     raise PermissionDenied(str(e))

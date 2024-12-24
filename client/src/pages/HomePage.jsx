@@ -3,11 +3,12 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import useAxios from '../hooks/useAxios';
 import TutorCard from '../components/TutorCard';
-import { Search, Globe, Filter, Loader, GraduationCap, MessageCircle } from 'lucide-react';
+import { Search, GraduationCap, MessageCircle } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const HomePage = () => {
   const axiosInstance = useAxios();
-  const [tutors, setTutors] = useState([]);
+  const [tutors, setTutors] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,19 +37,19 @@ const HomePage = () => {
 
   // Get unique languages for both teaching and spoken languages
   const teachingLanguages = Array.from(new Set(
-    tutors.flatMap(tutor => 
-      tutor.tutor_language_to_teach?.map(lang => lang.language) || []
+    tutors?.flatMap(tutor => 
+      tutor?.tutor_language_to_teach?.map(lang => lang.language) || []
     )
   )).sort();
 
   const spokenLanguages = Array.from(new Set(
-    tutors.flatMap(tutor => 
-      tutor.language_spoken?.map(lang => lang.language) || []
+    tutors?.flatMap(tutor => 
+      tutor?.language_spoken?.map(lang => lang.language) || []
     )
   )).sort();
 
   // Filter tutors based on search term and selected languages
-  const filteredTutors = tutors.filter(tutor => {
+  const filteredTutors = tutors?.filter(tutor => {
     const matchesSearch = tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          tutor.country?.toLowerCase().includes(searchTerm.toLowerCase());
     
@@ -63,7 +64,7 @@ const HomePage = () => {
                                  );
     
     return matchesSearch && matchesTeachLanguage && matchesSpokenLanguage;
-  });
+  }) || []; 
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
@@ -115,7 +116,7 @@ const HomePage = () => {
                         appearance-none cursor-pointer"
                     >
                       <option value="" className="text-gray-900">All Teaching Languages</option>
-                      {teachingLanguages.map(language => (
+                      {teachingLanguages?.map(language => (
                         <option key={language} value={language} className="text-gray-900">
                           {language}
                         </option>
@@ -142,7 +143,7 @@ const HomePage = () => {
                         appearance-none cursor-pointer"
                     >
                       <option value="" className="text-gray-900">All Spoken Languages</option>
-                      {spokenLanguages.map(language => (
+                      {spokenLanguages?.map(language => (
                         <option key={language} value={language} className="text-gray-900">
                           {language}
                         </option>
@@ -166,8 +167,7 @@ const HomePage = () => {
             {/* Results Info */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
-                {loading ? 'Loading tutors...' : 
-                 `${filteredTutors.length} Tutors Available`}
+                {!loading ? `${filteredTutors.length} Tutors Available` : ''}
               </h2>
               <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
                 {selectedTeachLanguage && (
@@ -187,39 +187,56 @@ const HomePage = () => {
 
             {/* Loading, Error, and Empty States */}
             {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader className="h-8 w-8 text-blue-600 animate-spin" />
+              <div className="container mx-auto px-4 py-12">
+                <div className="max-w-6xl mx-auto">
+                  <div className="min-h-[400px] flex flex-col items-center justify-center p-8">
+                    <LoadingSpinner size="lg" className="text-blue-600" />
+                  </div>
+                </div>
               </div>
             ) : error ? (
-              <div className="bg-red-50 text-red-600 p-4 rounded-lg text-center">
-                <p>{error}</p>
+              <div className="container mx-auto px-4 py-12">
+                <div className="max-w-6xl mx-auto">
+                  <div className="bg-red-50 text-red-600 p-6 rounded-xl text-center">
+                    <p className="font-medium">{error}</p>
+                  </div>
+                </div>
               </div>
             ) : filteredTutors.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Search className="h-12 w-12 mx-auto" />
+              <div className="container mx-auto px-4 py-12">
+                <div className="max-w-6xl mx-auto">
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 mb-4">
+                      <Search className="h-12 w-12 mx-auto" />
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      No tutors found
+                    </h3>
+                    <p className="text-gray-600">
+                      Try adjusting your search or filters to find more tutors
+                    </p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No tutors found
-                </h3>
-                <p className="text-gray-600">
-                  Try adjusting your search or filters to find more tutors
-                </p>
               </div>
             ) : (
-              <div className="grid gap-6">
-                {filteredTutors.map((tutor) => (
-                  <TutorCard
-                    key={tutor.id}
-                    name={tutor.name}
-                    profileImage={tutor.profile_image}
-                    tutorDetails={tutor.tutor_details}
-                    languageSpoken={tutor.language_spoken}
-                    languageToTeach={tutor.tutor_language_to_teach}
-                    country={tutor.country}
-                    tutor_id={tutor.id}
-                  />
-                ))}
+              <div className="container mx-auto px-4 py-12">
+                <div className="max-w-6xl mx-auto">
+                  {/* Tutors Grid */}
+                  <div className="grid gap-6">
+                    {filteredTutors.map((tutor) => (
+                      <TutorCard
+                        key={tutor.id}
+                        name={tutor.name}
+                        profileImage={tutor.profile_image}
+                        tutorDetails={tutor.tutor_details}
+                        languageSpoken={tutor.language_spoken}
+                        languageToTeach={tutor.tutor_language_to_teach}
+                        country={tutor.country}
+                        tutor_id={tutor.id}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
           </div>

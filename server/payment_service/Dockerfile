@@ -14,4 +14,4 @@ ENV DJANGO_SETTINGS_MODULE=payment_service.settings
 
 ENV PYTHONPATH=/app
 
-CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8001 & python3 grpc_services/grpc_server.py"]
+CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8001 & python3 protos/server.py"]

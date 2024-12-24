@@ -33,7 +33,7 @@ def get_chat_users(request, user_id):
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
 
-@api_view(['GET'])
+@api_view(['GET']) 
 @permission_classes([IsOwner])
 def get_chat_history(request, user_id, selected_id):
     """

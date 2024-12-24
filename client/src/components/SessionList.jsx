@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CreditCard, RotateCw, VideoIcon, Filter } from 'lucide-react';
+import { Clock, CreditCard, RotateCw, VideoIcon, Filter, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
 import EmptyState from './EmptyState';
 import useAxios from '../hooks/useAxios';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import Avatar from './Avatar';
 import { useNavigate } from 'react-router-dom';
 
 const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   const axiosInstance = useAxios();
-  const [sessionsWithStudentInfo, setSessionsWithStudentInfo] = useState([]);
+  const [sessionsWithStudentInfo, setSessionsWithStudentInfo] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState('all');
+  const [showRules, setShowRules] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -20,42 +22,43 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   };
 
   useEffect(() => {
-    if (!sessions || sessions.length === 0) {
-      setSessionsWithStudentInfo([]);
-      return;
-    }
     const fetchStudentInfo = async () => {
       try {
-        const updatedSessions = await Promise.all(
-          sessions.map(async (session) => {
-            const studentId = session.bookings?.[0]?.student_id;
-
-            if (studentId) {
-              try {
-                const response = await axiosInstance.get(`users/${studentId}/`);
-                return {
-                  ...session,
-                  studentInfo: response.data
-                };
-              } catch (error) {
-                console.error(`Error fetching student info for ID ${studentId}:`, error);
-                return session;
+        if (!sessions || sessions.length === 0) {
+          setSessionsWithStudentInfo([]);
+        } else {
+          const updatedSessions = await Promise.all(
+            sessions.map(async (session) => {
+              const studentId = session.bookings?.[0]?.student_id;
+              if (studentId) {
+                try {
+                  const response = await axiosInstance.get(`users/${studentId}/`);
+                  return {
+                    ...session,
+                    studentInfo: response.data
+                  };
+                } catch (error) {
+                  console.error(`Error fetching student info for ID ${studentId}:`, error);
+                  return session;
+                }
               }
-            }
-            return session;
-          })
-        );
-        console.log(updatedSessions)
-        setSessionsWithStudentInfo(updatedSessions);
+              return session;
+            })
+          );
+          setSessionsWithStudentInfo(updatedSessions);
+          console.log(updatedSessions)
+        }
       } catch (error) {
         console.error('Error fetching student information:', error);
         setSessionsWithStudentInfo(sessions);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (sessions?.length > 0) {
-      fetchStudentInfo();
-    }
+    setLoading(true);
+    fetchStudentInfo();
+    
   }, [sessions]);
 
   const formatLocalTime = (utcTime) => {
@@ -198,14 +201,12 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   
     if (session.bookings[0].booking_status === 'confirmed') {
       try {
-        const response = await axiosInstance.patch(`tutor-availabilities/${session.id}/`, 
+        await axiosInstance.patch(`tutor-availabilities/${session.id}/`, 
           {
             booking_status: 'canceled_by_tutor',
           }
         );
-        if (response.status === 204) {
-          toast.success('Session cancelled successfully');
-        }
+        toast.success('Session cancelled successfully');
         await fetchTutorAvailability(); // Wait for the fetch to complete
       } catch (error) {
         const backendMessage = error.response?.data?.message || error.response?.data?.error || 'Error cancelling session';
@@ -223,7 +224,14 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     navigate('/video-call-setup', { state: { bookingId } });
   };
 
-  if (!sessionsWithStudentInfo || sessionsWithStudentInfo.length === 0) {
+  if (loading || sessionsWithStudentInfo === null) {
+    return (
+      <div className="min-h-[400px] flex flex-col items-center justify-center p-8">
+      </div>
+    );
+  }
+
+  if (sessionsWithStudentInfo.length === 0) {
     return (
       <EmptyState
         handleRefresh={handleRefresh}
@@ -244,36 +252,25 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   const getBookingStatus = (session) => session.bookings?.[0]?.booking_status;
 
   const getRoomNameStatus = (session) => {
-    if (!session.bookings || session.bookings.length === 0) return null;
-  
-    const booking = session.bookings[0];
     const sessionStartTime = new Date(session.start_time);
     const sessionEndTime = new Date(session.end_time);
     const currentTime = new Date();
     const fiveMinutesBefore = new Date(sessionStartTime.getTime() - 5 * 60000);
+    const fiveMinutesAfter = new Date(sessionStartTime.getTime() + 5 * 60000);
     
-    // Conditions for showing room name
-    const isConfirmedStatus = booking.booking_status === 'confirmed' || 
-                               booking.booking_status === 'ongoing';
+    const isConfirmedStatus = session.bookings?.[0]?.booking_status === 'confirmed' || 
+                             session.bookings?.[0]?.booking_status === 'ongoing';
     
     if (isConfirmedStatus) {
-      // Session is currently happening (between start and end times)
-      if (currentTime >= sessionStartTime && currentTime <= sessionEndTime) {
+      // Show room name between 5 minutes before and 5 minutes after session start
+      if (currentTime >= fiveMinutesBefore && currentTime <= fiveMinutesAfter) {
         return {
           type: 'showRoomName',
-          roomName: booking.video_call_link
+          roomName: session.bookings[0].video_call_link
         };
       }
       
-      // Within 5 minutes before session start
-      if (currentTime >= fiveMinutesBefore && currentTime < sessionStartTime) {
-        return {
-          type: 'showRoomName',
-          roomName: booking.video_call_link
-        };
-      }
-      
-      // More than 5 minutes before session start
+      // Before 5 minutes of session start
       if (currentTime < fiveMinutesBefore) {
         const timeDiff = fiveMinutesBefore - currentTime;
         const hours = Math.floor(timeDiff / (1000 * 60 * 60));
@@ -285,14 +282,14 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
         } else if (minutes > 0) {
           timeMessage = `Room name will be available in ${minutes} min`;
         }
-        
+
         return {
           type: 'waitingMessage',
           timeMessage
         };
       }
     }
-  
+
     return null;
   };
 
@@ -379,16 +376,17 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     { value: 'unlisted', label: 'Unlisted' }
   ];
 
-  // Filter sessions based on selected status
-  const filteredSessions = sessions.filter(session => {
+  // Update the filtering logic to use sessionsWithStudentInfo instead of sessions
+  const filteredSessions = sessionsWithStudentInfo?.filter(session => {
     if (selectedStatus === 'all') return true;
     if (selectedStatus === 'listed') return isSessionListed(session);
     if (selectedStatus === 'unlisted') return !isSessionListed(session);
     return session.bookings?.[0]?.booking_status === selectedStatus;
-  });
+  }) || [];
 
   return (
     <div className="space-y-6">
+
       {/* Header with Filter and Stats */}
       <div className="flex flex-col gap-6">
         {/* Filter Controls */}
@@ -433,11 +431,11 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
         <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
             {sessionStatuses.slice(1).map(status => {
-              const count = sessions.filter(session => {
+              const count = sessionsWithStudentInfo?.filter(session => {
                 if (status.value === 'listed') return isSessionListed(session);
                 if (status.value === 'unlisted') return !isSessionListed(session);
                 return session.bookings?.[0]?.booking_status === status.value;
-              }).length;
+              }).length || 0;
               return (
                 <div 
                   key={status.value}
@@ -451,6 +449,87 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
           </div>
         </div>
       </div>
+
+            {/* Add Rules Button */}
+            <button
+        onClick={() => setShowRules(!showRules)}
+        className="flex items-center gap-2 px-4 py-3 bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-colors w-full"
+      >
+        <AlertCircle className="w-5 h-5" />
+        <span className="flex-1 text-left font-medium">Important Session Rules for Tutors - Please Read</span>
+        {showRules ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+      </button>
+            {/* Rules section at the bottom */}
+            {showRules && (
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 mt-6">
+          <div className="flex items-start space-x-4 mb-4">
+            <div className="p-2 bg-amber-50 rounded-lg">
+              <Clock className="w-6 h-6 text-amber-600" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Session Rules and Policies for Tutors
+              </h3>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    You can join your session starting <span className="font-medium">5 minutes before</span> the scheduled start time.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    If you don't join within <span className="font-medium">5 minutes after</span> the session start time, it will be marked as a "no-show" and you won't receive credits for the session.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    If both you and the student fail to join within the first 5 minutes, the session credits will be retained by the platform.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    For your no-shows, the student will receive a <span className="font-medium">full refund plus 10% bonus credits</span> as compensation, and this may affect your tutor rating.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    Trial sessions cannot be canceled within <span className="font-medium">1 hour</span> of the start time. Standard sessions cannot be canceled within <span className="font-medium">2 hours</span> of the start time.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-indigo-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    If you cancel a session, the student will receive a full refund, and frequent cancellations may impact your tutor status.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-teal-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    Unbooked sessions will be automatically unlisted <span className="font-medium">3 hours</span> before the start time.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    For standard sessions, you'll receive <span className="font-medium">80%</span> of the session credits, with <span className="font-medium">20%</span> retained as a platform fee.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-600 flex-shrink-0" />
+                  <p className="text-gray-600 text-sm">
+                    For trial sessions, you'll receive <span className="font-medium">100%</span> of the session credits with no platform fee.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Sessions Grid */}
       {!filteredSessions || filteredSessions.length === 0 ? (

@@ -120,32 +120,38 @@ const BuyCredits = () => {
                   <div className="text-sm text-gray-500 mt-1">₹{pricePerCredit} per credit</div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <button 
-                    onClick={decrementCredits}
-                    disabled={isLoading}
-                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  
-                  <input
-                    type="text"
-                    value={inputValue}
-                    onChange={handleInputChange}
-                    onBlur={handleBlur}
-                    disabled={isLoading}
-                    className="font-semibold text-lg w-20 text-center bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-                    placeholder="1"
-                  />
+  <button 
+    onClick={decrementCredits}
+    disabled={isLoading}
+    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <Minus className="w-4 h-4" />
+  </button>
+  
+  <input
+    type="text"
+    value={inputValue}
+    onChange={(e) => {
+      const value = e.target.value;
+      if (/^\d*$/.test(value)) {
+        handleInputChange(e); // Call the existing handler only if the input is numeric
+      }
+    }}
+    onBlur={handleBlur}
+    disabled={isLoading}
+    className="font-semibold text-lg w-20 text-center bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+    placeholder="1"
+  />
 
-                  <button 
-                    onClick={incrementCredits}
-                    disabled={isLoading}
-                    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                </div>
+  <button 
+    onClick={incrementCredits}
+    disabled={isLoading}
+    className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <Plus className="w-4 h-4" />
+  </button>
+</div>
+
               </div>
 
               {/* Total Calculation */}

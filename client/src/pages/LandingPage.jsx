@@ -2,7 +2,7 @@ import React from 'react'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useNavigate } from 'react-router-dom'
-import { Globe, Users, Video, Star, ChevronRight, MessageCircle, Shield } from 'lucide-react'
+import { Globe, Users, Video, Star, ChevronRight, MessageCircle, Shield, CreditCard, Lock, CheckCircle } from 'lucide-react'
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -64,12 +64,13 @@ const LandingPage = () => {
             </div>
 
             {/* Trust Features */}
-            <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            <div className="mt-16 grid grid-cols-2 md:grid-cols-5 gap-8 max-w-4xl mx-auto">
               {[
                 { icon: <Shield className="w-5 h-5" />, text: "Verified Tutors" },
                 { icon: <Video className="w-5 h-5" />, text: "HD Video Chat" },
                 { icon: <Star className="w-5 h-5" />, text: "Expert Teachers" },
-                { icon: <MessageCircle className="w-5 h-5" />, text: "Direct Messaging" }
+                { icon: <MessageCircle className="w-5 h-5" />, text: "Direct Messaging" },
+                { icon: <Lock className="w-5 h-5" />, text: "Secure Payments" }
               ].map((feature, index) => (
                 <div key={index} className="flex items-center justify-center gap-2 text-gray-600">
                   <div className="p-2 bg-blue-50 rounded-lg">
@@ -80,11 +81,6 @@ const LandingPage = () => {
               ))}
             </div>
           </div>
-        </div>
-
-        {/* Bottom Gradient Blob */}
-        <div className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]" aria-hidden="true">
-          <div className="relative left-[calc(50%+3rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-20 sm:left-[calc(50%+36rem)] sm:w-[72.1875rem]"></div>
         </div>
       </section>
 
@@ -201,6 +197,117 @@ const LandingPage = () => {
         </div>
       </section>
 
+        {/* New Payment Security Section */}
+        <section className="py-24 bg-white relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 to-transparent" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            We have partnered with Stripe for the best payment experience
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Your payments are protected by Stripe's world-class security infrastructure
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
+          {/* Left Column: Features */}
+          <div className="space-y-6">
+            {/* Security Features Grid */}
+            <div className="grid sm:grid-cols-2 gap-6">
+              {[
+                {
+                  icon: <Lock className="w-6 h-6 text-blue-600" />,
+                  title: "Bank-Level Encryption",
+                  desc: "256-bit TLS encryption for all transactions"
+                },
+                {
+                  icon: <Shield className="w-6 h-6 text-blue-600" />,
+                  title: "Fraud Prevention",
+                  desc: "Advanced fraud detection and prevention"
+                },
+                {
+                  icon: <CreditCard className="w-6 h-6 text-blue-600" />,
+                  title: "Multiple Payment Methods",
+                  desc: "Apple Pay, Google Pay, Cards, and others"
+                },
+                {
+                  icon: <CheckCircle className="w-6 h-6 text-blue-600" />,
+                  title: "PCI Compliant",
+                  desc: "Highest level of payment security"
+                }
+              ].map((item, index) => (
+                <div key={index} className="bg-gray-50 p-6 rounded-2xl hover:bg-blue-50 transition-colors group">
+                  <div className="p-3 bg-white rounded-xl w-fit mb-4 group-hover:bg-blue-100/50 transition-colors">
+                    {item.icon}
+                  </div>
+                  <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-sm text-gray-600">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Trust Indicators */}
+            <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
+              {["🔒 PCI DSS Level 1", "✓ 3D Secure", "🛡️ SSL Certified"].map((badge, index) => (
+                <span key={index} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 font-medium">
+                  {badge}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Right Column: Stripe Card */}
+          <div className="relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 rounded-3xl transform rotate-3" />
+            <div className="relative bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
+              {/* Stripe Logo */}
+              <div className="flex justify-center mb-8">
+                <img
+                  src="/src/assets/powered-by-stripe.webp"
+                  alt="Powered by Stripe"
+                  className="h-12"
+                />
+              </div>
+              
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                {[
+                  { value: "99.99%", label: "Uptime" },
+                  { value: "250M+", label: "Users Protected" }
+                ].map((stat, index) => (
+                  <div key={index} className="text-center">
+                    <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
+                    <div className="text-sm text-gray-600">{stat.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Testimonial */}
+              <blockquote className="text-center">
+                <p className="text-gray-600 italic mb-4">
+                  "Stripe powers payments for millions of businesses worldwide"
+                </p>
+                <footer className="text-sm text-gray-500">
+                  Trusted by leading companies globally
+                </footer>
+              </blockquote>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Security Badge */}
+        <div className="flex justify-center mt-16">
+          <div className="flex items-center gap-2 bg-blue-50 px-6 py-3 rounded-full">
+            <Lock className="w-4 h-4 text-blue-600" />
+            <span className="text-sm text-blue-600 font-medium">Your data is always protected</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
       {/* Pricing Section - Updated design */}
       <section className="py-20 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -253,6 +360,13 @@ const LandingPage = () => {
               </button>
             </div>
           </div>
+          <div className="flex justify-center mt-12">
+            <div className="flex items-center gap-3 text-gray-600 bg-white px-4 py-2 rounded-full shadow-sm">
+              <Lock className="w-4 h-4" />
+              <span className="text-sm">Secure payment processing by Stripe</span>
+            </div>
+          </div>
+
         </div>
       </section>
 
@@ -260,7 +374,7 @@ const LandingPage = () => {
       <section className="py-20 bg-gradient-to-br from-blue-600 to-indigo-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Ready to Start Teaching?</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Want to Start Teaching?</h2>
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Share your language expertise and earn money by becoming a tutor on our platform
           </p>

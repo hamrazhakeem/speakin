@@ -2,27 +2,121 @@
 <html>
 <head>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #4A90E2; color: white; padding: 10px; text-align: center; }
-        .content { padding: 20px; background-color: #f9f9f9; }
-        .highlight { font-size: 18px; font-weight: bold; color: #4A90E2; }
-        .button { background-color: #4A90E2; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; }
-        .button:hover { background-color: #357ABD; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+            padding: 24px;
+            text-align: center;
+            border-radius: 16px 16px 0 0;
+        }
+        .content {
+            padding: 32px;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .highlight-container {
+            background-color: #eff6ff;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 24px 0;
+            text-align: center;
+        }
+        .highlight {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2563eb;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #059669;
+            color: white;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 8px 0;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+            text-decoration: none;
+            border-radius: 9999px;
+            font-weight: 600;
+            margin-top: 16px;
+        }
+        .info-box {
+            background-color: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+        }
+        .support-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .support-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>SpeakIn Language Change Approval</h1>
+            <h1 class="logo">SpeakIn</h1>
         </div>
         <div class="content">
+            <h2>Language Change Approval</h2>
             <p>Dear {{tutor_name}},</p>
-            <p>We are pleased to inform you that your request to change the language you teach to <span class="highlight">{{language}}</span> on SpeakIn has been <span class="highlight">approved</span>.</p>
-            <p>Please note that you will no longer be able to teach the previous language, and you are now required to teach exclusively in <span class="highlight">{{language}}</span>.</p>
-            <p>You can now update your tutor profile and set your availability for students interested in learning <span class="highlight">{{language}}</span>. This is an exciting opportunity to connect with learners and share your expertise.</p>
-            <p>If you have any questions or require assistance, feel free to contact us at <a href="mailto:support@speakin.com">support@speakin.com</a>.</p>
-            <p>Best regards,<br>The SpeakIn Team</p>
+            
+            <div class="highlight-container">
+                <div class="status-badge">Approved</div>
+                <p>Your request to teach</p>
+                <div class="highlight">{{language}}</div>
+                <p>has been approved!</p>
+            </div>
+
+            <p>We're excited to inform you that you can now start teaching {{language}} on SpeakIn. Here's what you need to know:</p>
+            
+            <div class="info-box">
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li>You will no longer be able to teach your previous language</li>
+                    <li>You are now authorized to teach exclusively in {{language}}</li>
+                    <li>You can update your tutor profile and availability</li>
+                    <li>Start connecting with students interested in learning {{language}}</li>
+                </ul>
+            </div>
+
+            <p>Ready to start teaching? Update your profile and availability now:</p>
+            <a href="https://speakin.com/tutor-dashboard/" class="button">Update Profile</a>
+
+            <p style="margin-top: 32px;">Need assistance? Our support team is here to help:</p>
+            <a href="mailto:support@speakin.com" class="support-link">support@speakin.com</a>
+            
+            <p style="margin-top: 32px;">Best regards,<br>The SpeakIn Team</p>
         </div>
     </div>
 </body>

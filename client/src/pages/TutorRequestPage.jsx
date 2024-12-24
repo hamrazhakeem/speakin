@@ -3,9 +3,10 @@ import { useForm, Controller } from 'react-hook-form';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import { Eye, EyeOff, ChevronRight } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const TutorRequestPage = () => {
   const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm({
@@ -126,9 +127,15 @@ const TutorRequestPage = () => {
   };
 
   useEffect(() => {
+    let toastId;
     if (loading) {
-      toast.info('Submitting your application...');
+      toastId = toast.loading('Please wait while we upload your introduction video and process your application...');
     }
+    return () => {
+      if (toastId) {
+        toast.dismiss(toastId);
+      }
+    };
   }, [loading]);
 
   const onSubmit = async (data) => {
@@ -190,17 +197,23 @@ const TutorRequestPage = () => {
                     required: 'SpeakIn Name is required',
                     validate: {
                       noSpacesOrSpecialChars: (value) =>
-                        /^[A-Za-z]+$/.test(value) || 'Name must only contain letters',
+                        /^[a-z]+$/.test(value) || 'Name must only contain lowercase letters',
                       noStartingOrEndingSpaces: (value) =>
                         value.trim() === value || 'Name must not start or end with spaces',
+                      lowercase: (value) => 
+                        value === value.toLowerCase() || 'Name must be in lowercase',
                     },
                   }}
                   render={({ field }) => (
                     <InputField
                       {...field}
                       type="text"
-                      placeholder="SpeakIn Name"
+                      placeholder="SpeakIn Name (lowercase letters only)"
                       error={errors.speakinName}
+                      onChange={(e) => {
+                        // Convert to lowercase before updating
+                        field.onChange(e.target.value.toLowerCase())
+                      }}
                     />
                   )}
                 />
@@ -463,11 +476,13 @@ const TutorRequestPage = () => {
               </button>
               <button
                 type="submit"
-                className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={loading}
+                className="px-6 py-3 h-12 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
               >
                 {loading ? (
-                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="h-5 flex items-center">
+                    <LoadingSpinner size="sm"/>
+                  </div>
                 ) : (
                   <>
                     Submit Request

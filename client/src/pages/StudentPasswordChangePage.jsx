@@ -5,8 +5,9 @@ import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import useAxios from "../hooks/useAxios";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import { ShieldCheck } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const StudentPasswordChangePage = () => {
   const axiosInstance = useAxios();
@@ -14,6 +15,7 @@ const StudentPasswordChangePage = () => {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   const {
     register,
@@ -25,6 +27,7 @@ const StudentPasswordChangePage = () => {
 
   const onSubmit = async (data) => {
     try {
+      setLoading(true);
       const response = await axiosInstance.post('change-password/', {
         current_password: data.currentPassword,
         new_password: data.newPassword
@@ -45,6 +48,8 @@ const StudentPasswordChangePage = () => {
         toast.error('An error occurred. Please try again later');
       }
       console.error('Error changing password:', error);
+    } finally {
+      setLoading(false);
     }
   }; 
 
@@ -65,7 +70,7 @@ const StudentPasswordChangePage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 mt-20">
+      <main className="container mx-auto px-4 py-8 mt-16">
         {/* Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Account Security</h1>
@@ -234,10 +239,19 @@ const StudentPasswordChangePage = () => {
               {/* Submit Button */}
               <button
                 type="submit"
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 flex items-center justify-center gap-2"
+                disabled={loading}
+                className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
               >
-                <FaLock className="w-4 h-4" />
-                Change Password
+                {loading ? (
+                  <div className="h-5 flex items-center">
+                    <LoadingSpinner size="sm" className="text-white" />
+                  </div>
+                ) : (
+                  <>
+                    Change Password
+                    <FaLock className="ml-2 w-4 h-4" />
+                  </>
+                )}
               </button>
             </form>
           </div>

@@ -5,19 +5,19 @@ import { useNavigate } from 'react-router-dom';
 import useAxios from '../hooks/useAxios';
 import { useSelector } from 'react-redux';
 import StudentBookingsList from '../components/StudentBookingsList';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const StudentBookingsPage = () => {
   const navigate = useNavigate();
   const axiosInstance = useAxios();
   const { userId } = useSelector((state) => state.auth);
-  const [sessions, setSessions] = useState([]);
+  const [sessions, setSessions] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchStudentSessions = async () => {
+    setLoading(true);
     try {
-      // Fetch all bookings from the backend
       const response = await axiosInstance.get('bookings/');
-      console.log('responseee', response)
-      // Filter bookings for the current student
       const studentBookings = response.data.filter(
         (booking) => booking.student_id === userId
       );
@@ -26,15 +26,10 @@ const StudentBookingsPage = () => {
       const sessionsWithDetails = await Promise.all(
         studentBookings.map(async (session) => {
           try {
-            // Fetch session details from TutorAvailability
             const tutorAvailabilityResponse = await axiosInstance.get(`tutor-availabilities/${session.availability}/`);
-
-            const tutorUserResponse = await axiosInstance.get(`users/${tutorAvailabilityResponse.data.tutor_id}/`)
-
-            // Fetch tutor details
+            const tutorUserResponse = await axiosInstance.get(`users/${tutorAvailabilityResponse.data.tutor_id}/`);
             const tutorResponse = await axiosInstance.get(`tutor-details/${tutorAvailabilityResponse.data.tutor_id}/`);
 
-            // Combine the session, tutor, and availability details
             return {
               ...session,
               tutorDetails: tutorResponse.data,
@@ -43,15 +38,16 @@ const StudentBookingsPage = () => {
             };
           } catch (error) {
             console.error(`Error fetching details for session ${session.id}:`, error);
-            return session;  // If something goes wrong, return the session with missing details
+            return session;
           }
         })
       );
-      console.log(sessionsWithDetails)
-      // Set combined sessions data
       setSessions(sessionsWithDetails);
     } catch (error) {
       console.error("Error fetching student sessions:", error);
+      setSessions([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,7 +58,7 @@ const StudentBookingsPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
       <Navbar />
-      <main className="container mx-auto px-4 py-8 mt-20">
+      <main className="container mx-auto px-4 py-8 mt-16">
         {/* Profile Header Section */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Your Bookings</h1>
@@ -95,12 +91,16 @@ const StudentBookingsPage = () => {
         {/* Main Content */}
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-lg transition-shadow duration-200">
-
-            {/* Bookings List */}
-            <StudentBookingsList 
-              sessions={sessions} 
-              fetchStudentSessions={fetchStudentSessions} 
-            />
+            {loading ? (
+              <div className="min-h-[400px] flex flex-col items-center justify-center p-8">
+                <LoadingSpinner size="lg" className="text-blue-600" />
+              </div>
+            ) : (
+              <StudentBookingsList 
+                sessions={sessions} 
+                fetchStudentSessions={fetchStudentSessions} 
+              />
+            )}
           </div>
         </div>
       </main>

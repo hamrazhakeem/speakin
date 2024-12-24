@@ -65,9 +65,12 @@ class TutorAvailabilityView(APIView):
     
 class BookingsView(APIView):
     authentication_classes = [JWTAuthentication]
-    def get(self, request):
+    def get(self, request, pk=None):
         try:
-            session_service_url = os.getenv('SESSION_SERVICE_URL') + 'bookings/'
+            if pk:
+                session_service_url = os.getenv('SESSION_SERVICE_URL') + f'bookings/{pk}/'
+            else:
+                session_service_url = os.getenv('SESSION_SERVICE_URL') + 'bookings/'
             response = requests.get(session_service_url, json=request.data)
             return Response(response.json(), status=response.status_code)
         except requests.exceptions.RequestException as e:

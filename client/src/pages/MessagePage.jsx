@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import Avatar from '../components/Avatar';
 import { ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
 import EmojiPicker from 'emoji-picker-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const formatMessageTime = (timestamp) => {
   const messageDate = new Date(timestamp);
@@ -389,7 +390,7 @@ const MessagePage = () => {
           <div className="flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center h-32">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                <LoadingSpinner size="md" className='text-blue-600'/>
               </div>
             ) : filteredChatUsers.length === 0 ? (
               <div className="p-4 text-center text-gray-500">

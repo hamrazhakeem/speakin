@@ -2,27 +2,172 @@
 <html>
 <head>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #4A90E2; color: white; padding: 10px; text-align: center; }
-        .content { padding: 20px; background-color: #f9f9f9; }
-        .highlight { font-size: 18px; font-weight: bold; color: #4A90E2; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+            padding: 24px;
+            text-align: center;
+            border-radius: 16px 16px 0 0;
+        }
+        .content {
+            padding: 32px;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .highlight-container {
+            background-color: #ecfdf5;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+            text-align: center;
+            border: 1px solid #d1fae5;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            background-color: #059669;
+            color: white;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 500;
+            margin: 8px 0;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+            text-decoration: none;
+            border-radius: 9999px;
+            font-weight: 600;
+            margin-top: 16px;
+            text-align: center;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .feature-card {
+            background-color: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .next-steps {
+            background-color: #eff6ff;
+            border: 1px solid #dbeafe;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 24px 0;
+        }
+        .next-steps h3 {
+            color: #1e40af;
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+        .steps-list {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .steps-list li {
+            margin-bottom: 8px;
+            color: #1e40af;
+        }
+        .support-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .support-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>SpeakIn Tutor Approval</h1>
+            <h1 class="logo">SpeakIn</h1>
         </div>
         <div class="content">
+            <div class="highlight-container">
+                <div class="status-badge">Approved</div>
+                <h2 style="margin: 16px 0; color: #059669;">Welcome to SpeakIn!</h2>
+                <p style="margin: 0; color: #065f46;">Your application to become a tutor has been approved</p>
+            </div>
+
             <p>Dear {{tutor_name}},</p>
-            <p>We are delighted to inform you that your application to become a tutor on SpeakIn has been <span class="highlight">approved</span>.</p>
-            <p>You now have full access to your tutor dashboard, where you can set your availability, update your profile, and start accepting students. This is a great opportunity for you to share your language expertise, connect with learners worldwide, and <span class="highlight">earn money</span> by offering personalized 1-on-1 sessions.</p>
-            <p>We are excited to support you on your journey as you help others achieve their language learning goals, while building a rewarding teaching experience on SpeakIn.</p>
-            <p>Click the link below to sign in and start your journey as a tutor:</p>
-            <a href="{{ signin_url }}" class="button">Sign In to SpeakIn</a>
-            <p>If you have any questions or need further assistance, please feel free to reach out to us at support@speakin.com.</p>
-            <p>Best regards,<br>The SpeakIn Team</p>
+            
+            <p>Congratulations! We're excited to welcome you to our community of language tutors. Your expertise and passion for teaching will help students worldwide achieve their language learning goals.</p>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">💰</div>
+                    <h3 style="margin: 8px 0;">Earn Money</h3>
+                    <p style="margin: 0; color: #6b7280;">Set your own rates and schedule</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌍</div>
+                    <h3 style="margin: 8px 0;">Global Reach</h3>
+                    <p style="margin: 0; color: #6b7280;">Connect with students worldwide</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3 style="margin: 8px 0;">Track Progress</h3>
+                    <p style="margin: 0; color: #6b7280;">Monitor student development</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">💬</div>
+                    <h3 style="margin: 8px 0;">Direct Chat</h3>
+                    <p style="margin: 0; color: #6b7280;">Easy communication with students</p>
+                </div>
+            </div>
+
+            <div class="next-steps">
+                <h3>Next Steps</h3>
+                <ul class="steps-list">
+                    <li>Complete your tutor profile</li>
+                    <li>Set your availability schedule</li>
+                    <li>Set your hourly rate</li>
+                    <li>Start accepting booking requests</li>
+                </ul>
+            </div>
+
+            <p style="text-align: center;">Ready to start your teaching journey?</p>
+            <div style="text-align: center;">
+                <a href="{{signin_url}}" class="button">Sign In to Your Dashboard</a>
+            </div>
+
+            <p style="margin-top: 32px;">Need help getting started? Our support team is here for you:</p>
+            <a href="mailto:support@speakin.com" class="support-link">support@speakin.com</a>
+            
+            <p style="margin-top: 32px;">Best regards,<br>The SpeakIn Team</p>
         </div>
     </div>
 </body>

@@ -146,6 +146,19 @@ services:
     env_file:
       - .env 
 
+  user_service_worker:
+    container_name: user_service_worker
+    build:
+      context: ./user_service
+    command: celery -A user_service worker --loglevel=info
+    volumes:
+      - ./user_service:/app
+    depends_on:
+      - redis
+      - user_service
+    networks:
+      - microservice_network
+
 volumes:
   user_db_data:
   payment_db_data:

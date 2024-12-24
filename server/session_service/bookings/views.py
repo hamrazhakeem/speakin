@@ -8,14 +8,12 @@ from rest_framework.exceptions import ValidationError
 from django.db import transaction
 from django.conf import settings
 import requests
-from grpc_services.grpc_client import deduct_balance_credits, lock_credits_in_escrow, refund_credits_from_escrow, release_credits_from_escrow
-from .permissions import IsAdminOrOwnerPermission, ValidateRoomNamePermission, decode_jwt
+from protos.client import update_user_credits, lock_credits_in_escrow, refund_credits_from_escrow, release_credits_from_escrow
+from .permissions import IsAdminOrOwnerPermission, ValidateRoomNamePermission
 from django.utils import timezone
 from datetime import timedelta
 from hashlib import sha256
 from django.utils.crypto import get_random_string
-from twilio.jwt.access_token import AccessToken
-from twilio.jwt.access_token.grants import VideoGrant
 from django.conf import settings
 from rest_framework.views import APIView
 from django.db.models import Q 
@@ -72,7 +70,7 @@ class TutorAvailabilityDetail(generics.RetrieveUpdateDestroyAPIView):
                 return Response({"error": "Failed to refund credits from escrow."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             # Refund credits via Payment Service
-            refund_success = deduct_balance_credits(booking.student_id, session.credits_required, refund_from_escrow=True)
+            refund_success = update_user_credits(booking.student_id, session.credits_required, refund_from_escrow=True)
             if not refund_success:
                 return Response({"error": "Failed to refund credits to user."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
@@ -130,7 +128,7 @@ class BookingsList(generics.ListCreateAPIView):
         if user_data['balance_credits'] < credits_required:
             raise ValidationError({"error": "Insufficient credits"}, code=status.HTTP_400_BAD_REQUEST)
 
-        if not deduct_balance_credits(student_id, user_data['balance_credits'] - credits_required):
+        if not update_user_credits(student_id, user_data['balance_credits'] - credits_required):
             raise ValidationError("Failed to update user balance")
 
         if not lock_credits_in_escrow( 
@@ -138,7 +136,7 @@ class BookingsList(generics.ListCreateAPIView):
                 tutor_id=tutor_availability.tutor_id,
                 booking_id=booking_id,
                 credits_required=credits_required):
-            deduct_balance_credits(student_id, user_data['balance_credits'])
+            update_user_credits(student_id, user_data['balance_credits'])
             raise ValidationError("Failed to lock credits in escrow")
          
         # Generate a unique and secure room name
@@ -205,7 +203,7 @@ class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
 
                 # Refund credits from escrow and deduct balance
                 if refund_credits_from_escrow(booking_id=booking.id):
-                    if deduct_balance_credits(
+                    if update_user_credits(
                             user_id=booking.student_id,
                             new_balance=booking.availability.credits_required + (booking.availability.credits_required * 10 // 100),
                             refund_from_escrow=True

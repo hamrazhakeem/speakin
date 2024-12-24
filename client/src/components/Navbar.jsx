@@ -90,18 +90,6 @@ const Navbar = () => {
             <User className="mr-3 h-4 w-4 text-gray-500" />
             Profile
           </button>
-          {!isTutor && (
-            <button
-              onClick={() => {
-                navigate('/buy-credits');
-                setIsDropdownOpen(false);
-              }}
-              className="flex w-full items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <CreditCard className="mr-3 h-4 w-4 text-gray-500" />
-              Buy Credits
-            </button>
-          )}
         </div>
         <div className="py-1">
           <button
@@ -170,8 +158,6 @@ const Navbar = () => {
                     className="p-2 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors relative group"
                   >
                     <MessageCircle className="h-5 w-5" />
-                    {/* Add notification dot if needed */}
-                    <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                   </button>
   
                   <button
@@ -193,6 +179,7 @@ const Navbar = () => {
                         src={profileImage}
                         name={userName || ''}
                         size={32}
+                        isNavbar={true}
                       />
                     </button>
   
@@ -223,6 +210,7 @@ const Navbar = () => {
                   src={profileImage}
                   name={userName || ''}
                   size={32}
+                  isNavbar={true}
                 />
               ) : (
                 <Menu className="h-6 w-6" />
@@ -244,6 +232,7 @@ const Navbar = () => {
                     src={profileImage}
                     name={userName || ''}
                     size={40}
+                    isNavbar={true}
                   />
                   <div>
                     <p className="font-medium text-gray-900">{userName}</p>

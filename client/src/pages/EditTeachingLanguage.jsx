@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm, Controller, useFieldArray } from "react-hook-form";
-import { FaArrowLeft, FaTrash } from 'react-icons/fa';
+import { FaArrowLeft, FaTrash, FaChevronRight } from 'react-icons/fa';
 import Footer from "../components/Footer";
 import Navbar from "../components/Navbar";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
+import { toast } from 'react-hot-toast';
 import useAxios from '../hooks/useAxios';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const EditTeachingLanguage = () => {
   const navigate = useNavigate();
@@ -59,15 +60,7 @@ const EditTeachingLanguage = () => {
       e.target.value = null;  // Reset input
       return;
     }
-  
-    // Validate file size (limit: 4MB)
-    // if (file.size > 4 * 1024 * 1024) {
-    //   toast.error("Image size must not exceed 4 MB.");
-    //   e.target.value = null;  // Reset input
-    //   return;
-    // }
-  
-    // If valid, set image
+
     setImage(file);
   }, []);
   
@@ -81,15 +74,7 @@ const EditTeachingLanguage = () => {
       toast.error("Video is required.");
       return;
     }
-  
-    // Validate file size (limit: 8MB as per your condition, although the error message says 5MB, so choose accordingly)
-    // if (file.size > 8 * 1024 * 1024) {
-    //   toast.error("Video size must not exceed 8 MB.");
-    //   e.target.value = null;  // Reset input if invalid
-    //   return;
-    // }
-  
-    // If valid, set the video file
+    
     setVideo(file);
     console.log("Video uploaded:", file);
   }, []);
@@ -301,34 +286,17 @@ const EditTeachingLanguage = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    className="inline-flex items-center justify-center h-12 px-6 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 group"
                   >
                     {isSubmitting ? (
-                      <>
-                        <svg
-                          className="animate-spin -ml-1 mr-3 h-4 w-4 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                          ></path>
-                        </svg>
-                        Processing...
-                      </>
+                      <div className="h-5 flex items-center">
+                        <LoadingSpinner size="sm" className="text-white" />
+                      </div>
                     ) : (
-                      'Save Changes'
+                      <>
+                        Save Changes
+                        <FaChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      </>
                     )}
                   </button>
                 </div>

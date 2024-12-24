@@ -4,62 +4,35 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import ChangePasswordSerializer, TeachingLanguageChangeRequestSerializer, UserSerializer, TutorDetailsSerializer
 from .models import LanguageSpoken, LanguageToLearn, TeachingLanguageChangeRequest, TutorDetails, TutorLanguageToTeach, User, Language, Proficiency
-from django.core.mail import send_mail
-from django.conf import settings
-import random
-import string
 from django.contrib.auth.hashers import make_password
-import uuid
 from django.core.cache import cache
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.template.loader import render_to_string
 from rest_framework.views import APIView
 from pycountry import countries
 import json
-import logging
 from django.db import transaction
 from django.db.models import Q 
 from rest_framework.permissions import IsAdminUser
 from .permissions import IsAdminOrUserSelf
-from .utils import get_id_token
-
-logger = logging.getLogger(__name__)
-
-CACHE_TTL = 300
+from .utils import get_user_or_create, get_id_token
+from .services import EmailService
 
 # Create your views here.
-
-def generate_otp():
-    return ''.join(random.choices(string.digits, k=6))
-
-def send_email(subject, email, html):
-    subject = subject
-    html_message = html
-    from_email = settings.DEFAULT_FROM_EMAIL
-    recipient_list = [email]
-    send_mail(subject, '', from_email, recipient_list, html_message=html_message, fail_silently=False)
 
 @api_view(['POST'])
 def sign_up(request):
     serializer = UserSerializer(data=request.data)
     if serializer.is_valid():
-        otp = generate_otp()
+        cache_key = EmailService.send_registration_email(
+            serializer.validated_data['email'],
+            serializer.validated_data
+        )
         
-        cache_key = str(uuid.uuid4())
-
-        cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
-
-        cache.set(f'user_data_{cache_key}', {
-            'email': serializer.validated_data['email'],
-            'name': serializer.validated_data['name'],
-            'password': make_password(serializer.validated_data['password']),
-            'user_type': serializer.validated_data['user_type'],
-        })
-
-        send_email('Your OTP for SpeakIn Registration', serializer.validated_data['email'], render_to_string('emails/otp_email.html', {'otp': otp}))
-
-        return Response({'message': 'Please verify your OTP!', 'cache_key': cache_key}, status=status.HTTP_201_CREATED)
+        return Response({
+            'message': 'Please verify your OTP!',
+            'cache_key': cache_key
+        }, status=status.HTTP_201_CREATED)
     return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
@@ -133,11 +106,7 @@ def resend_otp(request):
     if not user_data or user_data['email'] != email:
         return Response({'message': 'User data not found. Please sign up again.'}, status=status.HTTP_404_NOT_FOUND)
 
-    otp = generate_otp()
-    cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
-
-    send_email('Resend: Your OTP for SpeakIn Registration', email, render_to_string('emails/resend_otp_email.html', {'otp': otp}))
-
+    EmailService.resend_registration_otp(email, cache_key)
     return Response({'message': 'New OTP sent successfully!'}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
@@ -152,47 +121,33 @@ def resend_forgot_password_otp(request):
     if not user_data or user_data['email'] != email:
         return Response({'message': 'User data not found. Please try again.'}, status=status.HTTP_404_NOT_FOUND)
 
-    otp = generate_otp()
-    print(otp)
-    cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
-
-    send_email('Resend: Your OTP for Password Reset', email, render_to_string('emails/resend_otp_email.html', {'otp': otp}))
-
+    EmailService.resend_forgot_password_otp(email, cache_key)
     return Response({'message': 'New OTP sent successfully!'}, status=status.HTTP_200_OK)
 
 @api_view(['POST'])
 def forgot_password(request):
     email = request.data.get('email')
     
-    # Check if the user exists
     if User.objects.filter(email=email).exists():
         user = User.objects.get(email=email)
         if user.with_google:
             return Response({
-                'error': 'You created your account using Google. Please click "Sign in with Google" to access your account.'
+                'error': 'You created your account using Google. Please click "Sign in with Google"'
             }, status=status.HTTP_403_FORBIDDEN)
-        # If the user is a tutor, check their status
+
         if user.user_type == 'tutor':
             tutor_details = TutorDetails.objects.filter(user=user).first()
             if tutor_details and tutor_details.status == 'pending':
-                return Response({'error': 'Your tutor account is still pending approval.'}, status=status.HTTP_403_FORBIDDEN)
+                return Response({
+                    'error': 'Your tutor account is still pending approval.'
+                }, status=status.HTTP_403_FORBIDDEN)
 
-        # Generate OTP and send password reset email (for students, admins, and approved tutors)
-        otp = generate_otp()
-        cache_key = str(uuid.uuid4())
-        cache.set(f'otp_{cache_key}', otp, timeout=CACHE_TTL)
+        cache_key = EmailService.send_forgot_password_email(email)
 
-        cache.set(f'user_data_{cache_key}', {
-            'email': email,
-        })
-
-        send_email( 
-            'Your OTP for SpeakIn Password Reset',
-            email,
-            render_to_string('emails/forgot_password_email.html', {'otp': otp})
-        )
-
-        return Response({'message': 'OTP has been sent to your email.', 'cache_key': cache_key}, status=status.HTTP_200_OK)
+        return Response({
+            'message': 'OTP has been sent to your email.',
+            'cache_key': cache_key
+        }, status=status.HTTP_200_OK)
 
     return Response({'error': 'Email not found.'}, status=status.HTTP_404_NOT_FOUND)
     
@@ -234,14 +189,6 @@ def set_new_password(request):
     else:
         return Response({'message': 'Invalid cache key or email'}, status=status.HTTP_400_BAD_REQUEST)
 
-def get_signin_url():
-    frontend_origin = next((origin for origin in settings.CORS_ALLOWED_ORIGINS if origin.startswith('http://localhost') or origin.startswith('http://127.0.0.1')), None)
-    
-    if not frontend_origin:
-        raise ValueError("No local frontend origin found in CORS_ALLOWED_ORIGINS")
-    
-    return f"{frontend_origin}/tutor-sign-in/"
-
 class LoginWithGoogle(APIView):
     def post(self, request):
         if 'code' in request.data:
@@ -270,16 +217,6 @@ class LoginWithGoogle(APIView):
         
         return Response({"detail": "Code not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
-
-def get_user_or_create(email, name): 
-    try:
-        user = User.objects.get(email=email)
-        if not user.is_active:
-            return Response({'error': 'User is blocked'}, status=status.HTTP_400_BAD_REQUEST)
-    except User.DoesNotExist:
-        user = User.objects.create_user(email=email, name=name, user_type='student', with_google=True, password=None)
-    return user
-
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -288,18 +225,6 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAdminOrUserSelf]
-
-    # def get_object(self):
-    #     # Check if the user is an admin
-    #     if self.request.user.is_superuser:
-    #         user_id = self.kwargs.get('pk')
-    #         if user_id:
-    #             return User.objects.get(pk=user_id)
-    #         else:
-    #             return self.request.user 
-        
-    #     # If not an admin, return the authenticated user's info
-    #     return self.request.user
 
     def get_object(self):
         user_id = self.kwargs.get('pk')
@@ -427,23 +352,7 @@ class TutorRequest(generics.RetrieveUpdateDestroyAPIView):
                         if tutor_details.status == 'pending' and self.request.data.get('action') == 'approve':
                             tutor_details.status = 'approved'
                             tutor_details.save()
-                            print('Tutor approved')
-
-                            signin_url = get_signin_url()
-                        
-                            email_content = render_to_string('emails/tutor_approval_email.html', {
-                                'tutor_name': user.name,
-                                'signin_url': signin_url
-                            })
-                            
-                            print('About to send email')
-
-                            send_email(
-                                'Your Tutor Account has been Approved!',
-                                user.email,
-                                email_content 
-                            )
-                            print('Email sent') 
+                            EmailService.send_tutor_approval_email(user)
                     except TutorDetails.DoesNotExist:
                         print("TutorDetails not found")
 
@@ -452,33 +361,18 @@ class TutorRequest(generics.RetrieveUpdateDestroyAPIView):
             try:
                 tutor_details = TutorDetails.objects.get(user=instance)
                 if tutor_details.status == 'pending':
-                    # Change tutor status to 'denied'
                     tutor_details.status = 'denied'
                     tutor_details.save()
-                    print('Tutor denied')
-
-                    # Send denial email
-                    email_content = render_to_string('emails/tutor_denial_email.html', {
-                        'tutor_name': instance.name,
-                    })
                     
-                    print('About to send denial email')
-                    send_email(
-                        'Your Tutor Account Application has been Denied',
-                        instance.email,
-                        email_content
-                    )
-                    print('Denial email sent')
+                    EmailService.send_tutor_denial_email(instance)
 
-                    # Optionally, you can delete the user or keep the record.
-                    instance.delete()  # This will delete the user from the database
+                    instance.delete()
                     return Response({"message": "Tutor account denied and deleted."}, status=status.HTTP_204_NO_CONTENT)
                 else:
                     return Response({"error": "Tutor cannot be denied, status is not pending."}, status=status.HTTP_400_BAD_REQUEST)
             except TutorDetails.DoesNotExist:
                 return Response({"error": "Tutor details not found."}, status=status.HTTP_404_NOT_FOUND)
         else:
-            # If the user is not a tutor, proceed with the standard deletion
             instance.delete()
             return Response({"message": "User deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
@@ -729,18 +623,14 @@ class TeachingLanguageChangeRequestDetail(generics.RetrieveUpdateDestroyAPIView)
 
     @transaction.atomic
     def patch(self, request, pk):
-        """
-        Approve a teaching language change request and update related models.
-        """
         try:
-            # Get the language change request
             change_request = get_object_or_404(TeachingLanguageChangeRequest, id=pk)
             
-            # Update TutorLanguageToTeach
+            # Create or update TutorLanguageToTeach
             TutorLanguageToTeach.objects.update_or_create(
                 user=change_request.user,
                 defaults={
-                    'language': change_request.new_language,
+                    'language_id': change_request.new_language.id,
                     'is_native': change_request.is_native
                 }
             )
@@ -762,15 +652,15 @@ class TeachingLanguageChangeRequestDetail(generics.RetrieveUpdateDestroyAPIView)
             user.name = change_request.full_name
             user.save()
             
+            EmailService.send_language_change_approval_email(
+                user,
+                change_request.new_language.name,
+                tutor_details.speakin_name
+            )
+            
             # Delete the change request
             change_request.delete()
             
-            html_message = render_to_string('emails/language_to_teach_change_approval_email.html', {'language': change_request.new_language, 'tutor_name': tutor_details.speakin_name})
-
-            email = user.email
-
-            send_email('SpeakIn Language Change Approval', email, html_message)
-
             return Response({
                 'message': 'Language change request approved successfully'
             }, status=status.HTTP_200_OK)
@@ -787,16 +677,18 @@ class TeachingLanguageChangeRequestDetail(generics.RetrieveUpdateDestroyAPIView)
             tutor_details = TutorDetails.objects.get(user=change_request.user)
             user = change_request.user
 
-            old_language = TutorLanguageToTeach.objects.get(user=user).language
+            # Get the current language name before deleting
+            old_language = TutorLanguageToTeach.objects.get(user=user).language.name
+            new_language_name = change_request.new_language.name
 
             change_request.delete() 
-            
-            html_message = render_to_string(
-                'emails/language_to_teach_change_denial_email.html',
-                {'language': change_request.new_language, 'tutor_name': tutor_details.speakin_name, 'old_language': old_language}
-            )
 
-            send_email('SpeakIn Language Change Denial', user.email, html_message)
+            EmailService.send_language_change_denial_email(
+                user,
+                new_language_name,
+                tutor_details.speakin_name,
+                old_language
+            )
 
             return Response({
                 'message': 'Language change request denied successfully'

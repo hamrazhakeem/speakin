@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import useAxios from '../hooks/useAxios';
 import { format, toDate } from 'date-fns';
 import { useSelector, useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import { updateCredits } from '../redux/authSlice';
 import { X, Clock, Calendar, CreditCard } from 'lucide-react'; // Import icons
+import LoadingSpinner from './ui/LoadingSpinner';
 
 const AvailabilityModal = ({ tutorId, onClose }) => {
   const axiosInstance = useAxios();
@@ -12,11 +13,14 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [bookingLoading, setBookingLoading] = useState(false); // New state for booking action
+  const [loadingSlotId, setLoadingSlotId] = useState(null); // Track which slot is being booked
   const { userId, credits } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const [availabilityResponse, bookingsResponse] = await Promise.all([
           axiosInstance.get('tutor-availabilities/'),
@@ -79,6 +83,8 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
   }, [tutorId, userId]);
 
   const handleBooking = async (slotId, creditsRequired) => {
+    setBookingLoading(true);
+    setLoadingSlotId(slotId);
     try {
       const response = await axiosInstance.post('bookings/', {
         availability: slotId,
@@ -101,6 +107,9 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
                            "An error occurred";
         toast.error(errorMessage);
         onClose();
+    } finally {
+      setBookingLoading(false);
+      setLoadingSlotId(null);
     }
   };
 
@@ -132,8 +141,8 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
         </div>
 
         {loading ? (
-          <div className="flex items-center justify-center h-40">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="min-h-[400px] flex flex-col items-center justify-center p-8">
+            <LoadingSpinner size="lg" className="text-blue-600" />
           </div>
         ) : error ? (
           <div className="p-4 bg-red-50 rounded-xl text-red-600">
@@ -151,6 +160,8 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
           <div className="overflow-y-auto max-h-[calc(90vh-120px)] pr-2 space-y-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             {availability.map((slot) => {
               const statusDisplay = getStatusDisplay(slot);
+              const isBooking = bookingLoading && loadingSlotId === slot.id;
+              
               return (
                 <div
                   key={slot.id}
@@ -191,11 +202,20 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
                   {/* Book Button */}
                   {slot.is_booked === false && !slot.bookedByYou && (
                     <button
-                      className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors"
+                      className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:bg-blue-400"
                       onClick={() => handleBooking(slot.id, slot.credits_required)}
+                      disabled={isBooking}
                     >
-                      <CreditCard className="h-4 w-4" />
-                      Book for {slot.credits_required} credits
+                      {isBooking ? (
+                        <div className="h-5 flex items-center">
+                          <LoadingSpinner size="sm"/>
+                        </div>
+                      ) : (
+                        <>
+                          <CreditCard className="h-4 w-4" />
+                          Book for {slot.credits_required} credits
+                        </>
+                      )}
                     </button>
                   )}
                 </div>

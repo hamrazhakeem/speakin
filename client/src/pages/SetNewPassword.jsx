@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, ChevronRight, KeyRound, Eye, EyeOff } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const SetNewPassword = () => {
     const location = useLocation();
@@ -138,10 +139,12 @@ const SetNewPassword = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
                             >
                                 {loading ? (
-                                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="h-5 flex items-center">
+                                        <LoadingSpinner size="sm"/>
+                                    </div>
                                 ) : (
                                     <>
                                         Set New Password

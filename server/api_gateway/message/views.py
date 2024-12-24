@@ -20,4 +20,4 @@ class MessageView(APIView):
             return Response(
                 {"error": "Failed to connect to message service.", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )   
+            )

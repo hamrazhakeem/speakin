@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import AdminNavbar from '../components/AdminNavbar';
-import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa'; // Icons for Approve/Deny buttons
+import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import useAxios from '../hooks/useAxios';
-import { toast } from 'react-toastify';
-import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import Avatar from '../components/Avatar';
+import { ArrowLeft } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const AdminVerifyTutorPage = () => {
   const location = useLocation();
@@ -15,185 +17,191 @@ const AdminVerifyTutorPage = () => {
   const [denyLoading, setDenyLoading] = useState(false);
 
   const handleAction = async (action) => {
-    if (action === 'approve') {
-        setApproveLoading(true); // Set loading for approve button
-        try {
-            await axiosInstance.patch(`users/${userData.id}/verify-tutor/`, {
-                action: action
-            });
-            console.log('Approved');
-            toast.success('Tutor Approved Successfully');
-            navigate('/admin/manage-users/');
-        } catch (error) {
-            console.error('Error Approving tutor:', error);
-            toast.error('Failed to Approve Tutor');
-        } finally {
-            setApproveLoading(false); // Reset loading state
-        }
-        
-    } else if (action === 'deny') {
-        setDenyLoading(true); // Set loading for deny button
-        try {
-            await axiosInstance.delete(`users/${userData.id}/verify-tutor/`,{
-                action: action
-            });
-            console.log('Denied');
-            toast.success('Tutor Denied Successfully');
-            navigate('/admin/manage-users/');
-        } catch (error) {
-            console.error('Error Denying tutor:', error);
-            toast.error('Failed to Deny Tutor');
-        } finally {
-            setDenyLoading(false); // Reset loading state
-        }
+    const isApprove = action === 'approve';
+    const loadingSetter = isApprove ? setApproveLoading : setDenyLoading;
+
+    loadingSetter(true);
+    try {
+      if (isApprove) {
+        await axiosInstance.patch(`users/${userData.id}/verify-tutor/`, { action });
+        toast.success('Tutor Approved Successfully');
+      } else {
+        await axiosInstance.delete(`users/${userData.id}/verify-tutor/`);
+        toast.success('Tutor Denied Successfully');
+      }
+      navigate('/admin/manage-users/');
+    } catch (error) {
+      console.error(`Error ${isApprove ? 'Approving' : 'Denying'} tutor:`, error);
+      toast.error(`Failed to ${isApprove ? 'Approve' : 'Deny'} Tutor`);
+    } finally {
+      loadingSetter(false);
     }
-};
+  };
 
-return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-        <AdminNavbar />
-        <main className="flex-1 flex justify-center items-center p-4 mt-16 md:mt-24 mb-10">
-            <div className="w-full max-w-5xl bg-white shadow-lg rounded-lg p-6 md:p-8">
-                <h1 className="text-2xl md:text-3xl font-bold mb-6 text-center">Verify Tutor Application</h1>
+  const Section = ({ title, children }) => (
+    <div className="bg-black border border-zinc-800 rounded-lg overflow-hidden mb-6">
+      <div className="px-6 py-4 border-b border-zinc-800">
+        <h2 className="text-lg font-semibold text-white">{title}</h2>
+      </div>
+      <div className="p-6 space-y-4">
+        {children}
+      </div>
+    </div>
+  );
 
-                {userData ? (
-                    <div className="space-y-8">
-                        <Section title="Personal Information">
-                            <InfoItem label="Full Name as in Documents" value={userData.name} />
-                            <InfoItem label="Email" value={userData.email} />
-                            <InfoItem label="Country" value={userData.country} />
-                            <InfoItem label="SpeakIn Name" value={userData.tutor_details.speakin_name} />
-                        </Section>
+  const InfoItem = ({ label, value, type = "text" }) => (
+    <div className="flex flex-col space-y-1">
+      <span className="text-sm font-medium text-zinc-400">{label}</span>
+      {type === "link" ? (
+        <a 
+          href={value} 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          className="text-blue-500 hover:text-blue-400 transition-colors"
+        >
+          View {label}
+        </a>
+      ) : (
+        <span className="text-white">{value}</span>
+      )}
+    </div>
+  );
 
-                        <Section title="Languages Spoken">
-                            <ul className="list-disc pl-5">
-                                {userData.language_spoken.map((lang, index) => (
-                                    <li key={index}>{lang.language} ({lang.proficiency})</li>
-                                ))}
-                            </ul>
-                        </Section>
-
-                        <Section title="Tutor Details">
-                            <InfoItem label="About" value={userData.tutor_details.about} />
-                            {userData.tutor_details.govt_id ? (
-                                <InfoItem
-                                    label="Government ID"
-                                    value={<a href={userData.tutor_details.govt_id} className="text-blue-500 hover:underline">View Government ID</a>}
-                                />
-                            ) : (
-                                <InfoItem
-                                    label="Certificate"
-                                    value={<a href={userData.tutor_details.certificate} className="text-blue-500 hover:underline">View Certificate</a>}
-                                />
-                            )}
-                            <InfoItem
-                                label="Intro Video"
-                                value={<a href={userData.tutor_details.intro_video} className="text-blue-500 hover:underline">View Intro Video</a>}
-                            />
-                            <InfoItem label="Required Credits" value={userData.tutor_details.required_credits} />
-                        </Section>
-
-                        <Section title="Language to Teach">
-                            <ul className="list-disc pl-5">
-                                {userData.tutor_language_to_teach.map((lang, index) => (
-                                    <li key={index}>{lang.language} (Native: {lang.is_native ? 'Yes' : 'No'})</li>
-                                ))}
-                            </ul>
-                        </Section>
-
-                        <div className="flex justify-center space-x-4 mt-10">
-                            {/* Deny Button */}
-                            <button
-                                className="px-6 py-2 bg-red-500 text-white flex items-center rounded hover:bg-red-600 transition-colors"
-                                onClick={() => handleAction('deny')}
-                                disabled={denyLoading}
-                            >
-                                {denyLoading ? (
-                                <svg
-                                    className="animate-spin h-5 w-5 text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                    ></circle>
-                                    <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                    ></path>
-                                </svg>
-                                ) : (
-                                <>
-                                    <FaTimesCircle className="mr-2" /> Deny
-                                </>
-                                )}
-                            </button>
-
-                            {/* Approve Button */}
-                            <button
-                                className="px-6 py-2 bg-green-500 text-white flex items-center rounded hover:bg-green-600 transition-colors"
-                                onClick={() => handleAction('approve')}
-                                disabled={approveLoading}
-                            >
-                                {approveLoading ? (
-                                <svg
-                                    className="animate-spin h-5 w-5 text-white"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                    ></circle>
-                                    <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                    ></path>
-                                </svg>
-                                ) : (
-                                <>
-                                    <FaCheckCircle className="mr-2" /> Approve
-                                </>
-                                )}
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <p className="text-center text-gray-600">No user data available.</p>
-                )}
+  return (
+    <div className="min-h-screen bg-zinc-950">
+      <AdminNavbar />
+      
+      <div className="max-w-5xl mx-auto px-4 py-8 pt-24">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <button
+              onClick={() => navigate('/admin/manage-users')}
+              className="flex items-center text-zinc-400 hover:text-white mb-4 transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Users
+            </button>
+            <h1 className="text-2xl font-bold text-white">Verify Tutor Application</h1>
+            <p className="text-zinc-400 mt-1">Review and verify tutor information</p>
+          </div>
+          
+          {userData && (
+            <div className="flex items-center space-x-3">
+              <Avatar 
+                src={userData.avatar}
+                name={userData.name}
+                size={48}
+              />
+              <div>
+                <h2 className="text-white font-medium">{userData.name}</h2>
+                <p className="text-sm text-zinc-400">{userData.email}</p>
+              </div>
             </div>
-        </main>
+          )}
+        </div>
+
+        {userData ? (
+          <div className="space-y-6">
+            <Section title="Personal Information">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InfoItem label="Full Name" value={userData.name} />
+                <InfoItem label="Email" value={userData.email} />
+                <InfoItem label="Country" value={userData.country} />
+                <InfoItem label="SpeakIn Name" value={userData.tutor_details.speakin_name} />
+              </div>
+            </Section>
+
+            <Section title="Languages Spoken">
+              <div className="flex flex-wrap gap-2">
+                {userData.language_spoken.map((lang, index) => (
+                  <span 
+                    key={index}
+                    className="px-3 py-1 rounded-full text-sm bg-zinc-800 text-white"
+                  >
+                    {lang.language} ({lang.proficiency})
+                  </span>
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Languages to Teach">
+              <div className="flex flex-wrap gap-2">
+                {userData.tutor_language_to_teach.map((lang, index) => (
+                  <div 
+                    key={index}
+                    className={`px-4 py-2 rounded-lg text-sm ${
+                      lang.is_native 
+                        ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/20' 
+                        : 'bg-blue-500/20 text-blue-400 border border-blue-500/20'
+                    }`}
+                  >
+                    <div className="font-medium">
+                      {lang.language}
+                    </div>
+                    <div className="text-xs mt-1 opacity-80">
+                      {lang.is_native ? 'Native Speaker' : 'Non-Native Speaker'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Section>
+
+            <Section title="Tutor Details">
+              <div className="space-y-6">
+                <InfoItem label="About" value={userData.tutor_details.about} />
+                {userData.tutor_details.govt_id ? (
+                  <InfoItem label="Government ID" value={userData.tutor_details.govt_id} type="link" />
+                ) : (
+                  <InfoItem label="Certificate" value={userData.tutor_details.certificate} type="link" />
+                )}
+                <InfoItem label="Intro Video" value={userData.tutor_details.intro_video} type="link" />
+                <InfoItem label="Required Credits" value={userData.tutor_details.required_credits} />
+              </div>
+            </Section>
+
+            <div className="flex justify-end space-x-4 mt-8">
+              <button
+                className="px-6 py-2 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition-colors flex items-center disabled:opacity-50"
+                onClick={() => handleAction('deny')}
+                disabled={denyLoading}
+              >
+                {denyLoading ? (
+                  <div className="flex items-center">
+                    <LoadingSpinner size="sm" className="text-white" />
+                  </div>
+                ) : (
+                  <>
+                    <FaTimesCircle className="mr-2" /> Deny
+                  </>
+                )}
+              </button>
+
+              <button
+                className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors flex items-center disabled:opacity-50"
+                onClick={() => handleAction('approve')}
+                disabled={approveLoading}
+              >
+                {approveLoading ? (
+                  <div className="flex items-center">
+                    <LoadingSpinner size="sm" className="text-white" />
+                  </div>
+                ) : (
+                  <>
+                    <FaCheckCircle className="mr-2" /> Approve
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-zinc-400">No user data available.</p>
+          </div>
+        )}
+      </div>
     </div>
-);
+  );
 };
-
-const Section = ({ title, children }) => (
-  <div className="border-b pb-4">
-    <h2 className="text-xl font-semibold mb-4 border-b-2 border-gray-200 pb-2">{title}</h2>
-    <div className="bg-gray-50 p-4 rounded-lg shadow-sm">
-      {children}
-    </div>
-  </div>
-);
-
-const InfoItem = ({ label, value }) => (
-  <div className="flex flex-col sm:flex-row sm:justify-between py-2 bg-white border rounded-lg p-4 shadow-sm mb-4">
-    <span className="font-medium">{label}:</span>
-    <span className="text-gray-700">{value}</span>
-  </div>
-);
 
 export default AdminVerifyTutorPage;

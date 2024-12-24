@@ -22,7 +22,6 @@ class UserSignUpView(APIView):
             )
         
 class UserSignInView(APIView):
-
     def post(self, request):
         try:
             user_service_url = os.getenv('USER_SERVICE_URL') + 'sign-in/'
@@ -35,7 +34,6 @@ class UserSignInView(APIView):
             )
 
 class GoogleSignInView(APIView):
-
     def post(self, request):
         try:
             user_service_url = os.getenv('USER_SERVICE_URL') + 'google-sign-in/'
@@ -48,7 +46,6 @@ class GoogleSignInView(APIView):
             )
         
 class TutorSignInView(APIView):
-
     def post(self, request):
         try:
             user_service_url = os.getenv('USER_SERVICE_URL') + 'tutor-sign-in/' 

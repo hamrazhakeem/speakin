@@ -31,7 +31,10 @@ const useAxios = () => {
       return response; // Pass through the successful response
     },
     (error) => {
-      if (error.response && error.response.data.code === "user_inactive") {
+      if (error.response && error.response.status === 403) {
+        dispatch(clearTokens());
+      }
+      else if (error.response && error.response.data.code === "user_inactive") {
         dispatch(clearTokens());
         toast.error("Your account has been deactivated. Please contact the support for more info.");
       }

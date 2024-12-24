@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { useNavigate, Link } from 'react-router-dom';
 import GoogleLoginButton from '../components/GoogleButton';
 import { ChevronRight, Eye, EyeOff, UserPlus } from 'lucide-react';
+import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const SignUpPage = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
@@ -14,9 +15,11 @@ const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [code, setCode] = useState('');
   const navigate = useNavigate();
+  const [sendingEmail, setSendingEmail] = useState(false);
 
   const onSubmit = async (data) => {
     setLoading(true);
+    setSendingEmail(true);
     try {                              
       const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}sign-up/`, {
         name: data.name,
@@ -24,12 +27,19 @@ const SignUpPage = () => {
         password: data.password,
         user_type: 'student',
       });
+      
       console.log('Sign up successful', response.data);
       reset();
       setBackendErrors({});
 
       const { cache_key } = response.data;
-      navigate('/verify-otp', { state: { email: data.email, cache_key } });
+      navigate('/verify-otp', { 
+        state: { 
+          email: data.email, 
+          cache_key,
+          message: 'Please check your email for the OTP code.' 
+        } 
+      });
     } catch (error) {
       if (error.response && error.response.data.errors) {
         setBackendErrors(error.response.data.errors);
@@ -38,6 +48,7 @@ const SignUpPage = () => {
       }
     } finally {
       setLoading(false);
+      setSendingEmail(false);
     }
   };
 
@@ -172,10 +183,12 @@ const SignUpPage = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
               >
                 {loading ? (
-                  <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <div className="h-5 flex items-center gap-3">
+                    <LoadingSpinner size="sm"/>
+                  </div>
                 ) : (
                   <>
                     Create Account
