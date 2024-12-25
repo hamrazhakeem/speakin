@@ -85,20 +85,6 @@ const AdminVerifyTutorPage = () => {
             <h1 className="text-2xl font-bold text-white">Verify Tutor Application</h1>
             <p className="text-zinc-400 mt-1">Review and verify tutor information</p>
           </div>
-          
-          {userData && (
-            <div className="flex items-center space-x-3">
-              <Avatar 
-                src={userData.avatar}
-                name={userData.name}
-                size={48}
-              />
-              <div>
-                <h2 className="text-white font-medium">{userData.name}</h2>
-                <p className="text-sm text-zinc-400">{userData.email}</p>
-              </div>
-            </div>
-          )}
         </div>
 
         {userData ? (
@@ -109,6 +95,7 @@ const AdminVerifyTutorPage = () => {
                 <InfoItem label="Email" value={userData.email} />
                 <InfoItem label="Country" value={userData.country} />
                 <InfoItem label="SpeakIn Name" value={userData.tutor_details.speakin_name} />
+                <InfoItem label="Profile Image" value={userData.profile_image} type="link" />
               </div>
             </Section>
 

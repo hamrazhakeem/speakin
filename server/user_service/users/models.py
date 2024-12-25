@@ -130,6 +130,7 @@ class TutorLanguageToTeach(models.Model):
 
 class TeachingLanguageChangeRequest(models.Model):
     user = models.ForeignKey(User, related_name='language_change_requests', on_delete=models.CASCADE)
+    profile_image = models.ImageField(storage=S3Boto3Storage(), upload_to='profile_images/', blank=True, null=True)
     new_language = models.ForeignKey(Language, on_delete=models.CASCADE)
     is_native = models.BooleanField()
     certificate = models.ImageField(storage=S3Boto3Storage(), upload_to='tutor_certificate_images/', blank=True, null=True)

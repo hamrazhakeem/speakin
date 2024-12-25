@@ -417,7 +417,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
           iconColor="text-blue-600"
         />
       ) : (
-        <div className="grid gap-6">
+        <div className="grid gap-6 max-h-[500px] overflow-y-auto pr-2">
           {filteredSessions.map((session) => (
             <div
               key={session.id}

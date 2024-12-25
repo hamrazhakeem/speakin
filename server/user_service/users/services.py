@@ -35,6 +35,29 @@ class EmailService:
         return cache_key
 
     @staticmethod
+    def send_tutor_verification_email(email):
+        """Handle registration email and OTP caching"""
+        otp = generate_otp()
+        cache_key = str(uuid.uuid4())
+
+        cache_otp_data(cache_key, otp)
+        cache_user_data(cache_key, {
+            'email': email
+        })
+
+        context = format_email_context({'otp': otp})
+        template = get_email_template_path('otp_email')
+
+        send_email_task.delay(
+            'Your OTP for SpeakIn Registration',
+            email,
+            template,
+            context
+        )
+
+        return cache_key
+
+    @staticmethod
     def resend_registration_otp(email, cache_key):
         """Handle resending registration OTP"""
         otp = generate_otp()
@@ -48,7 +71,7 @@ class EmailService:
             email,
             template,
             context
-        )
+        )        
 
     @staticmethod
     def send_forgot_password_email(email):

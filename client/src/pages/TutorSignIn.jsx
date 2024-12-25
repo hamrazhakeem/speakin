@@ -146,7 +146,7 @@ const TutorSignInPage = () => {
               <div className="text-center text-gray-600">
                 Want to become a tutor?{' '}
                 <Link 
-                  to="/tutor-request"
+                  to="/tutor-email-verification"
                   className="text-blue-600 hover:text-blue-700 font-medium"
                 >
                   Submit request

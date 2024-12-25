@@ -1,11 +1,11 @@
 import React, { forwardRef, useCallback, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import Footer from '../components/Footer';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import Navbar from '../components/Navbar';
-import { Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { Eye, EyeOff, ChevronRight, UserCircle } from 'lucide-react';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
 
 const TutorRequestPage = () => {
@@ -25,6 +25,8 @@ const TutorRequestPage = () => {
   });
 
   const [countries, setCountries] = useState([]);
+  const [profilePreview, setProfilePreview] = useState(null);
+  const [profileImageFile, setProfileImageFile] = useState(null);
   const [languagesToTeach, setLanguagesToTeach] = useState([]);
   const [languagesSpoken, setLanguagesSpoken] = useState([]);
   const [proficiencies, setProficiencies] = useState([]);
@@ -34,6 +36,14 @@ const TutorRequestPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const verifiedEmail = location.state?.verifiedEmail;
+
+  useEffect(() => {
+    if (!verifiedEmail) {
+      navigate('/tutor-email-verification');
+    }
+  }, [verifiedEmail, navigate]);
 
   const isNative = watch('isNative');
 
@@ -87,15 +97,20 @@ const TutorRequestPage = () => {
       e.target.value = null;
       return
     }
-  
-    // Check file size
-    // if (file.size > 4 * 1024 * 1024) {
-    //   toast.error("Image size must not exceed 2 MB.");
-    //   e.target.value = null;
-    //   return;
-    // }
     setImage(file)
   }, [])
+
+  const handleProfileImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5242880) { // 5MB
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+      setProfileImageFile(file);
+      setProfilePreview(URL.createObjectURL(file));
+    }
+  };
   
   const handleVideoChange = useCallback((e) => {
     const file = e.target.files[0];
@@ -104,13 +119,6 @@ const TutorRequestPage = () => {
     if (!file) {
       return toast.error("Video is required.");
     }
-  
-    // Check file size
-    // if (file.size > 8 * 1024 * 1024) {
-    //   toast.error("Video size must not exceed 5 MB.");
-    //   e.target.value = null;
-    //   return;
-    // }
     setVideo(file)
     // Add your logic to handle the video file here
     console.log("Video uploaded:", file);
@@ -151,8 +159,12 @@ const TutorRequestPage = () => {
         formData.append(key, data[key]);
       }
     });
+    formData.append('email', verifiedEmail); // Use verified email
     formData.append('video', video);
     formData.append('image', image);
+    if (profileImageFile) {
+      formData.append('profile_image', profileImageFile);
+    }
 
     setLoading(true);
 
@@ -243,25 +255,6 @@ const TutorRequestPage = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Controller
-              name="email"
-              control={control}
-              rules={{ 
-                required: 'Email is required',
-                pattern: {
-                  value: /^\S+[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\S*$/i,
-                  message: "Invalid email address or contains leading/trailing spaces"
-                }
-              }}
-              render={({ field }) => (
-                <InputField
-                  {...field}
-                  type="email"
-                  placeholder="Email"
-                  error={errors.email}
-                />
-              )}
-            />
                 <Controller
                   name="password"
                   control={control}
@@ -292,9 +285,7 @@ const TutorRequestPage = () => {
                     </div>
                   )}
                 />
-            </div>
-
-            <Controller
+                            <Controller
               name="country"
               control={control}
               rules={{ required: 'Country is required' }}
@@ -307,6 +298,42 @@ const TutorRequestPage = () => {
                 />
               )}
             />
+            </div>
+
+            <div className="space-y-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+              <h2 className="text-lg font-semibold text-gray-900">Profile Picture</h2>
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-32 h-32 rounded-full overflow-hidden">
+                  {profilePreview ? (
+                    <img 
+                      src={profilePreview} 
+                      alt="Profile Preview" 
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                      <UserCircle className="w-16 h-16 text-gray-400" />
+                    </div>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfileImage}
+                  className="hidden"
+                  id="profile-upload"
+                />
+                <label 
+                  htmlFor="profile-upload"
+                  className="px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 cursor-pointer"
+                >
+                  Upload Profile Picture
+                </label>
+                <p className="text-sm text-gray-500">
+                  Maximum file size: 5MB. Supported formats: JPG, PNG
+                </p>
+              </div>
+            </div>
 
             <div className="space-y-4">
               <label className="font-medium block">Language You Teach:</label>

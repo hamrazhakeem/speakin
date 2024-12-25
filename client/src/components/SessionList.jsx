@@ -547,7 +547,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
           </p>
         </div>
       ) : (
-        <div className="grid gap-6">
+        <div className="grid gap-6 max-h-[500px] overflow-y-auto pr-2">
           {filteredSessions.map((session) => (
             <div
               key={session.id}

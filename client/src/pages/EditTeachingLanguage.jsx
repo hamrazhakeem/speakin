@@ -7,12 +7,28 @@ import { useNavigate } from "react-router-dom";
 import { toast } from 'react-hot-toast';
 import useAxios from '../hooks/useAxios';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import Avatar from "../components/Avatar";
+import { UserCircle } from 'lucide-react';
 
 const EditTeachingLanguage = () => {
   const navigate = useNavigate();
   const axiosInstance = useAxios();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+  const [profilePreview, setProfilePreview] = useState(null);
+  const [profileImageFile, setprofileImage] = useState(null);
+
+  const handleProfileImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5242880) { // 5MB
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+      setprofileImage(file);
+      setProfilePreview(URL.createObjectURL(file));
+    }
+  };
+
   // Set default values in useForm, setting isNative to "true" for native
   const { control, handleSubmit, register, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -93,6 +109,9 @@ const EditTeachingLanguage = () => {
       formData.append("about", data.about);
       formData.append("imageUpload", imageFile);
       formData.append("intro_video", videoFile);
+      if (imageFile) {
+        formData.append('profile_image', profileImageFile);
+      }
 
       const response = await axiosInstance.post(`teaching-language-change-requests/`, formData, {
         headers: {
@@ -164,6 +183,41 @@ const EditTeachingLanguage = () => {
                   {errors.fullName && (
                     <p className="text-red-500 text-xs mt-1">{errors.fullName.message}</p>
                   )}
+                </div>
+
+                <div className="space-y-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                  <h2 className="text-lg font-semibold text-gray-900">Profile Picture</h2>
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="w-32 h-32 rounded-full overflow-hidden">
+                      {profilePreview ? (
+                        <img 
+                          src={profilePreview} 
+                          alt="Profile Preview" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                          <UserCircle className="w-16 h-16 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleProfileImage}
+                      className="hidden"
+                      id="profile-upload"
+                    />
+                    <label 
+                      htmlFor="profile-upload"
+                      className="px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 cursor-pointer"
+                    >
+                      Upload Profile Picture
+                    </label>
+                    <p className="text-sm text-gray-500">
+                      Maximum file size: 5MB. Supported formats: JPG, PNG
+                    </p>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -294,7 +348,7 @@ const EditTeachingLanguage = () => {
                       </div>
                     ) : (
                       <>
-                        Save Changes
+                        Submit Request
                         <FaChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                       </>
                     )}

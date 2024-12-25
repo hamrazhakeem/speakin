@@ -16,6 +16,8 @@ const AdminTable = ({ title, columns, data, showRating, isPending }) => {
 
       <div className="overflow-x-auto">
         {data.length > 0 ? (
+        <div className="max-h-[500px] overflow-y-auto">
+
           <table className="w-full">
             <thead>
               <tr className="bg-zinc-900 border-b border-zinc-800">
@@ -106,6 +108,7 @@ const AdminTable = ({ title, columns, data, showRating, isPending }) => {
               ))}
             </tbody>
           </table>
+        </div>
         ) : (
           <div className="px-6 py-8 text-center">
             <div className="text-zinc-400 text-sm">

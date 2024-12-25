@@ -36,6 +36,31 @@ def sign_up(request):
     return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
+def tutor_verify_email(request):
+    email = request.data.get('email')
+    if not email:
+        return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Send email with OTP
+    cache_key = EmailService.send_tutor_verification_email(email)
+    
+    return Response({'cache_key': cache_key}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def tutor_verify_otp(request):
+    email = request.data.get('email')
+    otp = request.data.get('otp')
+    cache_key = request.data.get('cache_key')
+     
+    stored_otp = cache.get(f'otp_{cache_key}')
+    print('stored otp', stored_otp)
+    if not stored_otp or stored_otp != otp:
+        return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    cache.delete(cache_key)
+    return Response({'message': 'Email verified successfully'}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
 def verify_otp(request):
     email  = request.data.get('email') 
     otp = request.data.get('otp')
@@ -448,11 +473,13 @@ def tutor_request(request):
 
         video_file = request.FILES.get('video')
         image_file = request.FILES.get('image')
+        profile_image = request.FILES.get('profile_image')
 
         # Create the User instance
         user = User.objects.create(
             email=email,
             name=data['fullName'],
+            profile_image=profile_image,
             password=make_password(data['password']),
             user_type='tutor',
             country=data['country'],
@@ -648,8 +675,10 @@ class TeachingLanguageChangeRequestDetail(generics.RetrieveUpdateDestroyAPIView)
             tutor_details.save()
             
             # Update User name
+            print('Updating profile', change_request.profile_image)
             user = change_request.user
             user.name = change_request.full_name
+            user.profile_image = change_request.profile_image
             user.save()
             
             EmailService.send_language_change_approval_email(

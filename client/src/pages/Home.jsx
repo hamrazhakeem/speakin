@@ -222,8 +222,7 @@ const HomePage = () => {
               <div className="container mx-auto px-4 py-12">
                 <div className="max-w-6xl mx-auto">
                   {/* Tutors Grid */}
-                  <div className="grid gap-6">
-                    {filteredTutors.map((tutor) => (
+                  <div className="grid gap-6 max-h-[600px] overflow-y-auto pr-2 bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">                  {filteredTutors.map((tutor) => (
                       <TutorCard
                         key={tutor.id}
                         name={tutor.name}

@@ -197,116 +197,63 @@ const LandingPage = () => {
         </div>
       </section>
 
-        {/* New Payment Security Section */}
-        <section className="py-24 bg-white relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-50/50 to-transparent" />
-      
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            We have partnered with Stripe for the best payment experience
-          </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Your payments are protected by Stripe's world-class security infrastructure
+      {/* New Payment Security Section */}
+      <section className="bg-gradient-to-b from-white to-gray-50 py-16">
+        <div className="container mx-auto px-4">
+        {/* New Headline */}
+        <div className="text-center max-w-3xl mx-auto mb-16">
+        <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4 leading-relaxed tracking-tight py-1">
+          Enterprise-Grade Payment Security
+        </h2>
+          <p className="text-lg text-gray-600">
+            Experience seamless and secure transactions powered by our strategic partnership with Stripe's global payment infrastructure
           </p>
         </div>
-
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Column: Features */}
-          <div className="space-y-6">
-            {/* Security Features Grid */}
-            <div className="grid sm:grid-cols-2 gap-6">
-              {[
-                {
-                  icon: <Lock className="w-6 h-6 text-blue-600" />,
-                  title: "Bank-Level Encryption",
-                  desc: "256-bit TLS encryption for all transactions"
-                },
-                {
-                  icon: <Shield className="w-6 h-6 text-blue-600" />,
-                  title: "Fraud Prevention",
-                  desc: "Advanced fraud detection and prevention"
-                },
-                {
-                  icon: <CreditCard className="w-6 h-6 text-blue-600" />,
-                  title: "Multiple Payment Methods",
-                  desc: "Apple Pay, Google Pay, Cards, and others"
-                },
-                {
-                  icon: <CheckCircle className="w-6 h-6 text-blue-600" />,
-                  title: "PCI Compliant",
-                  desc: "Highest level of payment security"
-                }
-              ].map((item, index) => (
-                <div key={index} className="bg-gray-50 p-6 rounded-2xl hover:bg-blue-50 transition-colors group">
-                  <div className="p-3 bg-white rounded-xl w-fit mb-4 group-hover:bg-blue-100/50 transition-colors">
-                    {item.icon}
-                  </div>
-                  <h3 className="font-semibold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-600">{item.desc}</p>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+              <div className="space-y-8">
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-8 p-6 bg-blue-50 rounded-xl">
+                  {[
+                    { value: "99.99%", label: "Uptime", description: "Industry-leading reliability" },
+                    { value: "250M+", label: "Users Protected", description: "Trusted globally" }
+                  ].map((stat, index) => (
+                    <div key={index} className="text-center p-4">
+                      <div className="text-3xl font-bold text-blue-600 mb-2">{stat.value}</div>
+                      <div className="font-medium text-gray-900 mb-1">{stat.label}</div>
+                      <div className="text-sm text-gray-600">{stat.description}</div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            {/* Trust Indicators */}
-            <div className="flex flex-wrap gap-4 justify-center sm:justify-start">
-              {["🔒 PCI DSS Level 1", "✓ 3D Secure", "🛡️ SSL Certified"].map((badge, index) => (
-                <span key={index} className="px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-700 font-medium">
-                  {badge}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Right Column: Stripe Card */}
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 rounded-3xl transform rotate-3" />
-            <div className="relative bg-white rounded-3xl p-8 shadow-xl border border-gray-100">
-              {/* Stripe Logo */}
-              <div className="flex justify-center mb-8">
-                <img
-                  src="/src/assets/powered-by-stripe.webp"
-                  alt="Powered by Stripe"
-                  className="h-12"
-                />
-              </div>
-              
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-6 mb-8">
-                {[
-                  { value: "99.99%", label: "Uptime" },
-                  { value: "250M+", label: "Users Protected" }
-                ].map((stat, index) => (
-                  <div key={index} className="text-center">
-                    <div className="text-2xl font-bold text-gray-900 mb-1">{stat.value}</div>
-                    <div className="text-sm text-gray-600">{stat.label}</div>
+                {/* Enhanced Testimonial */}
+                <blockquote className="relative p-6 bg-gradient-to-r from-blue-50 to-gray-50 rounded-xl text-center">
+                  <div className="relative z-10">
+                    <p className="text-lg text-gray-700 font-medium mb-4 mx-auto">
+                      "Stripe powers payments for millions of businesses worldwide"
+                    </p>
+                    <footer className="text-sm font-medium text-gray-600">
+                      Trusted by leading companies globally
+                    </footer>
                   </div>
-                ))}
+                </blockquote>
               </div>
+            </div>
 
-              {/* Testimonial */}
-              <blockquote className="text-center">
-                <p className="text-gray-600 italic mb-4">
-                  "Stripe powers payments for millions of businesses worldwide"
-                </p>
-                <footer className="text-sm text-gray-500">
-                  Trusted by leading companies globally
-                </footer>
-              </blockquote>
+            {/* Enhanced Security Badge */}
+            <div className="flex justify-center mt-12">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-4 rounded-full shadow-lg">
+                <Lock className="w-5 h-5 text-white" />
+                <span className="text-white font-medium">Bank-grade encryption for your data</span>
+              </div>
+            </div>
+            {/* Stripe Partnership Banner */}
+            <div className="flex justify-center items-center gap-4 mt-12">
+              <img src='/src/assets/powered-by-stripe.webp' alt="Stripe" className="h-8" />
             </div>
           </div>
         </div>
-
-        {/* Bottom Security Badge */}
-        <div className="flex justify-center mt-16">
-          <div className="flex items-center gap-2 bg-blue-50 px-6 py-3 rounded-full">
-            <Lock className="w-4 h-4 text-blue-600" />
-            <span className="text-sm text-blue-600 font-medium">Your data is always protected</span>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
 
       {/* Pricing Section - Updated design */}
       <section className="py-20 bg-gray-50">

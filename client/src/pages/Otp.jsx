@@ -149,6 +149,7 @@ const OtpPage = () => {
                 navigate('/home');
             }, 1500);
         } catch (error) {
+            
             console.error(error.response?.data);
             setVerifyLoading(false);
             setTimeout(() => {
@@ -172,8 +173,8 @@ const OtpPage = () => {
             localStorage.setItem('otpTimerEnd', (Date.now() + 30 * 1000).toString());
             setOtp(['', '', '', '', '', '']);
         } catch (error) {
+            toast.error(error.response?.data?.message || 'Failed to resend OTP. Please try again.')
             console.error(error.response?.data);
-            setError(error.response?.data?.message || 'Failed to resend OTP. Please try again.');
         } finally {
             setResendLoading(false);
         }

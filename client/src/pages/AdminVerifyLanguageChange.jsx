@@ -95,20 +95,6 @@ const AdminVerifyLanguageChangePage = () => {
             <h1 className="text-2xl font-bold text-white">Verify Language Change Request</h1>
             <p className="text-zinc-400 mt-1">Review and verify tutor's language change request</p>
           </div>
-          
-          {requestData && (
-            <div className="flex items-center space-x-3">
-              <Avatar 
-                src={requestData.user?.avatar}
-                name={requestData.full_name}
-                size={48}
-              />
-              <div>
-                <h2 className="text-white font-medium">{requestData.full_name}</h2>
-                <p className="text-sm text-zinc-400">{requestData.user?.email}</p>
-              </div>
-            </div>
-          )}
         </div>
 
         {requestData ? (
@@ -128,6 +114,13 @@ const AdminVerifyLanguageChangePage = () => {
                     value={requestData.about} 
                   />
                 </div>
+                  {requestData.profile_image && (
+                  <InfoItem
+                    label="Profile Image"
+                    value={requestData.profile_image}
+                    type="link"
+                  />
+                )}
               </div>
             </Section>
 

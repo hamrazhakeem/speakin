@@ -7,6 +7,8 @@ urlpatterns = [
     path('verify-otp/', verify_otp),
     path('sign-in/', sign_in),
     path('google-sign-in/', LoginWithGoogle.as_view()),
+    path('tutor/verify-email/', tutor_verify_email),
+    path('tutor/verify-otp/', tutor_verify_otp),
     path('tutor-sign-in/', tutor_sign_in),
     path('tutor-request/', tutor_request),
     path('admin-sign-in/', admin_signin),

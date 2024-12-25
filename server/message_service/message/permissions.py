@@ -10,7 +10,7 @@ class IsOwner(BasePermission):
             raise PermissionDenied("Authorization token is missing or invalid")
 
         token = auth_header.split(' ')[1]
-        payload = self.decode_jwt(token)
+        payload = decode_jwt(token)
 
         if payload is None:
             raise PermissionDenied("Invalid JWT token")

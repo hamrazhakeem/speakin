@@ -51,71 +51,57 @@ const StripeRefresh = () => {
         }
       ];
 
-  return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Verify Your Account for Withdrawals
-          </h1>
-          <p className="mt-4 text-gray-600">
-            Please complete your Stripe setup to enable seamless withdrawals.
-          </p>
-        </div>
-
-        <div className="bg-gray-50 p-8 rounded-lg shadow-md">
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Why Verify with Stripe?
-            </h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              {features.map((feature, index) => (
-                <div key={index} className="flex items-start">
-                  <div className="flex-shrink-0">
-                    {feature.icon}
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium text-gray-800">
-                      {feature.title}
-                    </h3>
-                    <p className="mt-1 text-gray-600">
-                      {feature.description}
-                    </p>
-                  </div>
+      return (
+        <div className="min-h-screen bg-gray-50">
+          <Navbar />
+          
+          <div className="bg-white mt-8">
+            <div className="container mx-auto px-4 py-16">
+              <div className="text-center max-w-3xl mx-auto mb-16">
+                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-relaxed">
+                  Complete Your Payment Setup
+                </h1>
+                <p className="text-lg text-gray-600 mb-6">
+                  To start receiving payments, you'll need to complete your Stripe Connect account setup
+                </p>
+              </div>
+      
+              <div className="max-w-6xl mx-auto">
+                <div className="grid md:grid-cols-3 gap-8">
+                  {features.map((feature, index) => (
+                    <div key={index} className="bg-white rounded-xl p-8 shadow-md border border-gray-100">
+                      <div className="bg-blue-50 rounded-lg p-3 inline-block mb-4">
+                        {feature.icon}
+                      </div>
+                      <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                        {feature.title}
+                      </h3>
+                      <p className="text-gray-600">
+                        {feature.description}
+                      </p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
+      
+              <div className="text-center mt-12">
+                <button
+                  onClick={() => navigate('/withdraw')}
+                  className="inline-flex items-center px-8 py-3 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-colors duration-200"
+                >
+                  Setup Payment Method
+                  <ChevronRight className="ml-2 h-5 w-5" />
+                </button>
+                <p className="mt-4 text-sm text-gray-500">
+                  You'll be redirected to payments to start over to complete your account setup
+                </p>
+              </div>
             </div>
           </div>
-
-          <div className="text-center">
-            <button
-              onClick={() => navigate('/withdraw')}
-              className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors duration-200"
-            >
-              Retry Stripe Setup
-              <ChevronRight className="ml-2 w-5 h-5" />
-            </button>
-          </div>
+      
+          <Footer />
         </div>
-
-        <div className="mt-8 text-center">
-          <p className="text-gray-600">
-            Need assistance?{' '}
-            <a
-              href="mailto:support@speakin.com"
-              className="text-blue-600 hover:underline"
-            >
-              Contact Support
-            </a>
-          </p>
-        </div>
-      </div>
-
-      <Footer />
-    </div>
-  );
-};
-
-export default StripeRefresh;
+      );
+    };
+    
+    export default StripeRefresh;

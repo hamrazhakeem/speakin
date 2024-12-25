@@ -45,6 +45,30 @@ class GoogleSignInView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
         
+class TutorVerifyEmailView(APIView):
+    def post(self, request):
+        try:
+            user_service_url = os.getenv('USER_SERVICE_URL') + 'tutor/verify-email/'
+            response = requests.post(user_service_url, json=request.data)
+            return Response(response.json(), status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "Failed to connect to user service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+         
+class TutorVerifyOtpView(APIView):
+    def post(self, request):
+        try:
+            user_service_url = os.getenv('USER_SERVICE_URL') + 'tutor/verify-otp/'
+            response = requests.post(user_service_url, json=request.data)
+            return Response(response.json(), status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "Failed to connect to user service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
 class TutorSignInView(APIView):
     def post(self, request):
         try:

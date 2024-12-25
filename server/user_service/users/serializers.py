@@ -119,7 +119,7 @@ class TeachingLanguageChangeRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = TeachingLanguageChangeRequest
         fields = ['id', 'new_language', 'is_native', 'certificate', 'govt_id', 'intro_video',  
-                 'full_name', 'about', 'status', 'user', 'tutor_language_to_teach']
+                 'full_name', 'about', 'status', 'user', 'tutor_language_to_teach', 'profile_image']
         read_only_fields = ['status']
 
     def to_representation(self, instance):

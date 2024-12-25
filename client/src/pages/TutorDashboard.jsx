@@ -186,7 +186,7 @@ const TutorDashboard = () => {
   };
 
   const { email, profile_image, tutor_language_to_teach = [], tutor_details, language_spoken = [] } = tutorData || {};
-  const { rating, total_reviews } = tutor_details || {};
+  const { rating, total_reviews, about } = tutor_details || {};
 
   const getProficiencyColor = (level) => {
     const colors = {
@@ -285,31 +285,16 @@ const TutorDashboard = () => {
               <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Profile Picture Card */}
                 <div className="lg:col-span-1">
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h2>
-                    {editMode ? (
-                      <div className="space-y-4">
-                        <input 
-                          type="file" 
-                          onChange={handleProfileImageChange} 
-                          accept="image/*"
-                          className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100"
-                        />
-                        {(profile_image || profileImage) && !deleteImage && (
-                          <button
-                            type="button"
-                            onClick={handleDeleteImage}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
-                          >
-                            <FaTrash className="w-4 h-4" />
-                            Delete Image
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex justify-center">
-                        <Avatar src={profile_image} name={tutorData?.name || ''} size={200} />
-                      </div>
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h2>
+                <div className="flex justify-center">
+                  <Avatar src={profile_image} name={tutorData?.name || ''} size={200} />
+                </div>
+                    {/* Profile Image Info */}
+                    {editMode && (
+                    <p className="mt-4 text-sm text-gray-600 text-center">
+                      To update your profile picture, please include it in your teaching language update request. This helps us maintain professional standards across the platform.
+                    </p>
                     )}
 
                     {/* Ratings Display */}
@@ -329,45 +314,36 @@ const TutorDashboard = () => {
                 {/* Profile Info Card - Adjusted button and text sizes */}
                 <div className="lg:col-span-2">
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8 hover:shadow-lg transition-shadow duration-200">
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">Teaching Information</h2>
-                      {editMode ? (
-                        <div className="flex gap-2 sm:gap-3">
-                          <button
-                            type="button"
-                            onClick={handleEditToggle}
-                            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
-                            disabled={saveLoading}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="submit"
-                            disabled={saveLoading}
-                            className="px-3 sm:px-4 py-1.5 sm:py-2 h-10 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400 flex items-center justify-center group"
-                          >
-                            {saveLoading ? (
-                              <div className="h-5 flex items-center">
-                                <LoadingSpinner size="sm" className="text-white" />
-                              </div>
-                            ) : (
-                              <>
-                                Save Changes
-                                <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={handleEditToggle}
-                          className="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100"
-                        >
-                          <FaEdit className="w-3.5 h-3.5 sm:w-4 sm:h-4" /> Edit Profile
-                        </button>
-                      )}
-                    </div>
+                  <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+  <h2 className="text-2xl font-semibold text-gray-900">Personal Information</h2>
+  {editMode ? (
+    <div className="flex flex-wrap w-full sm:w-auto gap-2 sm:gap-3">
+      <button
+        type="button"
+        onClick={handleEditToggle}
+        className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+        disabled={saveLoading}
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+        disabled={saveLoading}
+      >
+        {saveLoading ? <LoadingSpinner size="sm" /> : 'Save Changes'}
+      </button>
+    </div>
+  ) : (
+    <button
+      type="button"
+      onClick={handleEditToggle}
+      className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+    >
+      Edit Profile
+    </button>
+  )}
+</div>
 
                     {/* Rest of the form fields with updated styling */}
                     <div className="space-y-6">
@@ -403,6 +379,16 @@ const TutorDashboard = () => {
                         {errors.speakinName && (
                           <p className="text-red-500 text-sm mt-1">{errors.speakinName.message}</p>
                         )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">About</label>
+                        <textarea
+                          value={about || "No description available"}
+                          className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed resize-none"
+                          rows={4}
+                          readOnly
+                        />
                       </div>
 
                       <div>
@@ -463,8 +449,11 @@ const TutorDashboard = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Languages you can speak</label>
+                        <div className="max-h-[200px] overflow-y-auto bg-white border border-gray-100 rounded-lg p-4">
+
                         {editMode ? (
                           <div className="space-y-4">
+
                             {selectedLanguages.map((lang, index) => (
                               <div key={index} className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-sm">
                                 <div className="flex-1">
@@ -544,6 +533,7 @@ const TutorDashboard = () => {
                               )}
                             </div>
                           )}
+                          </div>
                         </div>
 
                       <div>

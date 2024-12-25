@@ -18,6 +18,7 @@ const ProfilePage = () => {
   const [studentData, setStudentData] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [deleteImage, setDeleteImage] = useState(false);
   const [countries, setCountries] = useState([]);
   const [availableLanguages, setAvailableLanguages] = useState([]);
@@ -126,13 +127,21 @@ const ProfilePage = () => {
   };
 
   const handleProfileImageChange = (e) => {
-    setProfileImage(e.target.files[0]);
-    setDeleteImage(false);
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5242880) {
+        toast.error('Image size should be less than 5MB');
+        return;
+      }
+      setProfileImage(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const handleDeleteImage = () => {
     setProfileImage(null);
     setDeleteImage(true);
+    setImagePreview(null);
   };
 
   const handleAddSpokenLanguage = () => {
@@ -293,30 +302,51 @@ const ProfilePage = () => {
                 <div className="lg:col-span-1">
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
                     <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h2>
-                    {editMode ? (
-                      <div className="space-y-4">
-                        <input 
-                          type="file" 
-                          onChange={handleProfileImageChange} 
-                          accept="image/*"
-                          className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100"
-                        />
-                        {(profile_image || profileImage) && !deleteImage && (
-                          <button
-                            type="button"
-                            onClick={handleDeleteImage}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
-                          >
-                            <FaTrash className="w-4 h-4" />
-                            Delete Image
-                          </button>
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="w-32 h-32 rounded-full overflow-hidden">
+                        {imagePreview ? (
+                          <img 
+                            src={imagePreview} 
+                            alt="Profile Preview" 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <Avatar 
+                            src={!deleteImage ? profileImage : null} 
+                            name={name || ''} 
+                            size={128} 
+                          />
                         )}
                       </div>
-                    ) : (
-                      <div className="flex justify-center">
-                        <Avatar src={profile_image} name={name || ''} size={200} />
-                      </div>
-                    )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfileImageChange}
+                        className="hidden"
+                        id="profile-upload"
+                        disabled={!editMode}
+                      />
+                      {editMode && (
+                        <div className="flex flex-col w-full gap-2">
+                          <label 
+                            htmlFor="profile-upload"
+                            className="px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 cursor-pointer text-center"
+                          >
+                            Change Profile Picture
+                          </label>
+                          {(profileImage) && (
+                            <button
+                              type="button"
+                              onClick={handleDeleteImage}
+                              className="px-4 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                            >
+                              <FaTrash className="w-4 h-4" />
+                              Delete Image
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
                     
                     {/* Credits Display */}
                     <div className="mt-6 p-4 bg-blue-50 rounded-xl">
@@ -338,14 +368,15 @@ const ProfilePage = () => {
                 {/* Profile Info Card */}
                 <div className="lg:col-span-2">
                   <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-lg transition-shadow duration-200">
-                    <div className="flex justify-between items-center mb-6">
-                      <h2 className="text-2xl font-semibold text-gray-900">Personal Information</h2>
-                      {editMode ? (
-                        <div className="flex gap-3">
+                  <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
+
+                  <h2 className="text-2xl font-semibold text-gray-900">Personal Information</h2>
+                  {editMode ? (
+                    <div className="flex flex-wrap w-full sm:w-auto gap-2 sm:gap-3">
                           <button
                             type="button"
                             onClick={handleEditToggle}
-                            className="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+                            className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
                             disabled={saveLoading}
                           >
                             Cancel
@@ -353,8 +384,8 @@ const ProfilePage = () => {
                           <button
                             type="submit"
                             disabled={saveLoading}
-                            className="px-4 py-2 h-10 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-400 flex items-center justify-center group"
-                          >
+                            className="flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                            >
                             {saveLoading ? (
                               <div className="h-5 flex items-center">
                                 <LoadingSpinner size="sm" className="text-white" />
@@ -362,7 +393,6 @@ const ProfilePage = () => {
                             ) : (
                               <>
                                 Save Changes
-                                <ChevronRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                               </>
                             )}
                           </button>
@@ -371,9 +401,9 @@ const ProfilePage = () => {
                         <button
                           type="button"
                           onClick={handleEditToggle}
-                          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100"
-                        >
-                          <FaEdit /> Edit Profile
+                          className="w-full sm:w-auto px-3 sm:px-4 py-1.5 sm:py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+                          >
+                          Edit Profile
                         </button>
                       )}
                     </div>
@@ -438,12 +468,14 @@ const ProfilePage = () => {
                         {formErrors.spokenLanguages && (
                                   <p className="text-red-500 text-sm mt-1">{formErrors.spokenLanguages}</p>
                                 )}
+  <div className="max-h-[200px] overflow-y-auto bg-white border border-gray-100 rounded-lg p-4">
 
                         {spokenLanguages.length === 0 ? (
                           <div className="bg-gray-50 p-6 rounded-lg text-center">
                             <p className="text-gray-500">No languages selected</p>
                           </div>
                         ) : (
+                          
                           spokenLanguages.map((lang, index) => (
                             <div key={index} className="space-y-2">
                               <div className="flex flex-col sm:flex-row gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
@@ -453,7 +485,7 @@ const ProfilePage = () => {
                                     onChange={(e) => handleSpokenLanguageChange(index, 'language', e.target.value)}
                                     disabled={!editMode}
                                     className={`w-full px-4 py-2 rounded-lg border ${
-                                      editMode ? 'bg-white hover:border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200' 
+                                      editMode ? 'bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
                                       : 'bg-gray-50 cursor-not-allowed'
                                     } ${languageErrors[index]?.language ? 'border-red-500' : ''} transition-colors`}
                                   >
@@ -482,7 +514,7 @@ const ProfilePage = () => {
                                     disabled={!editMode || index === 0}
                                     className={`w-full px-4 py-2 rounded-lg border ${
                                       index === 0 || !editMode ? 'bg-gray-50 cursor-not-allowed' 
-                                      : 'bg-white hover:border-green-500 focus:border-green-500 focus:ring-2 focus:ring-green-200'
+                                      : 'bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
                                     } ${languageErrors[index]?.proficiency ? 'border-red-500' : ''} transition-colors`}
                                   >
                                     {index === 0 ? (
@@ -516,12 +548,13 @@ const ProfilePage = () => {
                             </div>
                           ))
                         )}
+                        </div>
                         
                         {editMode && (
                           <button
                             type="button"
                             onClick={handleAddSpokenLanguage}
-                            className="mt-4 bg-green-50 text-green-600 py-2 px-4 rounded-lg hover:bg-green-100 transition-colors flex items-center gap-2 font-medium"
+                            className="mt-4 bg-blue-50 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 font-medium"
                           >
                             + Add Language
                           </button>

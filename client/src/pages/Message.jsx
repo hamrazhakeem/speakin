@@ -472,7 +472,7 @@ const MessagePage = () => {
                   {messages.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-500">
                       <p className="text-lg font-medium">Start a conversation</p>
-                      <p className="text-sm text-gray-400">Send your first message to {selectedUser.user_type === 'student' ? selectedUser.name : selectedUser.tutor_details.speakin_name}</p>
+                      <p className="text-sm text-gray-400">Send your first message to tutor {selectedUser.user_type === 'student' ? selectedUser.name : selectedUser.tutor_details.speakin_name}</p>
                     </div>
                   ) : (
                     messages.map((message, index) => (
