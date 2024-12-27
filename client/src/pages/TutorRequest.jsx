@@ -285,19 +285,19 @@ const TutorRequestPage = () => {
                     </div>
                   )}
                 />
-                            <Controller
-              name="country"
-              control={control}
-              rules={{ required: 'Country is required' }}
-              render={({ field }) => (
-                <SelectField
-                  {...field}
-                  options={countries.map(country => ({ value: country[0], label: country[0] }))}
-                  placeholder="Select Country"
-                  error={errors.country}
-                />
-              )}
-            />
+              <Controller
+                name="country"
+                control={control}
+                rules={{ required: 'Country is required' }}
+                render={({ field }) => (
+                  <SelectField
+                    {...field}
+                    options={countries.map(country => ({ value: country[0], label: country[0] }))}
+                    placeholder="Select Country"
+                    error={errors.country}
+                  />
+                )}
+              />
             </div>
 
             <div className="space-y-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

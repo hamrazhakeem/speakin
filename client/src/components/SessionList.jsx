@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CreditCard, RotateCw, VideoIcon, Filter, ChevronDown, ChevronUp, AlertCircle } from 'lucide-react';
+import { Clock, CreditCard, RotateCw, VideoIcon, Filter, ChevronDown, ChevronUp, AlertCircle, Plus } from 'lucide-react';
 import EmptyState from './EmptyState';
 import useAxios from '../hooks/useAxios';
 import { toast } from 'react-hot-toast';
 import Avatar from './Avatar';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from './ui/LoadingSpinner';
 
 const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   const axiosInstance = useAxios();
@@ -227,6 +228,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   if (loading || sessionsWithStudentInfo === null) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center p-8">
+        <LoadingSpinner size="lg" className="text-blue-600" />
       </div>
     );
   }
@@ -386,6 +388,15 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
 
   return (
     <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+        <button 
+          className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm"
+          onClick={onAddSession}
+        >
+          <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+          Add New Session
+        </button>
+      </div>
 
       {/* Header with Filter and Stats */}
       <div className="flex flex-col gap-6">

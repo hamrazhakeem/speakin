@@ -15,7 +15,7 @@ from rest_framework import generics
 from .utils import handle_account_verification, handle_checkout_completed
 
 load_dotenv()
-
+ 
 # Create your views here. 
   
 stripe.api_key = settings.STRIPE_SECRET_KEY

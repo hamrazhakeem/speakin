@@ -46,10 +46,12 @@ class PaymentService(payment_service_pb2_grpc.PaymentServiceServicer):
                 
                 return payment_service_pb2.RefundLockedCreditsResponse(success=True)
             except Escrow.DoesNotExist:
+                print('does not exist')
                 context.set_details("Escrow transaction not found")
                 context.set_code(grpc.StatusCode.NOT_FOUND)
                 return payment_service_pb2.RefundLockedCreditsResponse(success=False)
             except Exception as e:
+                print('exception iiiiiiiin payment', e)
                 context.set_details(f"Error processing refund: {e}")
                 context.set_code(grpc.StatusCode.INTERNAL)
                 return payment_service_pb2.RefundLockedCreditsResponse(success=False)

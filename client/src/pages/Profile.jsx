@@ -280,7 +280,6 @@ const ProfilePage = () => {
                 { label: 'Profile', path: '/profile', active: true },
                 { label: 'Security', path: '/student-password-change' },
                 { label: 'Bookings', path: '/bookings' },
-                { label: 'Refer a friend', path: '/refer' }
               ].map((tab) => (
                 <button
                   key={tab.label}

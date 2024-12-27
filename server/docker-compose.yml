@@ -22,7 +22,10 @@ services:
       - "8000:8000"
       - "50051:50051"
     depends_on:
-      - user_service_db
+      rabbitmq:
+        condition: service_healthy
+      user_service_db:
+        condition: service_started
     networks:
       - microservice_network
 
@@ -159,12 +162,32 @@ services:
     networks:
       - microservice_network
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS}
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - microservice_network
+
 volumes:
   user_db_data:
   payment_db_data:
   session_db_data:
   message_db_data:
   redis_data:
+  rabbitmq_data:
 
 networks:
   microservice_network:

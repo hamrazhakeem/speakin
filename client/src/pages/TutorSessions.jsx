@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
 import Footer from "../components/Footer";
 import { useNavigate } from 'react-router-dom';
 import SessionCreationModal from '../components/SessionCreationModal';
@@ -77,17 +76,6 @@ const TutorSessionsPage = () => {
         {/* Main Content */}
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 hover:shadow-lg transition-shadow duration-200">
-            {!loading && (
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-                <button 
-                  className="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 text-xs sm:text-sm"
-                  onClick={handleAddSession}
-                >
-                  <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-                  Add New Session
-                </button>
-              </div>
-            )}
 
             {/* Loading State or Sessions List */}
             {loading ? (

@@ -1,9 +1,10 @@
 from django.contrib.auth.hashers import make_password
 from .tasks import send_email_task
 from .utils import (
-    generate_otp, get_signin_url, cache_otp_data, cache_user_data, format_email_context, get_email_template_path
+    generate_otp, get_signin_url, cache_otp_data, cache_user_data, format_email_context, get_email_template_path, create_google_calendar_link
 )
 import uuid
+from django.utils.dateparse import parse_datetime
 
 class EmailService:
     @staticmethod
@@ -169,9 +170,106 @@ class EmailService:
         })
         template = get_email_template_path('language_to_teach_change_denial_email')
 
-        send_email_task.delay(
+        send_email_task.delay( 
             'SpeakIn Language Change Denial',
             user.email,
             template,
             context
         ) 
+
+    @staticmethod
+    def send_booking_notification_email(booking_data, tutor_data):
+        start_time = parse_datetime(booking_data['start_time'])
+        end_time = parse_datetime(booking_data['end_time'])
+
+        # Prepare calendar event data for tutor
+        tutor_event_data = {
+            'session_type': booking_data['session_type'],
+            'language': booking_data['language'],
+            'student_name': booking_data['student_name'],
+            'start_time': start_time,
+            'end_time': end_time,
+        }
+
+        tutor_context = format_email_context({
+            'tutor_name': tutor_data['name'],
+            'student_name': booking_data['student_name'],
+            'session_type': booking_data['session_type'],
+            'start_time': start_time,
+            'end_time': end_time,
+            'language': booking_data['language'],
+            'calendar_event': create_google_calendar_link(tutor_event_data)
+        })
+
+        send_email_task.delay(
+            'New Session Booking',
+            tutor_data['email'],
+            get_email_template_path('tutor_booking_notification'),
+            tutor_context      
+        )
+
+            # Prepare calendar event data for student
+        student_event_data = {
+            'session_type': booking_data['session_type'],
+            'language': booking_data['language'],
+            'tutor_name': tutor_data['name'],
+            'start_time': start_time,
+            'end_time': end_time,
+        }
+
+        # Send email to student
+        student_context = { 
+            'student_name': booking_data['student_name'],
+            'tutor_name': tutor_data['name'],
+            'session_type': booking_data['session_type'],
+            'start_time': start_time,
+            'end_time': end_time,
+            'language': booking_data['language'],
+            'calendar_event': create_google_calendar_link(student_event_data)
+        }
+        
+        send_email_task.delay(
+            'Booking Confirmation',
+            booking_data['student_email'],
+            get_email_template_path('student_booking_notification'),
+            student_context
+        )
+
+    @staticmethod
+    def send_cancellation_notification_email(data: dict) -> None:
+        """Handle cancellation notification emails"""
+        start_time = parse_datetime(data['start_time'])
+        
+        if data['cancelled_by'] == 'tutor':
+            # Send to student
+            context = format_email_context({
+                'student_name': data['student_name'],
+                'tutor_name': data['tutor_name'],
+                'session_type': data['session_type'],
+                'start_time': start_time,
+                'language': data['language'],
+                'credits_required': data['credits_required']
+            })
+            
+            send_email_task.delay(
+                'Session Cancelled by Tutor',
+                data['student_email'],
+                get_email_template_path('tutor_cancellation_notification'),
+                context
+            )
+        else:
+            # Send to tutor
+            context = format_email_context({
+                'tutor_name': data['tutor_name'],
+                'student_name': data['student_name'],
+                'session_type': data['session_type'],
+                'start_time': start_time,
+                'language': data['language']
+            })
+            
+            send_email_task.delay(
+                'Session Cancelled by Student',
+                data['tutor_email'],
+                get_email_template_path('student_cancellation_notification'),
+                context
+            )

@@ -159,18 +159,6 @@ const SignUpPage = () => {
                 {backendErrors.password && <p className="mt-1 text-red-500 text-sm">{backendErrors.password}</p>}
               </div>
 
-              {/* Trial Code Input */}
-              <div>
-                <p className="text-sm text-gray-600 mb-2">Have a code for free trial? Enter below</p>
-                <input
-                  type="text"
-                  placeholder="Trial Code (Optional)"
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 focus:bg-white focus:border-blue-500 transition-colors duration-200 outline-none"
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                />
-              </div>
-
               {/* General Error Message */}
               {backendErrors.general && (
                 <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-start">

@@ -107,6 +107,7 @@ const AvailabilityModal = ({ tutorId, onClose }) => {
                            "An error occurred";
         toast.error(errorMessage);
         onClose();
+        console.log(err)
     } finally {
       setBookingLoading(false);
       setLoadingSlotId(null);

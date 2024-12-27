@@ -255,68 +255,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Pricing Section - Updated design */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16 space-y-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">Simple, Transparent Pricing</h2>
-            <p className="text-gray-600 text-lg">Choose the plan that works best for you</p>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <div className="rounded-2xl bg-white p-8 shadow-lg hover:shadow-xl transition-shadow duration-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold">Free</h3>
-                <span className="text-3xl font-bold">₹0</span>
-              </div>
-              <ul className="space-y-4 mb-8">
-                {['1-on-1 sessions with Tutors', 'Chat with Tutors', 'Earn credits by referring friends'].map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <Star className="w-5 h-5 text-yellow-400 mr-2" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <button 
-                onClick={() => navigate('/sign-up')}
-                className="w-full py-3 bg-gray-100 text-gray-800 rounded-xl font-semibold hover:bg-gray-200 transition-colors duration-200"
-              >
-                Get Started
-              </button>
-            </div>
-
-            <div className="rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 p-8 shadow-lg hover:shadow-xl transition-shadow duration-200 text-white">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-2xl font-bold">SpeakIn+</h3>
-                <span className="text-3xl font-bold">₹149</span>
-              </div>
-              <p className="text-blue-100 mb-2">for 6 months</p>
-              <ul className="space-y-4 mb-8">
-                {['All features from Free plan', 'Priority booking for popular Tutors', 'Faster Customer Care support'].map((feature, index) => (
-                  <li key={index} className="flex items-center">
-                    <Star className="w-5 h-5 text-yellow-400 mr-2" />
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-              <button 
-                onClick={() => navigate('/sign-up')}
-                className="w-full py-3 bg-white text-blue-600 rounded-xl font-semibold hover:bg-blue-50 transition-colors duration-200"
-              >
-                Get Premium
-              </button>
-            </div>
-          </div>
-          <div className="flex justify-center mt-12">
-            <div className="flex items-center gap-3 text-gray-600 bg-white px-4 py-2 rounded-full shadow-sm">
-              <Lock className="w-4 h-4" />
-              <span className="text-sm">Secure payment processing by Stripe</span>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
       {/* CTA Section - Updated design */}
       <section className="py-20 bg-gradient-to-br from-blue-600 to-indigo-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>

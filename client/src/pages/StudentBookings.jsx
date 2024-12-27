@@ -73,7 +73,6 @@ const StudentBookingsPage = () => {
             { label: 'Profile', path: '/profile' },
             { label: 'Security', path: '/student-password-change' },
             { label: 'Bookings', path: '/bookings', active: true },
-            { label: 'Refer a friend', path: '/refer' }
           ].map((tab) => (
             <button
               key={tab.label}

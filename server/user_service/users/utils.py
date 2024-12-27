@@ -10,6 +10,7 @@ import string
 from django.core.cache import cache
 from django.conf import settings
 from .models import User
+import datetime
 
 # Load environment variables from .env file
 load_dotenv()
@@ -89,3 +90,21 @@ def get_user_or_create(email, name):
         )
     return user
 
+def create_google_calendar_link(event_data):
+    try:
+        """Generate Google Calendar event link"""
+        base_url = "https://calendar.google.com/calendar/render"
+        
+        # Format event details
+        event = {
+            'action': 'TEMPLATE',
+            'text': f"SpeakIn {event_data['session_type']} Session",
+            'dates': f"{event_data['start_time'].strftime('%Y%m%dT%H%M%SZ')}/{event_data['end_time'].strftime('%Y%m%dT%H%M%SZ')}",
+            'location': 'Online Session'
+        }
+        
+        # Build query string
+        query_string = urllib.parse.urlencode(event)
+        return f"{base_url}?{query_string}"
+    except Exception as e:
+        return str(e)

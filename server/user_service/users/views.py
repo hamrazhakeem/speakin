@@ -36,31 +36,6 @@ def sign_up(request):
     return Response({'errors': serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
-def tutor_verify_email(request):
-    email = request.data.get('email')
-    if not email:
-        return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Send email with OTP
-    cache_key = EmailService.send_tutor_verification_email(email)
-    
-    return Response({'cache_key': cache_key}, status=status.HTTP_200_OK)
-
-@api_view(['POST'])
-def tutor_verify_otp(request):
-    email = request.data.get('email')
-    otp = request.data.get('otp')
-    cache_key = request.data.get('cache_key')
-     
-    stored_otp = cache.get(f'otp_{cache_key}')
-    print('stored otp', stored_otp)
-    if not stored_otp or stored_otp != otp:
-        return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
-        
-    cache.delete(cache_key)
-    return Response({'message': 'Email verified successfully'}, status=status.HTTP_200_OK)
-
-@api_view(['POST'])
 def verify_otp(request):
     email  = request.data.get('email') 
     otp = request.data.get('otp')
@@ -242,6 +217,31 @@ class LoginWithGoogle(APIView):
         
         return Response({"detail": "Code not provided"}, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
+def tutor_verify_email(request):
+    email = request.data.get('email')
+    if not email:
+        return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Send email with OTP
+    cache_key = EmailService.send_tutor_verification_email(email)
+    
+    return Response({'cache_key': cache_key}, status=status.HTTP_200_OK)
+
+@api_view(['POST'])
+def tutor_verify_otp(request):
+    email = request.data.get('email')
+    otp = request.data.get('otp')
+    cache_key = request.data.get('cache_key')
+     
+    stored_otp = cache.get(f'otp_{cache_key}')
+    print('stored otp', stored_otp)
+    if not stored_otp or stored_otp != otp:
+        return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    cache.delete(cache_key)
+    return Response({'message': 'Email verified successfully'}, status=status.HTTP_200_OK)
+
 class UserList(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -261,7 +261,6 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial) 
         serializer.is_valid(raise_exception=True) 
         self.perform_update(serializer)
-
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
 
@@ -270,7 +269,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
-
+ 
     def perform_update(self, serializer):
         print("Entering perform_update")
         if serializer.is_valid():
@@ -283,7 +282,7 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
             try:
                 languages = json.loads(language_spoken_data)
                 LanguageSpoken.objects.filter(user=user).delete()
-                for lang_data in languages:
+                for lang_data in languages: 
                     if lang_data.get('language') and lang_data.get('proficiency'):
                         language, _ = Language.objects.get_or_create(name=lang_data['language'])
                         proficiency, _ = Proficiency.objects.get_or_create(level=lang_data['proficiency'])
