@@ -32,7 +32,7 @@ const AdminSignInPage = () => {
         isAdmin: true 
       }));
       toast.success('Welcome back, Admin!');
-      navigate('/admin/manage-users');
+      navigate('/admin/dashboard');
       console.log('Admin signed in');
     } catch (error) {
       toast.error('Invalid admin credentials');
@@ -76,7 +76,6 @@ const AdminSignInPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="admin@speakin.com"
                 />
               </div>
             </div>
@@ -93,7 +92,6 @@ const AdminSignInPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  placeholder="••••••••"
                 />
               </div>
             </div>

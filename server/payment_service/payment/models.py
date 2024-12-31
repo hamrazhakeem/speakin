@@ -14,8 +14,6 @@ class StripeAccount(models.Model):
 class Transactions(models.Model):
     TRANSACTION_TYPE_CHOICES = [
         ('credit_purchase', 'Credit Purchase'),
-        ('subscription', 'Subscription'),
-        ('platform_fee', 'Platform Fee'),  
         ('withdrawal', 'Withdrawal'),
     ]
 

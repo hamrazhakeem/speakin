@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Transactions, StripeAccount
+from .models import Transactions, StripeAccount, Escrow
 
 class TransactionsSerializer(serializers.ModelSerializer):
     price_per_credit = serializers.FloatField(write_only=True)
@@ -38,3 +38,9 @@ class WithdrawalSerializer(serializers.Serializer):
             raise serializers.ValidationError("Insufficient credits balance")
         
         return value
+
+class EscrowSerializer(serializers.ModelSerializer): 
+    class Meta:
+        model = Escrow
+        fields = ['id', 'student_id', 'tutor_id', 'booking_id', 'credits_locked', 'status', 'created_at', 'released_at']
+        read_only_fields = ['id', 'created_at', 'released_at']

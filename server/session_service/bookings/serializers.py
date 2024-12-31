@@ -17,14 +17,21 @@ class BookingsSerializer(serializers.ModelSerializer):
             
             # Check if it's a trial session and if student already completed a trial with this tutor
             if session_type == 'trial':
-                existing_trials = Bookings.objects.filter(
+                # Check for any trial session (completed, confirmed, or ongoing)
+                existing_trial = Bookings.objects.filter(
                     availability__tutor_id=tutor_id,
                     student_id=student_id,
                     availability__session_type='trial',
-                    booking_status='completed'
-                )
-                if existing_trials.exists():
-                    raise serializers.ValidationError("You have already completed a trial with this tutor.")
+                    booking_status__in=['completed', 'confirmed', 'ongoing']
+                ).first()
+                if existing_trial:
+                    if existing_trial.booking_status == 'completed':
+                        message = "You have already completed a trial session with this tutor."
+                    elif existing_trial.booking_status == 'confirmed': 
+                        message = "You can only book one trial session per tutor. Please cancel your existing trial booking if you wish to book a different time slot."
+                    else:
+                        message = "Your trial session with this tutor is currently in progress."
+                    raise serializers.ValidationError(message) 
 
             if session_type == 'standard':
                 completed_trials = Bookings.objects.filter(

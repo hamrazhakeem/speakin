@@ -78,9 +78,26 @@ class WithdrawView(APIView):
 
 class TransactionsView(APIView):
     authentication_classes=[JWTAuthentication]
-    def get(self, request, user_id):
+    def get(self, request, user_id=None):
         try:
-            payment_service_url = os.getenv('PAYMENT_SERVICE_URL') + f'transactions/{user_id}/'
+            if user_id:
+                payment_service_url = os.getenv('PAYMENT_SERVICE_URL') + f'transactions/{user_id}/'
+            else:
+                payment_service_url = os.getenv('PAYMENT_SERVICE_URL') + 'transactions/'
+            headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
+            response = requests.get(payment_service_url, headers=headers)
+            return Response(response.json(), status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "Failed to connect to payment service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        
+class EscrowView(APIView):
+    authentication_classes=[JWTAuthentication]
+    def get(self, request):
+        try:
+            payment_service_url = os.getenv('PAYMENT_SERVICE_URL') + 'escrow/'
             headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
             response = requests.get(payment_service_url, headers=headers)
             return Response(response.json(), status=response.status_code)

@@ -18,7 +18,7 @@ from django.conf import settings
 from rest_framework.views import APIView
 from django.db.models import Q 
 from django.utils.timezone import now
-from services.message_broker import RabbitMQPublisher, NotificationType
+from services.publisher import RabbitMQPublisher, NotificationType
 
 # Create your views here.
 
@@ -147,17 +147,18 @@ class BookingsList(generics.ListCreateAPIView):
         tutor_availability = get_object_or_404(TutorAvailability, id=availability_id)
         credits_required = tutor_availability.credits_required
         
-        user_service_url = f"{settings.USER_SERVICE_URL}users/{student_id}/balance/"
-        user_response = requests.get(user_service_url)
-        if user_response.status_code != 200: 
-            raise ValidationError("User not found")
-        
-        user_data = user_response.json()
+        student_data = requests.get(
+            f"{settings.USER_SERVICE_URL}users/{student_id}/"
+        ).json()
 
-        if user_data['balance_credits'] < credits_required:
+        tutor_data = requests.get(
+            f"{settings.USER_SERVICE_URL}users/{booking.availability.tutor_id}/"
+        ).json()
+
+        if student_data['balance_credits'] < credits_required:
             raise ValidationError({"error": "Insufficient credits"}, code=status.HTTP_400_BAD_REQUEST)
 
-        if not update_user_credits(student_id, user_data['balance_credits'] - credits_required):
+        if not update_user_credits(student_id, student_data['balance_credits'] - credits_required):
             raise ValidationError("Failed to update user balance")
 
         if not lock_credits_in_escrow( 
@@ -165,7 +166,7 @@ class BookingsList(generics.ListCreateAPIView):
                 tutor_id=tutor_availability.tutor_id,
                 booking_id=booking_id,
                 credits_required=credits_required):
-            update_user_credits(student_id, user_data['balance_credits'])
+            update_user_credits(student_id, student_data['balance_credits'])
             raise ValidationError("Failed to lock credits in escrow")
          
         # Generate a unique and secure room name
@@ -179,14 +180,6 @@ class BookingsList(generics.ListCreateAPIView):
 
         tutor_availability.is_booked = True
         tutor_availability.save()
-
-        tutor_data = requests.get(
-            f"{settings.USER_SERVICE_URL}users/{booking.availability.tutor_id}/"
-        ).json()
-        
-        student_data = requests.get(
-            f"{settings.USER_SERVICE_URL}users/{booking.student_id}/"
-        ).json()
 
         # Prepare notification data
         notification_data = {
@@ -202,7 +195,7 @@ class BookingsList(generics.ListCreateAPIView):
                 'name': tutor_data['tutor_details']['speakin_name'],
                 'email': tutor_data['email']
             } 
-        } 
+        }  
 
         rabbitmq_publisher = RabbitMQPublisher()
         if not rabbitmq_publisher.publish_notification(
@@ -278,7 +271,7 @@ class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
                                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         booking.save()
-        return response
+        return response 
 
 class DailyRoomCreateView(APIView):
     """

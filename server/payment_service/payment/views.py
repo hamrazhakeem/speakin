@@ -3,9 +3,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.http import JsonResponse
 from rest_framework.views import APIView
-from django.db import transaction
-from .models import Transactions, StripeAccount
-from .serializers import TransactionsSerializer, WithdrawalSerializer, StripeAccountSerializer
+from .models import Transactions, StripeAccount, Escrow
+from .serializers import TransactionsSerializer, WithdrawalSerializer, StripeAccountSerializer, EscrowSerializer
 from .permissions import IsOwner
 from protos.client import update_user_credits
 import os 
@@ -71,7 +70,7 @@ class StripeWebhook(APIView):
             payload = request.body 
             sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
             event = stripe.Webhook.construct_event(
-                payload, sig_header, os.getenv('STRIPE_WEBHOOK_SECRET'), # tolerance=300 # Increase to 10 minutes (600 seconds)
+                payload, sig_header, os.getenv('STRIPE_WEBHOOK_SECRET'), tolerance=360000000000000000000000000000
             ) 
 
         except Exception as e:
@@ -93,7 +92,7 @@ class StripeWebhook(APIView):
 
         return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
 
-class StripeAccountDetailView(generics.RetrieveAPIView):
+class StripeAccountDetail(generics.RetrieveAPIView):
     queryset = StripeAccount.objects.all()
     serializer_class = StripeAccountSerializer
     permission_classes = [IsOwner]
@@ -108,7 +107,7 @@ class StripeAccountDetailView(generics.RetrieveAPIView):
         except StripeAccount.DoesNotExist:
             return Response({'error': 'Stripe account not found for the specified user.'}, status=status.HTTP_404_NOT_FOUND)
 
-class StripeAccountListView(generics.ListCreateAPIView):
+class StripeAccountList(generics.ListCreateAPIView):
     queryset = StripeAccount.objects.all()
     serializer_class = StripeAccountSerializer
     permission_classes = [IsOwner]
@@ -247,9 +246,17 @@ class WithdrawView(APIView):
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
 
-class TransactionsDetailView(generics.ListAPIView):
+class TransactionsDetail(generics.ListAPIView):
     serializer_class = TransactionsSerializer
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
         return Transactions.objects.filter(user_id=user_id).order_by('-transaction_date')
+    
+class TransactionsList(generics.ListAPIView):
+    serializer_class = TransactionsSerializer
+    queryset = Transactions.objects.all().order_by('-transaction_date')
+
+class EscrowList(generics.ListAPIView):
+    serializer_class = EscrowSerializer
+    queryset = Escrow.objects.all().order_by('-created_at')

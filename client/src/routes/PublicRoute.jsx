@@ -8,7 +8,7 @@ const PublicRoute = () => {
   if (isAuthenticated){
     if (isTutor) return <Navigate to="/tutor-dashboard" />;
     if (isStudent) return <Navigate to="/home" />;
-    return <Navigate to="/admin/manage-users" />;
+    return <Navigate to="/admin/dashboard" />;
   }
 
   return <Outlet />; 

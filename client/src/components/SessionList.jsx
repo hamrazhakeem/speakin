@@ -15,6 +15,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [showRules, setShowRules] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [cancellingSessionIds, setCancellingSessionIds] = useState(new Set());
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -171,6 +172,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   };
 
   const handleCancelSession = async (session) => {
+    setCancellingSessionIds(prev => new Set([...prev, session.id]));
     if (session.is_booked === false) {
       try {
         await axiosInstance.delete(`tutor-availabilities/${session.id}/`);
@@ -181,6 +183,13 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
         toast.error(backendMessage);
         fetchTutorAvailability();
         console.error('Error deleting session:', error);      
+      } finally {
+        // Remove session ID from loading state
+        setCancellingSessionIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(session.id);
+          return newSet;
+        });
       }
       return;
     }
@@ -197,6 +206,11 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
           session.session_type === 'trial' ? '1 hour' : '2 hours'
         } of start time.`
       );
+      setCancellingSessionIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(session.id);
+        return newSet;
+      });
       return;
     }
   
@@ -214,10 +228,23 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
         toast.error(backendMessage);
         console.error('Error cancelling session:', error);      
         await fetchTutorAvailability(); // Wait for the fetch to complete
+      } finally {
+        // Remove session ID from loading state
+        setCancellingSessionIds(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(session.id);
+          return newSet;
+        });
       }
     } else {
       toast.error('Cannot cancel session with status other than "confirmed".');
-      await fetchTutorAvailability(); // Wait for the fetch to complete
+      await fetchTutorAvailability();
+      // Remove session ID from loading state
+      setCancellingSessionIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(session.id);
+        return newSet;
+      });
     }
   };
 
@@ -313,6 +340,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     const currentTime = new Date();
     const fiveMinutesBefore = new Date(sessionStartTime.getTime() - 5 * 60000);
     const showJoinButton = currentTime >= fiveMinutesBefore;
+    const isLoading = cancellingSessionIds.has(session.id);
 
     return (
       <div className="flex flex-col gap-3">
@@ -330,10 +358,17 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
         {/* Cancel Button - Only show if unbooked or status is confirmed */}
         {(isUnbooked(session) || getBookingStatus(session) === 'confirmed' || session.is_booked === false) && (
           <button
-            className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-3 rounded-xl font-medium transition-colors duration-200"
+            className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-3 rounded-xl font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             onClick={() => handleCancelSession(session)}
+            disabled={isLoading}
           >
-            Cancel Session
+            {isLoading ? (
+              <>
+                <LoadingSpinner size="sm" className="text-red-600" />
+              </>
+            ) : (
+              'Cancel Session'
+            )}
           </button>
         )}
         {session.bookings?.[0]?.booking_status === 'completed' && (
@@ -461,8 +496,8 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
         </div>
       </div>
 
-            {/* Add Rules Button */}
-            <button
+      {/* Add Rules Button */}
+      <button
         onClick={() => setShowRules(!showRules)}
         className="flex items-center gap-2 px-4 py-3 bg-amber-50 text-amber-700 rounded-xl hover:bg-amber-100 transition-colors w-full"
       >
