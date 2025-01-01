@@ -162,7 +162,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
       return (
         <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-4">
           <span className="font-medium text-gray-900">
-            Credits have been retained by the platform as per no-show policy
+            {creditsRequired} Credits have been retained by the platform as per no-show policy
           </span>
         </div>
       );

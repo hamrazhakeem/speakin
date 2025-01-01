@@ -11,6 +11,9 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import EscrowDashboard from '../components/EscrowDashboard';
+import TopTutorsCard from '../components/TopTutorsCard';
+import TopStudentsCard from '../components/TopStudentsCard';
+import LanguageStatsCard from '../components/LanguageStatsCard';
 
 const CustomBarTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
@@ -44,46 +47,26 @@ const AdminDashboard = () => {
   const [availabilities, setAvailabilities] = useState({});
   const [timeframe, setTimeframe] = useState('month'); // 'week', 'month', 'year'
   const [escrowData, setEscrowData] = useState([]);
-  const [topTutors, setTopTutors] = useState([]);
-  const [topStudents, setTopStudents] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [transactionsRes, bookingsRes, escrowRes] = await Promise.all([
+        const [transactionsRes, bookingsRes, escrowRes, availabilitiesRes] = await Promise.all([
           axiosInstance.get('transactions/'),
           axiosInstance.get('bookings/'),
-          axiosInstance.get('escrow/')
+          axiosInstance.get('escrow/'),
+          axiosInstance.get('tutor-availabilities/')
         ]);
-        console.log('escrowdata', escrowRes);
-        const bookingsData = bookingsRes.data;
+        const availabilitiesMap = {};
+        availabilitiesRes.data.forEach(availability => {
+          availabilitiesMap[availability.id] = availability;
+        });
+  
         setTransactions(transactionsRes.data);
-        setBookings(bookingsData);
-        setEscrowData(escrowRes.data)
-
-        const refundBookings = bookingsData.filter(
-          booking => booking.refund_status && 
-                    booking.student_joined_within_5_min && 
-                    !booking.tutor_joined_within_5_min
-        );
-
-        // Fetch availability details for refund-eligible bookings
-        const availabilityIds = [...new Set(refundBookings.map(b => b.availability))];
-        
-        const availabilityData = {};
-        await Promise.all(
-          availabilityIds.map(async (availId) => {
-            try {
-              const response = await axiosInstance.get(`tutor-availabilities/${availId}/`);
-              availabilityData[availId] = response.data;
-            } catch (error) {
-              console.error(`Error fetching availability ${availId}:`, error);
-            }
-          })
-        );
-
-        setAvailabilities(availabilityData);
+        setBookings(bookingsRes.data);
+        setEscrowData(escrowRes.data);
+        setAvailabilities(availabilitiesMap);
       } catch (error) {
         console.error('Error fetching transactions:', error);
       } finally {
@@ -93,42 +76,6 @@ const AdminDashboard = () => {
 
     fetchData();
   }, []);
-
-  const processTopPerformers = (bookingsData) => {
-    // Filter completed standard sessions
-    const completedStandardSessions = bookingsData.filter(
-      booking => booking.booking_status === 'completed' && 
-      booking.availability.session_type === 'standard'
-    );
-  
-    // Process tutors
-    const tutorSessions = completedStandardSessions.reduce((acc, booking) => {
-      const tutorId = booking.availability.tutor_id;
-      acc[tutorId] = acc[tutorId] || { id: tutorId, name: booking.tutor_name, count: 0 };
-      acc[tutorId].count += 1;
-      return acc;
-    }, {});
-  
-    // Process students
-    const studentSessions = completedStandardSessions.reduce((acc, booking) => {
-      const studentId = booking.student_id;
-      acc[studentId] = acc[studentId] || { id: studentId, name: booking.student_name, count: 0 };
-      acc[studentId].count += 1;
-      return acc;
-    }, {});
-  
-    // Sort and get top 5
-    const sortedTutors = Object.values(tutorSessions)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-    
-    const sortedStudents = Object.values(studentSessions)
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-  
-    setTopTutors(sortedTutors);
-    setTopStudents(sortedStudents);
-  };
 
   const calculateRefundCreditsExpense = (booking) => {
     if (
@@ -174,22 +121,62 @@ const AdminDashboard = () => {
     const filteredTransactions = filterByTimeframe(transactions, 'transaction_date');
     const filteredBookings = filterByTimeframe(bookings, 'created_at');
   
+    // Calculate revenue from credit purchases 
     const revenue = filteredTransactions
       .filter(t => t.transaction_type === 'credit_purchase' && t.status === 'completed')
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
   
+    // Calculate withdrawals
     const totalWithdrawals = filteredTransactions
       .filter(t => t.transaction_type === 'withdrawal' && t.status === 'completed')
       .reduce((sum, t) => sum + parseFloat(t.amount), 0);
-
+  
     const totalRefundCreditsExpenses = filteredBookings
       .reduce((sum, booking) => sum + calculateRefundCreditsExpense(booking), 0);
+    console.log('filteredbookings and availability', filteredBookings, availabilities)
+    // Calculate platform fee from completed standard sessions (20%)
+    const platformFeeFromSessions = filteredBookings
+      .filter(booking => {
+        const isCompleted = booking.booking_status === 'completed';
+        const isStandardSession = availabilities[booking.availability]?.session_type === 'standard';
+        return isCompleted && isStandardSession;
+      })
+      .reduce((sum, booking) => {
+        const credits = availabilities[booking.availability]?.credits_required || 0;
+        const platformFee = Math.trunc((credits * 20) / 100);
+        return sum + (platformFee * 150); // Convert credits to rupees
+      }, 0);
+    console.log('platformFeeFromSessions', platformFeeFromSessions);
   
-    const platformProfit = revenue - totalWithdrawals;
+    // Calculate retained credits from missed sessions
+    const retainedCredits = filteredBookings
+      .filter(booking => {
+        const currentTime = new Date(); // Get the current time
+        const startTime = new Date(availabilities[booking.availability]?.start_time); // Convert the booking's start time to a Date object
+        const fiveMinutesAfterStart = new Date(startTime.getTime() + 5 * 60 * 1000); // Add 5 minutes to the start time
+      
+        const bothJoinedLate = 
+          booking.booking_status === 'confirmed' &&
+          !booking.student_joined_within_5_min && 
+          !booking.tutor_joined_within_5_min &&
+          currentTime > fiveMinutesAfterStart; // Check if current time is greater than 5 minutes after start time
+      
+        return bothJoinedLate;
+      })
+      .reduce((sum, booking) => {
+        const credits = availabilities[booking.availability]?.credits_required || 0;
+        return sum + (credits * 150); // Convert credits to rupees
+      }, 0);
+    console.log('retainedCredits', retainedCredits);
+  
+    // Total platform profit
+    const platformProfit = platformFeeFromSessions + retainedCredits;
+    const minimumGuaranteedProfit = platformProfit - totalRefundCreditsExpenses;
   
     return {
       revenue,
       platformProfit,
+      minimumGuaranteedProfit,
       totalWithdrawals,
       totalRefundCreditsExpenses
     };
@@ -198,7 +185,6 @@ const AdminDashboard = () => {
   const stats = calculateStats();
   // Prepare chart data
   const prepareMonthlyData = () => {
-    const timeframeDate = getTimeframeDate();
     const monthlyData = {};
     
     const filteredTransactions = filterByTimeframe(transactions, 'transaction_date');
@@ -212,10 +198,12 @@ const AdminDashboard = () => {
         monthlyData[monthKey] = {
           month: new Date(date.getFullYear(), date.getMonth(), 1).toLocaleString('default', { month: 'short' }),
           revenue: 0,
-          fees: 0,
           withdrawals: 0,
+          platformFeeFromSessions: 0,
+          retainedCredits: 0,
           refundCreditsExpenses: 0,
-          profit: 0
+          profit: 0,
+          minimumGuaranteedProfit: 0
         };
       }
 
@@ -234,15 +222,52 @@ const AdminDashboard = () => {
     filteredBookings.forEach(booking => {
       const date = new Date(booking.created_at);
       const monthKey = `${date.getFullYear()}-${date.getMonth() + 1}`;
-      
-      if (monthlyData[monthKey]) {
-        const refundExpense = calculateRefundCreditsExpense(booking);
-        monthlyData[monthKey].refundCreditsExpenses += refundExpense;
+
+      if (!monthlyData[monthKey]) {
+        monthlyData[monthKey] = {
+          month: new Date(date.getFullYear(), date.getMonth(), 1).toLocaleString('default', { month: 'short' }),
+          revenue: 0,
+          withdrawals: 0,
+          platformFeeFromSessions: 0,
+          retainedCredits: 0,
+          refundCreditsExpenses: 0,
+          profit: 0,
+          minimumGuaranteedProfit: 0
+        };
       }
-    });
+    const isCompleted = booking.booking_status === 'completed';
+    const isStandardSession = availabilities[booking.availability]?.session_type === 'standard';
+    if (isCompleted && isStandardSession) {
+      const credits = availabilities[booking.availability]?.credits_required || 0;
+      const platformFee = Math.trunc((credits * 20) / 100);
+      monthlyData[monthKey].platformFeeFromSessions += platformFee * 150; // Convert credits to rupees
+    }
+
+    // Calculate retained credits from missed sessions
+    const currentTime = new Date();
+    const startTime = new Date(availabilities[booking.availability]?.start_time);
+    const fiveMinutesAfterStart = new Date(startTime.getTime() + 5 * 60 * 1000);
+
+    const bothJoinedLate = 
+      booking.booking_status === 'confirmed' &&
+      !booking.student_joined_within_5_min && 
+      !booking.tutor_joined_within_5_min &&
+      currentTime > fiveMinutesAfterStart;
+
+    if (bothJoinedLate) {
+      const credits = availabilities[booking.availability]?.credits_required || 0;
+      monthlyData[monthKey].retainedCredits += credits * 150; // Convert credits to rupees
+    }
+
+    // Calculate refund expenses
+    const refundExpense = calculateRefundCreditsExpense(booking);
+    monthlyData[monthKey].refundCreditsExpenses += refundExpense;
+  });
+
 
     Object.values(monthlyData).forEach(month => {
-      month.profit = month.revenue - month.withdrawals - month.refundCreditsExpenses;
+      month.profit = month.platformFeeFromSessions + month.retainedCredits;
+      month.minimumGuaranteedProfit = month.profit - month.refundCreditsExpenses;
     });
 
     return Object.values(monthlyData);
@@ -260,15 +285,13 @@ const AdminDashboard = () => {
       }, {})
     ).map(([name, value]) => ({
       name: name === 'credit_purchase' ? 'Credit Purchase' : 'Withdrawals',
-      value: Math.round(value)
+      value: Math.trunc(value)
     }));
   };
 
   const monthlyData = prepareMonthlyData();
   const transactionTypeData = getTransactionTypeData();
   const filteredTransactions = filterByTimeframe(transactions, 'transaction_date');
-
-  const COLORS = ['#3b82f6', '#ef4444', '#f59e0b'];
 
   const StatCard = ({ title, value, icon: Icon, trend, trendValue }) => (
     <div className="bg-black rounded-lg border border-zinc-800 p-6">
@@ -317,8 +340,9 @@ const AdminDashboard = () => {
     const summaryData = [
       ['Revenue', `Rs. ${stats.revenue}`],
       ['Total Withdrawals', `Rs. ${stats.totalWithdrawals}`],
+      ['Platform Profit', `Rs. ${stats.platformProfit}`],
+      ['Minimum Guaranteed Profit', `Rs. ${stats.minimumGuaranteedProfit}`],
       ['Refund Credits Expenses', `Rs. ${stats.totalRefundCreditsExpenses}`],
-      ['Platform Profit', `Rs. ${stats.platformProfit}`]
     ];
   
     doc.autoTable({
@@ -339,13 +363,14 @@ const AdminDashboard = () => {
       month.month,
       `Rs. ${month.revenue}`,
       `Rs. ${month.withdrawals}`,
+      `Rs. ${month.profit}`,
+      `Rs. ${month.minimumGuaranteedProfit}`,
       `Rs. ${month.refundCreditsExpenses}`,
-      `Rs. ${month.profit}`
     ]);
   
     doc.autoTable({
       startY: 20,
-      head: [['Month', 'Revenue', 'Withdrawals', 'Refund Credits Expenses', 'Profit']],
+      head: [['Month', 'Revenue', 'Withdrawals', 'Profit', 'Minimum Guaranteed Profit', 'Refund Credits Expenses']],
       body: monthlyTableData,
       theme: 'grid',
       styles: { fontSize: 10 },
@@ -384,21 +409,23 @@ const AdminDashboard = () => {
       ['Metric', 'Amount'],
       ['Revenue', `Rs. ${stats.revenue}`],
       ['Total Withdrawals', `Rs. ${stats.totalWithdrawals}`],
+      ['Platform Profit', `Rs. ${stats.platformProfit}`],
+      ['Minimum Guaranteed Profit', `Rs. ${stats.minimumGuaranteedProfit}`],
       ['Refund Credits Expenses', `Rs. ${stats.totalRefundCreditsExpenses}`],
-      ['Platform Profit', `Rs. ${stats.platformProfit}`]
     ];
     const summarySheet = XLSX.utils.aoa_to_sheet(summarySheetData);
     XLSX.utils.book_append_sheet(workbook, summarySheet, 'Financial Overview');
   
     // Monthly Data
     const monthlySheetData = [
-      ['Month', 'Revenue', 'Withdrawals', 'Refund Credits Expenses', 'Profit'],
+      ['Month', 'Revenue', 'Total Withdrawals', 'Platform Profit', 'Minimum Guaranteed Profit', 'Refund Credits Expenses'],
       ...monthlyData.map(month => [
         month.month,
         `Rs. ${month.revenue}`,
         `Rs. ${month.withdrawals}`,
+        `Rs. ${month.profit}`,
+        `Rs. ${month.minimumGuaranteedProfit}`,
         `Rs. ${month.refundCreditsExpenses}`,
-        `Rs. ${month.profit}`
       ])
     ];
     const monthlySheet = XLSX.utils.aoa_to_sheet(monthlySheetData);
@@ -479,19 +506,27 @@ const AdminDashboard = () => {
                 <StatCard
                   title="Total Withdrawals"
                   value={`₹${stats.totalWithdrawals}`}
-                  icon={TrendingDown}  // TrendingDown shows money leaving the platform
+                  icon={TrendingDown}
+                />
+
+                <StatCard
+                  title="Maximum Potential Profit"
+                  value={`₹${stats.platformProfit}`}
+                  icon={TrendingUp}
+                  tooltip="Maximum profit if no refunds are claimed"
+                />
+
+                <StatCard
+                  title="Minimum Guaranteed Profit"
+                  value={`₹${stats.minimumGuaranteedProfit}`}
+                  icon={TrendingUp}
+                  tooltip="Minimum profit after accounting for potential refunds"
                 />
 
                 <StatCard
                   title="Refund Credits Expenses"
                   value={`₹${stats.totalRefundCreditsExpenses}`}
-                  icon={AlertTriangle}  // AlertTriangle represents potential risk/contingent expenses
-                />
-
-                <StatCard
-                  title="Platform Profit"
-                  value={`₹${stats.platformProfit}`}
-                  icon={TrendingUp}  // TrendingUp shows positive financial outcome
+                  icon={AlertTriangle}
                 />
                 </div>
 
@@ -510,8 +545,9 @@ const AdminDashboard = () => {
                           />
                           <Bar dataKey="revenue" name="Revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                           <Bar dataKey="withdrawals" name="Withdrawals" fill="#ef4444" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="refundCreditsExpenses" name="Refund Credits Expenses" fill="#f59e0b" radius={[4, 4, 0, 0]} />
-                          <Bar dataKey="profit" name="Profit" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="profit" name="Profit" fill="#a855f7" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="minimumGuaranteedProfit" name="Minimum Guaranteed Profit" fill="#22c55e" radius={[4, 4, 0, 0]} />
+                          <Bar dataKey="refundCreditsExpenses" name="Refund Credits Expenses" fill="#facc15" radius={[4, 4, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
@@ -597,51 +633,16 @@ const AdminDashboard = () => {
                 <div className="mb-6">  {/* Added margin-bottom for spacing */}
                   <EscrowDashboard escrowData={escrowData} />
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-  <div className="bg-black rounded-lg border border-zinc-800 p-6">
-    <h3 className="text-lg font-semibold text-white mb-4">Top Tutors</h3>
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm text-white">
-        <thead>
-          <tr className="text-zinc-400 border-b border-zinc-800">
-            <th className="text-left pb-3">Name</th>
-            <th className="text-right pb-3">Completed Sessions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {topTutors.map((tutor) => (
-            <tr key={tutor.id} className="border-b border-zinc-800">
-              <td className="py-3">{tutor.name}</td>
-              <td className="text-right py-3">{tutor.count}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div className="bg-black rounded-lg border border-zinc-800 p-6">
-    <h3 className="text-lg font-semibold text-white mb-4">Top Students</h3>
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm text-white">
-        <thead>
-          <tr className="text-zinc-400 border-b border-zinc-800">
-            <th className="text-left pb-3">Name</th>
-            <th className="text-right pb-3">Completed Sessions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {topStudents.map((student) => (
-            <tr key={student.id} className="border-b border-zinc-800">
-              <td className="py-3">{student.name}</td>
-              <td className="text-right py-3">{student.count}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                  <TopTutorsCard
+                    bookings={bookings} 
+                    availabilities={availabilities} 
+                  />
+                  <TopStudentsCard
+                    bookings={bookings} 
+                  />
+                </div>
+                <LanguageStatsCard />
               </>
             )}
           </div>

@@ -80,10 +80,11 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   
     // Check if current time is greater than 5 minutes after start time
     const isPastFiveMinutes = currentTime > fiveMinutesAfterStartTime;
-  
+    console.log('session bookings', session.bookings, session.id)
     // Check if both student and tutor did not join within 5 minutes
-    const isStudentMissed = !session.bookings[0]?.student_joined_within_5_min;
-    const isTutorMissed = !session.bookings[0]?.tutor_joined_within_5_min;
+    const isStudentMissed = session.is_booked && session.bookings[0]?.student_joined_within_5_min === false;
+    const isTutorMissed = session.is_booked && session.bookings[0]?.tutor_joined_within_5_min === false;
+    
   
     return isPastFiveMinutes && isStudentMissed && isTutorMissed;
   };
@@ -384,20 +385,19 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
     const currentTime = new Date();
     const startTime = new Date(session.start_time);
   
-    // Calculate time difference
-    const timeToStart = startTime - currentTime;
+    // Calculate the time 3 hours before the start time
+    const threeHoursBeforeStart = new Date(startTime.getTime() - 3 * 60 * 60 * 1000);
   
-    // Check if session is within 3 hours, unbooked, and has no bookings
+    // Check if current time is after 3 hours before start time and session is unbooked with no bookings
     if (
-      timeToStart <= 3 * 60 * 60 * 1000 && // Within 3 hours
-      timeToStart > 0 && // Future session
-      !session.is_booked &&
-      (!session.bookings || session.bookings.length === 0)
+      currentTime >= threeHoursBeforeStart && // Current time is after 3 hours before the start time
+      !session.is_booked
     ) {
       return 'expired_unbooked';
     }
     return 'normal';
-  };  
+  };
+  
 
   // Define all possible session statuses
   const sessionStatuses = [
@@ -629,7 +629,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 mt-4">
                 <div className="space-y-4 sm:space-y-6">
-                  {session.bookings?.length > 0 && session.studentInfo ? (
+                  {session.is_booked && session.bookings?.length > 0 && session.studentInfo ? (
                     <div className="bg-gray-50 rounded-xl p-3 sm:p-5 border border-gray-100">
                       <div className="flex items-start space-x-2 sm:space-x-3">
                         <Avatar
