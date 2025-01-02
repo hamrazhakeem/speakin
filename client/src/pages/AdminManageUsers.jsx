@@ -50,8 +50,9 @@ const AdminManageUsersPage = () => {
 
   const sidebarItems = [
     { label: 'Dashboard', active: false },
-    { label: 'Manage Users', active: true },
+    { label: 'Users', active: true },
     { label: 'Sessions', active: false },
+    { label: 'Languages', active: false },
   ];
 
   const studentColumns = ['No.', 'User Info', 'Language to Learn', 'Balance Credits', 'Status', 'Action'];

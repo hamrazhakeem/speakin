@@ -162,6 +162,19 @@ services:
     networks:
       - microservice_network
 
+  session_service_worker:
+    container_name: session_service_worker
+    build:
+      context: ./session_service
+    command: celery -A session_service worker --loglevel=info
+    volumes:
+      - ./session_service:/app
+    depends_on:
+      - redis
+      - session_service
+    networks:
+      - microservice_network
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq

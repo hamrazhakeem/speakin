@@ -464,8 +464,9 @@ const AdminDashboard = () => {
         <AdminSidebar 
           items={[
             { label: 'Dashboard', active: true },
-            { label: 'Manage Users', active: false },
+            { label: 'Users', active: false },
             { label: 'Sessions', active: false },
+            { label: 'Languages', active: false },
           ]} 
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}

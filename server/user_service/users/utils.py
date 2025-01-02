@@ -9,11 +9,29 @@ import random
 import string
 from django.core.cache import cache
 from django.conf import settings
-from .models import User
-import datetime
+from .models import User, Language, Proficiency
+import pycountry
 
 # Load environment variables from .env file
 load_dotenv()
+
+def populate_languages():
+    for language in pycountry.languages:
+        if hasattr(language, 'alpha_2') and hasattr(language, 'name'):  
+            Language.objects.get_or_create(name=language.name)
+
+def populate_proficiencies():
+    levels = [ 
+        ('A1', 'A1 - Beginner'),
+        ('A2', 'A2 - Elementary'),
+        ('B1', 'B1 - Intermediate'),
+        ('B2', 'B2 - Upper-Intermediate'),
+        ('C1', 'C1 - Advanced'),
+        ('C2', 'C2 - Proficient'),
+        ('Native', 'Native'),
+    ]
+    for level, description in levels:
+        Proficiency.objects.get_or_create(level=level)
 
 def cache_otp_data(cache_key, otp, timeout=None):
     """Helper to cache OTP data"""

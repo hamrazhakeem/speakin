@@ -12,4 +12,4 @@ COPY . /app/
 
 ENV DJANGO_SETTINGS_MODULE=message_service.settings
 
-CMD ["sh", "-c", "python3 manage.py runserver 0.0.0.0:8003"]
+CMD ["sh", "-c", "python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8003"]   

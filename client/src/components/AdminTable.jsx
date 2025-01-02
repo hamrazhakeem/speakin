@@ -55,14 +55,14 @@ const AdminTable = ({ title, columns, data, showRating, isPending }) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-wrap gap-1">
-                      {item.language.split(', ').map((lang, i) => (
+                      {item.language?.split(', ').map((lang, i) => (
                         <span 
                           key={i}
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-800 text-zinc-300"
                         >
                           {lang}
                         </span>
-                      ))}
+                      )) || item.availability}
                     </div>
                   </td>
                   {title === "Language Change Requests" ? (
@@ -101,7 +101,7 @@ const AdminTable = ({ title, columns, data, showRating, isPending }) => {
                   )}
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex justify-end">
-                      {item.action}
+                      {item.action || item.time}
                     </div>
                   </td>
                 </tr>

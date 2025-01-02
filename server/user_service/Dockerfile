@@ -22,4 +22,4 @@ ENV PYTHONPATH=/app
 # Switch to non-root user
 USER appuser
 
-CMD ["sh", "-c", "python manage.py runserver 0.0.0.0:8000 & python protos/server.py & python3 ./users/consumer.py"]
+CMD ["sh", "-c", "python3 manage.py migrate && python3 manage.py populate_data && python3 manage.py runserver 0.0.0.0:8000 & python3 protos/server.py & python3 ./users/consumer.py"]  

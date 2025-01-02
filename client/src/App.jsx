@@ -30,6 +30,8 @@ import TutorSessions from './pages/TutorSessions';
 import AdminSignIn from './pages/AdminSignIn';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminManageUsers from './pages/AdminManageUsers';
+import AdminManageSessions from './pages/AdminManageSessions';
+import AdminManageLanguages from './pages/AdminManageLanguages';
 import ApplicationConfirmation from './pages/ApplicationConfirmation';
 import AdminVerifyTutor from './pages/AdminVerifyTutor';
 import AdminVerifyLanguageChange from './pages/AdminVerifyLanguageChange';
@@ -81,6 +83,8 @@ const App = () => {
             <Route element={<AdminRoute />}>
               <Route path='/admin/dashboard' element={<AdminDashboard />} />
               <Route path='/admin/manage-users' element={<AdminManageUsers />} />
+              <Route path='/admin/manage-sessions' element={<AdminManageSessions />} />
+              <Route path='/admin/manage-languages' element={<AdminManageLanguages />} />
               <Route path='/admin/verify-tutor/:userId' element={<AdminVerifyTutor />} />
               <Route path='/admin/verify-language-change/:requestId' element={<AdminVerifyLanguageChange />} />
             </Route>

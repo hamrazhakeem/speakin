@@ -1,8 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-import pycountry
 from django.contrib.auth.models import BaseUserManager
 from storages.backends.s3boto3 import S3Boto3Storage
+import pycountry
 
 # Create your models here. 
 
@@ -75,25 +75,7 @@ class Proficiency(models.Model):
     level = models.CharField(max_length=25, unique=True, choices=LEVEL_CHOICES)
 
     def __str__(self):
-        return self.level
-    
-def populate_languages():
-    for language in pycountry.languages:
-        if hasattr(language, 'alpha_2') and hasattr(language, 'name'):  
-            Language.objects.get_or_create(name=language.name)
-
-def populate_proficiencies():
-    levels = [ 
-        ('A1', 'A1 - Beginner'),
-        ('A2', 'A2 - Elementary'),
-        ('B1', 'B1 - Intermediate'),
-        ('B2', 'B2 - Upper-Intermediate'),
-        ('C1', 'C1 - Advanced'),
-        ('C2', 'C2 - Proficient'),
-        ('Native', 'Native'),
-    ]
-    for level, description in levels:
-        Proficiency.objects.get_or_create(level=level) 
+        return self.level 
  
 class TutorDetails(models.Model):
     user = models.OneToOneField(User, related_name='tutor_details', on_delete=models.CASCADE)

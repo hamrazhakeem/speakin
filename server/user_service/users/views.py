@@ -434,7 +434,6 @@ class PlatformLanguageList(APIView):
             'languages': [{'id': lang.id, 'name': lang.name} for lang in languages], 
             'proficiencies': proficiencies,
         })
-
  
 class SpokenLanguageList(APIView):
     def get(self, request):

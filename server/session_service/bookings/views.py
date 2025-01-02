@@ -18,7 +18,7 @@ from django.conf import settings
 from rest_framework.views import APIView
 from django.db.models import Q 
 from django.utils.timezone import now
-from services.publisher import RabbitMQPublisher, NotificationType
+from .tasks import send_cancellation_notification, send_booking_notification
 
 # Create your views here.
 
@@ -75,33 +75,8 @@ class TutorAvailabilityDetail(generics.RetrieveUpdateDestroyAPIView):
             if not refund_success:
                 return Response({"error": "Failed to refund credits to user."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
-            student_data = requests.get(
-                f"{settings.USER_SERVICE_URL}users/{booking.student_id}/"
-            ).json()
-            
-            tutor_data = requests.get(
-                f"{settings.USER_SERVICE_URL}users/{booking.availability.tutor_id}/"
-            ).json()
-
-            cancellation_data = {
-                'cancelled_by': 'student' if new_status == 'canceled_by_student' else 'tutor',
-                'student_name': student_data['name'],
-                'student_email': student_data['email'],
-                'tutor_name': tutor_data['tutor_details']['speakin_name'],
-                'tutor_email': tutor_data['email'],
-                'session_type': booking.availability.session_type,
-                'start_time': booking.availability.start_time.isoformat(),
-                'language': booking.availability.language_to_teach,
-                'credits_required': booking.availability.credits_required
-            }
-
-            # Send notification via RabbitMQ
-            rabbitmq_publisher = RabbitMQPublisher()
-            if not rabbitmq_publisher.publish_notification(
-                cancellation_data, 
-                NotificationType.CANCELLATION
-            ):
-                raise ValidationError("Failed to send cancellation notification")
+            # Instead of direct RabbitMQ call, use Celery task
+            send_cancellation_notification.delay(booking.id, new_status)
 
             if session.start_time and session.start_time - timezone.now() >= timedelta(hours=3) and new_status == 'canceled_by_student':
                 session.is_booked = False
@@ -151,10 +126,6 @@ class BookingsList(generics.ListCreateAPIView):
             f"{settings.USER_SERVICE_URL}users/{student_id}/"
         ).json()
 
-        tutor_data = requests.get(
-            f"{settings.USER_SERVICE_URL}users/{booking.availability.tutor_id}/"
-        ).json()
-
         if student_data['balance_credits'] < credits_required:
             raise ValidationError({"error": "Insufficient credits"}, code=status.HTTP_400_BAD_REQUEST)
 
@@ -173,7 +144,7 @@ class BookingsList(generics.ListCreateAPIView):
         random_string = get_random_string(12)  # Generate a random 12-character string
         room_name_hash = sha256(f"{booking_id}-{tutor_id}-{student_id}-{random_string}".encode()).hexdigest()
         room_name = f"room_{room_name_hash[:16]}"  # Use a shorter part of the hash if needed
-         
+        
         # Update the booking with the room name
         booking.video_call_link = room_name  # Now `video_call_link` acts as `room_name`
         booking.save()
@@ -181,28 +152,8 @@ class BookingsList(generics.ListCreateAPIView):
         tutor_availability.is_booked = True
         tutor_availability.save()
 
-        # Prepare notification data
-        notification_data = {
-            'booking_data': {
-                'session_type': booking.availability.session_type,
-                'start_time': booking.availability.start_time.isoformat(),
-                'end_time': booking.availability.end_time.isoformat(),
-                'language': booking.availability.language_to_teach,
-                'student_name': student_data['name'],
-                'student_email': student_data['email'],
-            },
-            'tutor_data': {
-                'name': tutor_data['tutor_details']['speakin_name'],
-                'email': tutor_data['email']
-            } 
-        }  
-
-        rabbitmq_publisher = RabbitMQPublisher()
-        if not rabbitmq_publisher.publish_notification(
-            notification_data, 
-            NotificationType.BOOKING
-        ): 
-            raise ValidationError("Failed to send booking notification")
+        # Pass booking_id instead of booking object
+        send_booking_notification.delay(booking.id, student_data)
         
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

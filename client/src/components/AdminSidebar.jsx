@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Users, Video } from 'lucide-react';
+import { Home, Languages, Users, Video } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const AdminSidebar = ({ items, isOpen, onClose }) => {
@@ -8,14 +8,16 @@ const AdminSidebar = ({ items, isOpen, onClose }) => {
   // Define the available icons and paths
   const icons = {
     Dashboard: <Home className="h-5 w-5" />,
-    'Manage Users': <Users className="h-5 w-5" />,
+    'Users': <Users className="h-5 w-5" />,
     Sessions: <Video className="h-5 w-5" />,
+    Languages: <Languages className="h-5 w-5" />,
   };
 
   const paths = {
     Dashboard: '/admin/dashboard',
-    'Manage Users': '/admin/manage-users',
-    Sessions: '/admin/sessions',
+    'Users': '/admin/manage-users',
+    Sessions: '/admin/manage-sessions',
+    Languages: '/admin/manage-languages',
   };
 
   return (
