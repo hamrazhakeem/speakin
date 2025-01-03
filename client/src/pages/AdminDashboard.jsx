@@ -460,7 +460,7 @@ const AdminDashboard = () => {
         </button>
       </AdminNavbar>
       
-      <div className="flex pt-16">
+      <div className="flex flex-col lg:flex-row pt-16">
         <AdminSidebar 
           items={[
             { label: 'Dashboard', active: true },
@@ -472,18 +472,18 @@ const AdminDashboard = () => {
           onClose={() => setIsSidebarOpen(false)}
         />
         
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 lg:p-8 w-full">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-8 flex justify-between items-center">
+            <div className="mb-6 lg:mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
-                <h1 className="text-2xl font-bold text-white">Financial Dashboard</h1>
+                <h1 className="text-xl lg:text-2xl font-bold text-white">Financial Dashboard</h1>
                 <p className="text-sm text-zinc-400">Overview of your platform's financial performance</p>
               </div>
               
               <select
                 value={timeframe}
                 onChange={(e) => setTimeframe(e.target.value)}
-                className="bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-2"
+                className="w-full sm:w-auto bg-zinc-900 border border-zinc-800 text-white rounded-lg px-4 py-2"
               >
                 <option value="week">Last Week</option>
                 <option value="month">Last Month</option>
@@ -497,12 +497,12 @@ const AdminDashboard = () => {
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard
-                  title="Revenue"
-                  value={`₹${stats.revenue}`}
-                  icon={DollarSign}  // DollarSign is appropriate here as it represents total money flow
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-6 lg:mb-8">
+                  <StatCard
+                    title="Revenue"
+                    value={`₹${stats.revenue}`}
+                    icon={DollarSign}
+                  />
 
                 <StatCard
                   title="Total Withdrawals"
@@ -531,10 +531,10 @@ const AdminDashboard = () => {
                 />
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                  <div className="bg-black rounded-lg border border-zinc-800 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-6">Monthly Revenue Overview</h3>
-                    <div className="h-80">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6">
+                  <div className="bg-black rounded-lg border border-zinc-800 p-4 lg:p-6">
+                    <h3 className="text-base lg:text-lg font-semibold text-white mb-4 lg:mb-6">Monthly Revenue Overview</h3>
+                    <div className="h-64 lg:h-80">
                       <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={monthlyData}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
@@ -557,20 +557,20 @@ const AdminDashboard = () => {
                   <TransactionDistributionChart data={transactionTypeData} />
                 </div>
 
-                <div className="bg-black rounded-lg border border-zinc-800 overflow-hidden">
-                  <div className="px-6 py-4 border-b border-zinc-800">
-                    <h3 className="text-lg font-semibold text-white">Transactions</h3>
+                <div className="bg-black rounded-lg border border-zinc-800 overflow-hidden mb-6">
+                  <div className="px-4 lg:px-6 py-4 border-b border-zinc-800">
+                    <h3 className="text-base lg:text-lg font-semibold text-white">Transactions</h3>
                   </div>
                   <div className="overflow-x-auto">
-                    <div className="max-h-[500px] overflow-y-auto">
+                    <div className="max-h-[400px] lg:max-h-[500px] overflow-y-auto">
                       <table className="w-full">
                         <thead>
                           <tr className="bg-zinc-900 border-b border-zinc-800">
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400">Date</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400">Reference ID</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400">Type</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400">Amount</th>
-                            <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400">Status</th>
+                            <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Date</th>
+                            <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Reference ID</th>
+                            <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Type</th>
+                            <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Amount</th>
+                            <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Status</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-800">
@@ -617,24 +617,27 @@ const AdminDashboard = () => {
                     </div>
                   </div>
                 </div>
-                <div className="px-6 py-4 space-x-4">
+
+                <div className="flex flex-col sm:flex-row gap-4 px-4 lg:px-6 py-4">
                   <button
                     onClick={exportToPDF}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-center"
                   >
                     Download as PDF
                   </button>
                   <button
-                    onClick={exportToExcel} // Button for downloading Excel
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                    onClick={exportToExcel}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center"
                   >
                     Download Excel
                   </button>
                 </div>
-                <div className="mb-6">  {/* Added margin-bottom for spacing */}
+
+                <div className="mb-6">
                   <EscrowDashboard escrowData={escrowData} />
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6">
                   <TopTutorsCard
                     bookings={bookings} 
                     availabilities={availabilities} 
@@ -643,6 +646,7 @@ const AdminDashboard = () => {
                     bookings={bookings} 
                   />
                 </div>
+
                 <LanguageStatsCard />
               </>
             )}

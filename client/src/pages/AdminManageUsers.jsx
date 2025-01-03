@@ -114,19 +114,21 @@ const AdminManageUsersPage = () => {
           onClose={() => setIsSidebarOpen(false)}
         />
         
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 md:p-8">
           <div className="max-w-7xl mx-auto">
-            <div className="mb-8">
-              <h1 className="text-2xl font-bold text-white">User Management</h1>
-              <p className="text-sm text-zinc-400">Manage all users and their permissions</p>
+          <div className="mb-6 md:mb-8">
+            <div className="flex flex-col">
+              <h1 className="text-xl md:text-2xl font-bold text-white">User Management</h1>
+              <p className="text-sm text-zinc-400 mt-2">Manage all users and their permissions</p>
             </div>
+          </div>
 
             {loading ? (
               <div className="flex justify-center items-center h-64">
                 <LoadingSpinner size="lg" className="text-white" />
               </div>
             ) : (
-              <>
+              <div className="grid grid-cols-1 gap-6 md:gap-8">
                 <AdminTable
                   title="Students"
                   columns={studentColumns}
@@ -223,7 +225,7 @@ const AdminManageUsersPage = () => {
                     ),
                   }))}
                 />
-              </>
+              </div>
             )}
           </div>
         </div>

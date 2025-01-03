@@ -10,27 +10,27 @@ const TopTutorsCard = ({ bookings, availabilities }) => {
 
   useEffect(() => {
     const fetchTutorDetails = async () => {
-        try {
-            const availabilitiesArray = Object.values(availabilities);
-            const tutorIds = [...new Set(availabilitiesArray.map(avail => avail.tutor_id))];
-    
-            for (const tutorId of tutorIds) {
-                const response = await axiosInstance.get(`users/${tutorId}/`);
-                setTutorDetails(prevDetails => ({
-                    ...prevDetails,
-                    [tutorId]: {
+      try {
+        const availabilitiesArray = Object.values(availabilities);
+        const tutorIds = [...new Set(availabilitiesArray.map(avail => avail.tutor_id))];
+
+        for (const tutorId of tutorIds) {
+          const response = await axiosInstance.get(`users/${tutorId}/`);
+          setTutorDetails(prevDetails => ({
+            ...prevDetails,
+            [tutorId]: {
                         speakin_name: response.data.tutor_details.speakin_name,
                         teaching_language: response.data.tutor_language_to_teach.map(lang => lang.language),
-                    }
-                }));
             }
-        } catch (error) {
-            console.error('Error fetching tutor details:', error);
-        } finally {
-            setLoading(false);
+          }));
         }
+      } catch (error) {
+        console.error('Error fetching tutor details:', error);
+      } finally {
+        setLoading(false);
+      }
     };
-    
+
   
     // Ensure availabilities is not empty before calling the function
     if (Object.keys(availabilities).length > 0) {
@@ -44,25 +44,25 @@ const TopTutorsCard = ({ bookings, availabilities }) => {
 
     bookings.forEach(booking => {
         if (booking.booking_status === 'completed') {
-            const availability = availabilities[booking.availability];
+        const availability = availabilities[booking.availability];
             if (availability && availability.session_type === 'standard') {
-                const tutorId = availability.tutor_id;
-                tutorSessionCounts[tutorId] = (tutorSessionCounts[tutorId] || 0) + 1;
-            }
+          const tutorId = availability.tutor_id;
+          tutorSessionCounts[tutorId] = (tutorSessionCounts[tutorId] || 0) + 1;
         }
+      }
     });
 
     const sortedTutors = Object.entries(tutorSessionCounts)
-        .map(([tutorId, sessionCount]) => ({
-            tutorId: parseInt(tutorId),
-            sessionCount,
-            ...tutorDetails[tutorId],
-        }))
-        .sort((a, b) => b.sessionCount - a.sessionCount)
-        .slice(0, 5);
+      .map(([tutorId, sessionCount]) => ({
+        tutorId: parseInt(tutorId),
+        sessionCount,
+        ...tutorDetails[tutorId],
+      }))
+      .sort((a, b) => b.sessionCount - a.sessionCount)
+      .slice(0, 5);
 
     return sortedTutors;
-};
+  };
 
   
 

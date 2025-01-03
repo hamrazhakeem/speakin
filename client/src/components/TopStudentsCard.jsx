@@ -22,15 +22,15 @@ const TopStudentsCard = ({ bookings }) => {
         
         const studentDetails = await Promise.all(
           studentIds.map(async (id) => {
-            const response = await axiosInstance.get(`users/${id}/`);
-            return {
-              studentId: parseInt(id),
-              sessionCount: studentCounts[id],
+              const response = await axiosInstance.get(`users/${id}/`);
+              return {
+                studentId: parseInt(id),
+                sessionCount: studentCounts[id],
               name: response.data.name,
               learningLanguages: response.data.language_to_learn.map(
-                (lang) => lang.language
+                  (lang) => lang.language
               )
-            };
+              };
           })
         );
 
@@ -47,7 +47,7 @@ const TopStudentsCard = ({ bookings }) => {
     };
 
     if (bookings.length > 0) {
-      fetchAndProcessStudents();
+    fetchAndProcessStudents();
     }
   }, [bookings]);
 
