@@ -1,11 +1,14 @@
 # 🌟 SpeakIn - Language Learning Platform
 
 <div align="center">
-  [![Under Development](https://img.shields.io/badge/Status-Under%20Development-yellow.svg)](https://github.com/yourusername/speakin)
-  [![React](https://img.shields.io/badge/Frontend-React-blue.svg)](https://reactjs.org/)
-  [![Django](https://img.shields.io/badge/Backend-Django-green.svg)](https://www.djangoproject.com/)
-  [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue.svg)](https://www.postgresql.org/)
-  [![Microservices](https://img.shields.io/badge/Architecture-Microservices-orange.svg)](https://microservices.io/)
+
+[![Status](https://img.shields.io/badge/Status-Under%20Development-yellow?style=for-the-badge)](https://github.com/yourusername/speakin)
+
+[![Tech Stack](https://img.shields.io/badge/Frontend-React-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
+[![Tech Stack](https://img.shields.io/badge/Backend-Django-green?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
+[![Tech Stack](https://img.shields.io/badge/Database-PostgreSQL-blue?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
+[![Tech Stack](https://img.shields.io/badge/Architecture-Microservices-orange?style=for-the-badge&logo=kubernetes)](https://microservices.io/)
+
 </div>
 
 ## 🚧 Renovation in Progress
@@ -99,4 +102,3 @@ Have questions? Reach out to us at [support@speakin.com](mailto:support@speakin.
 <div align="center">
   <sub>Built with ❤️ for language learners worldwide</sub>
 </div>
-
