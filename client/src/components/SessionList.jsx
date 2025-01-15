@@ -250,7 +250,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
   };
 
   const handleJoinSession = (bookingId) => () => {
-    navigate('/video-call-setup', { state: { bookingId } });
+    navigate('/video-call/setup', { state: { bookingId } });
   };
 
   if (loading || sessionsWithStudentInfo === null) {

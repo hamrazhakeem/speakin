@@ -35,7 +35,8 @@ const AdminSignInPage = () => {
       navigate('/admin/dashboard');
       console.log('Admin signed in');
     } catch (error) {
-      toast.error('Invalid admin credentials');
+      const message = error.response?.data?.detail || 'Login failed. Please try again.';
+      toast.error(message);
     } finally {
       setLoading(false);
     }

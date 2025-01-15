@@ -52,7 +52,7 @@ const TutorLandingPage = () => {
           {/* CTA Buttons */}
           <div className="flex flex-wrap gap-4 justify-center">
             <button 
-              onClick={() => navigate('/tutor-email-verification')}
+              onClick={() => navigate('/tutor/sign-in')}
               className="px-8 py-4 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition-all duration-200 flex items-center justify-center group shadow-lg shadow-blue-500/25"
             >
               Start Teaching
@@ -170,7 +170,7 @@ const TutorLandingPage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button 
-                  onClick={() => navigate('/tutor-request')}
+                  onClick={() => navigate('/tutor/verify-email')}
                   className="px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg flex items-center justify-center group"
                 >
                 Apply Now

@@ -83,7 +83,7 @@ const StudentPasswordChangePage = () => {
         <nav className="max-w-4xl mx-auto mb-8 flex space-x-1 rounded-xl bg-blue-50 p-1">
           {[
             { label: 'Profile', path: '/profile' },
-            { label: 'Security', path: '/student-password-change', active: true },
+            { label: 'Security', path: '/password', active: true },
             { label: 'Bookings', path: '/bookings' },
           ].map((tab) => (
             <button

@@ -19,8 +19,8 @@ const Footer = () => {
     {
       title: "Join Us",
       links: [
-        { name: "Become a Tutor", path: "/become-a-tutor" },
-        { name: "Find a Tutor", path: "/tutors" },
+        { name: "Become a Tutor", path: "/tutor" },
+        { name: "Find a Tutor", path: "/home" },
       ]
     },
     {
@@ -30,11 +30,6 @@ const Footer = () => {
           name: "support@speakin.com", 
           path: "mailto:support@speakin.com",
           icon: <Mail className="w-4 h-4" />
-        },
-        { 
-          name: "+1 (555) 123-4567", 
-          path: "tel:+15551234567",
-          icon: <Phone className="w-4 h-4" />
         }
       ]
     }

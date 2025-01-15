@@ -41,7 +41,7 @@ const TutorRequestPage = () => {
 
   useEffect(() => {
     if (!verifiedEmail) {
-      navigate('/tutor-email-verification');
+      navigate('/tutor/verify-email');
     }
   }, [verifiedEmail, navigate]);
 
@@ -175,7 +175,7 @@ const TutorRequestPage = () => {
         },
       });
       if (response.status === 201) {
-        navigate('/application-confirmation');
+        navigate('/tutor/request/application-confirmation', { state: { verifiedEmail: verifiedEmail } });
       }
     } catch (error) {
       // Check if the error has a response and extract the message
@@ -496,7 +496,7 @@ const TutorRequestPage = () => {
               <button
                 type="button"
                 className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200 font-medium"
-                onClick={() => navigate('/tutor-sign-in')}
+                onClick={() => navigate('/tutor/sign-in')}
                 disabled={loading}
               >
                 Cancel

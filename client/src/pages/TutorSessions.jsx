@@ -55,9 +55,9 @@ const TutorSessionsPage = () => {
         {/* Navigation Tabs */}
         <nav className="max-w-4xl mx-auto mb-8 flex space-x-1 rounded-xl bg-blue-50 p-1">
           {[
-            { label: 'Profile', path: '/tutor-dashboard' },
-            { label: 'Security', path: '/tutor-password-change' },
-            { label: 'Sessions', path: '/tutor-sessions', active: true },
+            { label: 'Profile', path: '/tutor/dashboard' },
+            { label: 'Security', path: '/tutor/password' },
+            { label: 'Sessions', path: '/tutor/sessions', active: true },
             { label: 'Payments', path: '/withdraw' }
           ].map((tab) => (
             <button

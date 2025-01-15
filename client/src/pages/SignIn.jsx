@@ -20,7 +20,7 @@ const SignInPage = () => {
   const dispatch = useDispatch();
 
   const handleTutorClick = () => {
-    navigate('/tutor-sign-in');
+    navigate('/tutor/sign-in');
   };
 
   const handleSubmit = async (e) => {
@@ -46,7 +46,7 @@ const SignInPage = () => {
       navigate('/home');
     } catch (error) {
       const message = error.response?.data?.detail || 'Login failed. Please try again.';
-      setErrorMessage(message);
+      toast.error(message);
       console.error('Login failed', message);
     } finally {
       setIsLoading(false);

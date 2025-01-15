@@ -248,7 +248,7 @@ const Withdraw = () => {
           {/* Button to navigate back */}
           <div className="max-w-sm mx-auto mt-6">
             <button
-              onClick={() => navigate(isTutor ? '/tutor-dashboard' : '/profile')}
+              onClick={() => navigate(isTutor ? '/tutor/dashboard' : '/profile')}
               className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
             >
               <span>{isTutor ? 'Go to Dashboard' : 'Go to Profile'}</span>
@@ -297,8 +297,8 @@ const Withdraw = () => {
                         ) : (
                           'Connect with Stripe'
                         )}
-                      </button>
-                    </div>
+                        </button>
+                    </div>  
                   </div>
                 ) : (
                   <div className="space-y-4">

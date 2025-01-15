@@ -55,7 +55,7 @@ const LandingPage = () => {
                 <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </button>
               <button
-                onClick={() => navigate('/become-a-tutor')}
+                onClick={() => navigate('/tutor')}
                 className="px-8 py-4 bg-white text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition-all duration-200 flex items-center justify-center group border border-gray-200"
               >
                 Become a Tutor
@@ -264,7 +264,7 @@ const LandingPage = () => {
             Share your language expertise and earn money by becoming a tutor on our platform
           </p>
           <button 
-            onClick={() => navigate('/become-a-tutor')}
+            onClick={() => navigate('/tutor')}
             className="px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-colors duration-200 shadow-lg"
           >
             Become a Tutor

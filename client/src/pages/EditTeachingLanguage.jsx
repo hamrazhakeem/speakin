@@ -123,7 +123,7 @@ const EditTeachingLanguage = () => {
         toast.error(response.data.error);
       } else {
         toast.success("Request submitted successfully, the status will be notified.");
-        navigate('/tutor-dashboard');
+        navigate('/tutor/dashboard');
       }
     } catch (error) {
       console.error('Error editing teaching language:', error);
@@ -152,7 +152,7 @@ const EditTeachingLanguage = () => {
           <div className="bg-white shadow-lg rounded-2xl overflow-hidden">
             <div className="bg-blue-50/80 backdrop-blur-sm p-6 border-b border-gray-100">
               <button
-                onClick={() => navigate('/tutor-dashboard')}
+                onClick={() => navigate('/tutor/dashboard')}
                 className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 transition-colors text-sm font-medium"
               >
                 <FaArrowLeft className="w-4 h-4" />

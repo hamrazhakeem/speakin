@@ -139,7 +139,7 @@ const ForgotPasswordOtpPage = () => {
             );
             console.log('OTP verified successfully:', response.data);
             toast.success('OTP verified successfully!');
-            navigate('/set-new-password', { state: { email, cache_key } });
+            navigate('/forgot-password/set-new-password', { state: { email, cache_key } });
         } catch (error) {
             console.error(error.response?.data);
             setError(error.response?.data?.message || 'Invalid OTP. Please try again.');

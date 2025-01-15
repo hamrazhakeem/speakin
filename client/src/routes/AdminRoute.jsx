@@ -7,7 +7,7 @@ const AdminRoute = () => {
   
   if (isAuthenticated) {
     if (isTutor) {
-      return <Navigate to="/tutor-dashboard" />;
+      return <Navigate to="/tutor/dashboard" />;
     }
     if (isStudent) {
       return <Navigate to="/home" />;

@@ -10,7 +10,7 @@ const AboutUs = () => {
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-
+  
       {/* Hero Section with Abstract Background */}
       <section className="pt-28 pb-16 relative overflow-hidden">
         <div className="absolute inset-0 -z-10">

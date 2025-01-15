@@ -29,16 +29,16 @@ const AdminSidebar = ({ items, isOpen, onClose }) => {
         />
       )}
 
-<div
-  className={`
-    fixed lg:sticky top-16 inset-y-0 left-0 z-50
-    w-64 h-[calc(100vh-4rem)] bg-black border-r border-zinc-800
-    transform transition-all duration-300 ease-in-out
-    ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-    overflow-y-auto
-    lg:z-30
-  `}
->
+      <div
+        className={`
+          fixed lg:sticky top-16 inset-y-0 left-0 z-50
+          w-48 h-[calc(100vh-4rem)] bg-black border-r border-zinc-800 // Changed from w-64 to w-48
+          transform transition-all duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          overflow-y-auto
+          lg:z-30
+        `}
+      >
         <div className="flex flex-col h-full">
           <div className="sticky top-0 bg-black z-10 p-6 border-b border-zinc-800">
             <h2 className="text-xl font-semibold text-white">Admin Portal</h2>

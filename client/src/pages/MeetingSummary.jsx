@@ -51,7 +51,7 @@ const MeetingSummary = () => {
     if (userType === 'student') {
       navigate('/bookings');
     } else {
-      navigate('/tutor-sessions');
+      navigate('/tutor/sessions');
     }
   };
 

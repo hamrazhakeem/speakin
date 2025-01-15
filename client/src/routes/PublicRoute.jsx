@@ -6,7 +6,7 @@ const PublicRoute = () => {
   const { isAuthenticated, isTutor, isStudent } = useSelector((state) => state.auth);
 
   if (isAuthenticated){
-    if (isTutor) return <Navigate to="/tutor-dashboard" />;
+    if (isTutor) return <Navigate to="/tutor/dashboard" />;
     if (isStudent) return <Navigate to="/home" />;
     return <Navigate to="/admin/dashboard" />;
   }

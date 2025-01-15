@@ -87,7 +87,7 @@ const AdminManageUsersPage = () => {
         request => request.id === requestId
       );
       if (requestData) {
-        navigate(`/admin/verify-language-change/${requestId}`, {
+        navigate(`/admin/verify-language/${requestId}`, {
           state: requestData
         });
       }

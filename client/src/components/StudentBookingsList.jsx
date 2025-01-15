@@ -147,7 +147,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
   };
 
   const handleJoinSession = (bookingId) => {
-    navigate('/video-call-setup', { state: { bookingId } });
+    navigate('/video-call/setup', { state: { bookingId } });
   };
   
   const renderCreditInfo = (session) => {

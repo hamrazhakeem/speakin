@@ -36,17 +36,17 @@ const Navbar = () => {
 
   const handleLogout = () => {
     dispatch(clearTokens());
-    navigate(isTutor ? '/tutor-sign-in' : '/sign-in');
+    navigate(isTutor ? '/tutor/sign-in' : '/sign-in');
   };
 
   const navigationLinks = [
     { title: 'Find a tutor', href: '/home' },
-    { title: 'Become a tutor', href: '/become-a-tutor' },
+    { title: 'Become a tutor', href: '/tutor' },
   ];
 
   const getProfilePath = () => isTutor ? '/tutor-profile' : '/profile';
-  const getSignInPath = () => isTutor ? '/tutor-sign-in' : '/sign-in';
-  const getHomePath = () => isTutor ? '/become-a-tutor' : '/';
+  const getSignInPath = () => isTutor ? '/tutor/sign-in' : '/sign-in';
+  const getHomePath = () => isTutor ? '/tutor' : '/';
 
   const renderCreditsSection = () => (
     <div className="flex items-center space-x-3">

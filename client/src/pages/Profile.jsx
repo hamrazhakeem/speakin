@@ -278,7 +278,7 @@ const ProfilePage = () => {
             <nav className="max-w-4xl mx-auto mb-8 flex space-x-1 rounded-xl bg-blue-50 p-1">
               {[
                 { label: 'Profile', path: '/profile', active: true },
-                { label: 'Security', path: '/student-password-change' },
+                { label: 'Security', path: '/password' },
                 { label: 'Bookings', path: '/bookings' },
               ].map((tab) => (
                 <button

@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import { useForm } from 'react-hook-form';
 import { ArrowLeft, ChevronRight, KeyRound, Eye, EyeOff } from 'lucide-react';
 import LoadingSpinner from '../components/ui/LoadingSpinner';
+import { useEffect } from 'react';
 
 const SetNewPassword = () => {
     const location = useLocation();
@@ -15,7 +16,15 @@ const SetNewPassword = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    const { register, handleSubmit, watch, formState: { errors } } = useForm();
+    const { register, handleSubmit, formState: { errors } } = useForm();
+
+    useEffect(() => {
+        if (!cache_key || !email) {
+            navigate('/sign-in');
+        }
+    }, [navigate, cache_key, email]);
+
+    if (!cache_key || !email) return null;
 
     const onSubmit = async (data) => {
         if (data.newPassword !== data.confirmPassword) {

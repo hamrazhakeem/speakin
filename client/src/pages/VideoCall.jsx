@@ -43,7 +43,7 @@ const VideoCall = () => {
   const handleMeetingLeft = useCallback(() => {
     // Navigate to meeting summary page
     console.log("Meeting left", bookingId);
-    navigate('/meeting-summary', { 
+    navigate('/video-call/summary', { 
       state: { 
         bookingId: bookingId
       } 
@@ -58,12 +58,12 @@ const VideoCall = () => {
 
   const handleError = useCallback((event) => {
     console.error('Daily.co error:', event);
-    navigate('/video-call-setup');
+    navigate('/video-call/setup');
   }, [navigate]);
 
   useEffect(() => {
     if (!roomUrl) {
-      navigate('/video-call-setup');
+      navigate('/video-call/setup');
       return;
     }
 

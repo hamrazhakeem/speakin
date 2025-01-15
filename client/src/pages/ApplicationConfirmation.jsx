@@ -1,12 +1,21 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { ClipboardCheck, Clock, Mail, ArrowLeft } from 'lucide-react';
+import { useEffect } from 'react';
 
 const ApplicationConfirmation = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { verifiedEmail } = location.state || {}; // Access the state
+
+  useEffect(() => {
+    if (!verifiedEmail) navigate('/tutor/request');
+  }, [navigate, verifiedEmail]);
+
+  if (!verifiedEmail) return null;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -81,7 +90,7 @@ const ApplicationConfirmation = () => {
             {/* Action Buttons */}
             <div className="space-y-4">
               <button
-                onClick={() => navigate('/become-a-tutor')}
+                onClick={() => navigate('/tutor')}
                 className="w-full bg-blue-600 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-blue-700 transition duration-200"
               >
                 <ArrowLeft className="w-5 h-5" />

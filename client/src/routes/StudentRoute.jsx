@@ -9,7 +9,7 @@ const StudentRoute = () => {
     return <Navigate to="/sign-in" />;
   }
 
-  if (isTutor) return <Navigate to="/tutor-dashboard" />;
+  if (isTutor) return <Navigate to="/tutor/dashboard" />;
 
   return <Outlet />; 
 };

@@ -86,7 +86,7 @@ const handleResendOtp = async () => {
         otp: otp.join(''),
         cache_key: cacheKey
       });
-      navigate('/tutor-request', {state: { verifiedEmail: email }});
+      navigate('/tutor/request', {state: { verifiedEmail: email }});
     } catch (error) {
       toast.error(error.response?.data?.error || 'Invalid OTP');
     } finally {
@@ -241,7 +241,7 @@ const handleResendOtp = async () => {
             {/* Back to Sign In Link */}
             <div className="mt-6 text-center">
               <Link 
-                to="/tutor-sign-in"
+                to="/tutor/sign-in"
                 className="text-blue-600 hover:text-blue-700 font-medium"
               >
                 Back to Sign In

@@ -33,7 +33,7 @@ const SignUpPage = () => {
       setBackendErrors({});
 
       const { cache_key } = response.data;
-      navigate('/verify-otp', { 
+      navigate('/sign-up/verify-otp', { 
         state: { 
           email: data.email, 
           cache_key,

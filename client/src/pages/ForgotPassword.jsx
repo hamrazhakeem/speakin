@@ -29,7 +29,7 @@ const ForgotPassword = () => {
             const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}forgot-password/`, { email });
             console.log('OTP sent successfully:', response.data);
             toast.success('OTP sent successfully! Please check your email.');
-            navigate('/forgot-password-verify-otp', { state: { email, cache_key: response.data.cache_key } });
+            navigate('/forgot-password/verify-otp', { state: { email, cache_key: response.data.cache_key } });
         } catch (error) {
             console.error(error.response?.data);
             setError(error.response?.data?.error || 'An unknown error occurred.');

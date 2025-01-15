@@ -45,12 +45,12 @@ const OtpPage = () => {
         if (emailFromSignUp) {
             setEmail(emailFromSignUp);
         } else {
-            setError('Email not found. Please try signing up again.');
+            navigate('/sign-up');
         }
         if (cache_key) {
             setCacheKey(cache_key);  
         } else {
-            setError('Cache key not found. Please try signing up again.');  
+            navigate('/sign-up');
         }
     }, [location.state]);
 

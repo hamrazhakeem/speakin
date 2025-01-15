@@ -42,10 +42,10 @@ const TutorSignInPage = () => {
       }));
 
       toast.success(`Welcome, ${name}!`);
-      navigate('/tutor-dashboard');
+      navigate('/tutor/dashboard');
     } catch (error) {
       const message = error.response?.data?.detail || 'Login failed. Please try again.';
-      setErrorMessage(message);
+      toast.error(message);
       console.error('Login failed', message);
     } finally {
       setIsLoading(false);
@@ -146,7 +146,7 @@ const TutorSignInPage = () => {
               <div className="text-center text-gray-600">
                 Want to become a tutor?{' '}
                 <Link 
-                  to="/tutor-email-verification"
+                  to="/tutor/verify-email"
                   className="text-blue-600 hover:text-blue-700 font-medium"
                 >
                   Submit request

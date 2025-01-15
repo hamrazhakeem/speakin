@@ -81,9 +81,9 @@ const TutorPasswordChangePage = () => {
         {/* Navigation Tabs */}
         <nav className="max-w-4xl mx-auto mb-8 flex space-x-1 rounded-xl bg-blue-50 p-1">
           {[
-            { label: 'Profile', path: '/tutor-dashboard' },
-            { label: 'Security', path: '/tutor-password-change', active: true },
-            { label: 'Sessions', path: '/tutor-sessions' },
+            { label: 'Profile', path: '/tutor/dashboard' },
+            { label: 'Security', path: '/tutor/password', active: true },
+            { label: 'Sessions', path: '/tutor/sessions' },
             { label: 'Payments', path: '/withdraw' }
           ].map((tab) => (
             <button
