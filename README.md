@@ -1,60 +1,86 @@
-# 🚧 SpeakIn - Under Construction 🚧
+# 🌟 SpeakIn - Language Learning Platform
 
 <div align="center">
-  <img src="https://img.shields.io/badge/status-renovating-orange" alt="Project Status"/>
-  <img src="https://img.shields.io/badge/version-0.1.0-blue" alt="Version"/>
-  <img src="https://img.shields.io/badge/license-MIT-green" alt="License"/>
+  <img src="client/public/logo.png" alt="SpeakIn Logo" width="200"/>
+  
+  [![Under Development](https://img.shields.io/badge/Status-Under%20Development-yellow.svg)](https://github.com/yourusername/speakin)
+  [![React](https://img.shields.io/badge/Frontend-React-blue.svg)](https://reactjs.org/)
+  [![Django](https://img.shields.io/badge/Backend-Django-green.svg)](https://www.djangoproject.com/)
+  [![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue.svg)](https://www.postgresql.org/)
+  [![Microservices](https://img.shields.io/badge/Architecture-Microservices-orange.svg)](https://microservices.io/)
 </div>
 
-## 🏗️ Project Overview
+## 🚧 Renovation in Progress
 
-> **Note**: This project is currently undergoing major renovations to create an exceptional language learning platform.
+We're currently enhancing SpeakIn to provide an even better language learning experience. Our platform connects language learners with expert tutors through 1-on-1 video sessions.
 
-SpeakIn is an innovative language learning platform connecting students with expert tutors for 1-on-1 video sessions. We're building something special, and while we're not quite ready for the grand opening, exciting changes are happening every day!
+### 🎯 Current Focus
 
-## 🎯 Coming Features
+- **Frontend Standardization**
+  - Implementing consistent naming conventions
+  - Enhancing component reusability
+  - Optimizing React performance
+  - Improving UI/UX patterns
 
-- 🌐 Real-time video chat with native & certified tutors
-- 🔐 Secure authentication & tutor verification
-- 💳 Integrated payment system
-- 📱 Responsive design for all devices
-- 🌍 Support for multiple languages
+- **Backend Optimization**
+  - Refining microservices architecture
+  - Strengthening API security
+  - Enhancing data validation
+  - Implementing caching strategies
 
-## 🛠️ Tech Stack
+- **Infrastructure**
+  - Preparing for EKS deployment
+  - Setting up CI/CD pipelines
+  - Configuring monitoring and logging
+  - Implementing auto-scaling
 
-- **Frontend**: React.js with modern practices
-- **Backend**: Django & PostgreSQL
-- **Architecture**: Microservices
-- **DevOps**: CI/CD Pipeline (Coming Soon)
+### 🌟 Key Features
 
-## 🚀 Development Status
+- **Seamless Video Learning**
+  - Real-time 1-on-1 sessions
+  - Screen sharing capabilities
+  - Interactive whiteboard
 
-| Module | Status |
-|--------|---------|
-| User Authentication | 🏗️ In Progress |
-| Video Chat | 🏗️ In Progress |
-| Payment Integration | 🏗️ In Progress |
-| Admin Dashboard | 🏗️ In Progress |
+- **Expert Tutors**
+  - Native speaker verification
+  - Language certification validation
+  - Comprehensive tutor profiles
 
-## 📅 Roadmap
+- **Smart Booking System**
+  - Flexible scheduling
+  - Time zone management
+  - Credit-based payments
 
-- [x] Project initialization
-- [x] Basic architecture setup
-- [ ] Core features implementation
-- [ ] Testing & optimization
-- [ ] Beta release
-- [ ] Public launch
+### 🔧 Tech Stack
 
-## 👷 Want to Contribute?
+- **Frontend**
+  - React with Vite
+  - TailwindCSS
+  - Redux Toolkit
+  - WebRTC
 
-We're not accepting contributions just yet, but stay tuned! Once our foundation is solid, we'll welcome collaborators to help build something amazing.
+- **Backend**
+  - Django REST Framework
+  - PostgreSQL
+  - Redis Cache
+  - Celery
 
-## 📬 Contact
+- **Infrastructure**
+  - Docker
+  - Kubernetes (EKS)
+  - AWS Services
+  - Nginx
 
-Have questions? Reach out to us at [support@speakin.com](mailto:support@speakin.com)
+### 🚀 Coming Soon
+
+- Advanced matching algorithm
+- Interactive learning materials
+- Progress tracking
+- Community features
+- Mobile applications
 
 ---
 
 <div align="center">
-  <sub>Built with ❤️ by the SpeakIn Team</sub>
+  <sub>Built with ❤️ for language learners worldwide</sub>
 </div>
