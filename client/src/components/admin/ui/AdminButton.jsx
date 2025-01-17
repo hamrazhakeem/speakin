@@ -1,5 +1,5 @@
 import React from 'react';
-import LoadingSpinner from '../../ui/LoadingSpinner';
+import LoadingSpinner from '../../common/LoadingSpinner';
 
 const AdminButton = ({ 
   type = 'button',

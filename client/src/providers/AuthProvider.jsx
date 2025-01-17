@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setTokens, clearTokens } from "../redux/authSlice";
-import LoadingSpinner from "../components/ui/LoadingSpinner";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const AuthProvider = ({ children }) => {
   const dispatch = useDispatch();

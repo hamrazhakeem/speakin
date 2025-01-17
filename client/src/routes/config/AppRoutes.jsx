@@ -17,49 +17,49 @@ import AdminVerifyTutor from '../../pages/admin/AdminVerifyTutor';
 import AdminVerifyLanguage from '../../pages/admin/AdminVerifyLanguage';
 
 // Student Pages
-import Home from '../../pages/student/Home';
-import Profile from '../../pages/student/Profile';
-import Password from '../../pages/student/Password';
-import BuyCredits from '../../pages/student/BuyCredits';
-import PaymentSuccess from '../../pages/student/PaymentSuccess';
-import PaymentCancel from '../../pages/student/PaymentCancel';
-import Bookings from '../../pages/student/Bookings';
+import Home from '../../pages/user/student/Home';
+import Profile from '../../pages/user/student/Profile';
+import Password from '../../pages/user/student/Password';
+import BuyCredits from '../../pages/user/student/BuyCredits';
+import PaymentSuccess from '../../pages/user/student/PaymentSuccess';
+import PaymentCancel from '../../pages/user/student/PaymentCancel';
+import Bookings from '../../pages/user/student/Bookings';
 
 // Tutor Pages
-import TutorDashboard from '../../pages/tutor/TutorDashboard';
-import TutorPassword from '../../pages/tutor/TutorPassword';
-import TutorTeachingLanguages from '../../pages/tutor/TutorTeachingLanguages';
-import TutorSessions from '../../pages/tutor/TutorSessions';
+import TutorDashboard from '../../pages/user/tutor/TutorDashboard';
+import TutorPassword from '../../pages/user/tutor/TutorPassword';
+import TutorTeachingLanguages from '../../pages/user/tutor/TutorTeachingLanguages';
+import TutorSessions from '../../pages/user/tutor/TutorSessions';
 
 // Common Protected Pages
-import VideoCall from '../../pages/shared/VideoCall';
-import VideoCallSetup from '../../pages/shared/VideoCallSetup';
-import VideoCallSummary from '../../pages/shared/VideoCallSummary';
-import Messages from '../../pages/shared/Messages';
-import Withdraw from '../../pages/shared/Withdraw';
-import StripeRefresh from '../../pages/shared/StripeRefresh';
+import VideoCall from '../../pages/user/common/VideoCall';
+import VideoCallSetup from '../../pages/user/common/VideoCallSetup';
+import VideoCallSummary from '../../pages/user/common/VideoCallSummary';
+import Messages from '../../pages/user/common/Messages';
+import Withdraw from '../../pages/user/common/Withdraw';
+import StripeRefresh from '../../pages/user/common/StripeRefresh';
 
 // Public Pages
-import Landing from '../../pages/student/Landing';
-import SignIn from '../../pages/student/SignIn';
-import SignUp from '../../pages/student/SignUp';
-import SignUpVerifyOtp from '../../pages/student/SignUpVerifyOtp';
-import TutorLanding from '../../pages/tutor/TutorLanding';
-import TutorSignIn from '../../pages/tutor/TutorSignIn';
-import TutorVerifyEmail from '../../pages/tutor/TutorVerifyEmail';
-import TutorRequest from '../../pages/tutor/TutorRequest';
-import TutorRequestApplicationConfirmation from '../../pages/tutor/TutorRequestApplicationConfirmation';
-import ForgotPassword from '../../pages/shared/ForgotPassword';
-import ForgotPasswordVerifyOtp from '../../pages/shared/ForgotPasswordVerifyOtp';
-import ForgotPasswordSetNewPassword from '../../pages/shared/ForgotPasswordSetNewPassword';
+import Landing from '../../pages/user/student/Landing';
+import SignIn from '../../pages/user/student/SignIn';
+import SignUp from '../../pages/user/student/SignUp';
+import SignUpVerifyOtp from '../../pages/user/student/SignUpVerifyOtp';
+import TutorLanding from '../../pages/user/tutor/TutorLanding';
+import TutorSignIn from '../../pages/user/tutor/TutorSignIn';
+import TutorVerifyEmail from '../../pages/user/tutor/TutorVerifyEmail';
+import TutorRequest from '../../pages/user/tutor/TutorRequest';
+import TutorRequestApplicationConfirmation from '../../pages/user/tutor/TutorRequestApplicationConfirmation';
+import ForgotPassword from '../../pages/user/common/ForgotPassword';
+import ForgotPasswordVerifyOtp from '../../pages/user/common/ForgotPasswordVerifyOtp';
+import ForgotPasswordSetNewPassword from '../../pages/user/common/ForgotPasswordSetNewPassword';
 import AdminSignIn from '../../pages/admin/AdminSignIn';
 
 // Static Pages
-import AboutUs from '../../pages/static/AboutUs';
-import HowItWorks from '../../pages/static/HowItWorks';
-import Faq from '../../pages/static/Faq';
-import TermsAndConditions from '../../pages/static/TermsAndConditions';
-import PrivacyPolicy from '../../pages/static/PrivacyPolicy';
+import AboutUs from '../../pages/user/static/AboutUs';
+import HowItWorks from '../../pages/user/static/HowItWorks';
+import Faq from '../../pages/user/static/Faq';
+import TermsAndConditions from '../../pages/user/static/TermsAndConditions';
+import PrivacyPolicy from '../../pages/user/static/PrivacyPolicy';
 
 const AppRoutes = () => {
   return (

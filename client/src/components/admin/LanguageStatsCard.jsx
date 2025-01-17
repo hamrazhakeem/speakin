@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Languages } from 'lucide-react';
 import useAxios from '../../hooks/useAxios';
-import LoadingSpinner from '../ui/LoadingSpinner';
+import LoadingSpinner from '../common/LoadingSpinner';
 
 const LanguageStatsCard = () => {
   const [languageStats, setLanguageStats] = useState({ teaching: [], learning: [], spoken: [] });

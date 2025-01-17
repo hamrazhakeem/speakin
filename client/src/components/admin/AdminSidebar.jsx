@@ -42,7 +42,7 @@ const AdminSidebar = ({ items, isOpen, onClose }) => {
       >
         <div className="flex flex-col h-full">
           <div className="sticky top-0 bg-black z-10 p-6 border-b border-zinc-800">
-            <h2 className="text-xl font-semibold text-white">Admin Portal</h2>
+            <h2 className="text-xl font-bold text-white">Admin Portal</h2>
             <p className="text-sm text-zinc-400">Manage your platform</p>
           </div>
 

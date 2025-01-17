@@ -1,6 +1,6 @@
 import React from 'react';
 import { Star } from 'lucide-react';
-import Avatar from '../Avatar';
+import Avatar from '../common/Avatar';
 
 const AdminTable = ({ title, columns, data, showRating, isPending }) => {
   return (
