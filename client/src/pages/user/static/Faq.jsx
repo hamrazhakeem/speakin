@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Search, MessageCircle, Book, Settings, Users } from 'lucide-react';
-import Navbar from '../../../components/user/common/Navbar';
-import Footer from '../../../components/user/common/Footer';
+import { Search, MessageCircle, Book, Settings, Users, ArrowRight, ChevronRight } from 'lucide-react';
+import Layout from '../../../components/user/layout/Layout';
 import FaqItem from '../../../components/user/common/FaqItem';
 
 const Faq = () => {
@@ -109,38 +108,47 @@ const Faq = () => {
     }
   ];
 
+  const filteredFAQs = faqCategories
+    .find(cat => cat.category === activeCategory)?.questions
+    .filter(q => 
+      searchQuery === '' || 
+      q.q.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      q.a.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || [];
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <Navbar />
-      
+    <Layout>
       {/* Hero Section */}
-      <section className="pt-24 pb-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e510_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full text-blue-700 text-sm font-medium mb-8">
-            <MessageCircle className="w-4 h-4" />
-            Get Quick Answers
-          </div>
-          
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            How can we help you?
-          </h1>
-          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-            Everything you need to know about our language learning platform
-          </p>
-          
-          {/* Search Bar */}
-          <div className="max-w-2xl mx-auto relative group">
-            <div className="absolute inset-0 bg-blue-500 blur-xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Type your question here..."
-                className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all duration-200 text-lg"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+      <section className="pt-28 pb-16 bg-blue-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
+        <div className="relative">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium mb-8 hover:bg-white/20 transition-colors cursor-pointer group">
+                <MessageCircle className="w-4 h-4" />
+                Get Quick Answers
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                How can we help you?
+              </h1>
+              <p className="text-xl text-blue-50 max-w-2xl mx-auto mb-12">
+                Everything you need to know about our language learning platform
+              </p>
+              
+              {/* Search Bar */}
+              <div className="max-w-2xl mx-auto relative">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 w-5 h-5 z-10" />
+                  <input
+                    type="text"
+                    placeholder="Type your question here..."
+                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-white/20 bg-white/10 backdrop-blur-sm focus:border-white/40 focus:outline-none focus:ring-4 focus:ring-white/10 transition-all duration-200 text-lg text-white placeholder-white/60"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -160,8 +168,8 @@ const Faq = () => {
                     flex items-center gap-2 px-6 py-3 rounded-full font-medium
                     transition-all duration-200 
                     ${activeCategory === cat.label 
-                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/25' 
-                      : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'}
+                      ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}
                   `}
                 >
                   <Icon className="w-5 h-5" />
@@ -171,54 +179,44 @@ const Faq = () => {
             })}
           </div>
 
-          {/* FAQ Items */}
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100">
-            {faqCategories
-              .find(cat => cat.category === activeCategory)?.questions
-              .filter(item => 
-                item.q.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                item.a.toLowerCase().includes(searchQuery.toLowerCase())
-              )
-              .map((item, index) => (
-                <FaqItem
-                  key={index}
-                  question={item.q}
-                  answer={item.a}
-                  isActive={activeIndex === index}
-                  onClick={() => setActiveIndex(activeIndex === index ? null : index)}
-                />
-              ))
-            }
+          {/* FAQ List */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            {filteredFAQs.map((faq, index) => (
+              <FaqItem
+                key={index}
+                question={faq.q}
+                answer={faq.a}
+                isActive={activeIndex === index}
+                onClick={() => setActiveIndex(activeIndex === index ? null : index)}
+              />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Contact Support Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-indigo-600 relative overflow-hidden">
+      {/* Contact Section */}
+      <section className="py-20 bg-blue-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-white/90 text-sm font-medium mb-8">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-            </span>
-            24/7 Support Available
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium mb-8">
+              <MessageCircle className="w-4 h-4" />
+              Still have questions?
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Can't find what you're looking for?
+            </h2>
+            <p className="text-xl text-blue-50 mb-8">
+              Our support team is here to help you with any questions
+            </p>
+            <button className="group px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-colors flex items-center gap-2 mx-auto">
+              Contact Support
+              <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-            Still have questions?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Our support team is here to help you anytime
-          </p>
-          <button className="px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 transform">
-            Contact Support
-          </button>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 

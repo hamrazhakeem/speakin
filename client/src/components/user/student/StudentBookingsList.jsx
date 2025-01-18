@@ -424,7 +424,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
 
       {/* Session Cards - Improved mobile layout */}
       {filteredSessions?.length > 0 ? (
-        <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2">
+        <div className="grid gap-4 max-h-[500px] overflow-y-auto pr-2 scrollbar-thin">
           {filteredSessions.map((session) => (
             <div
               key={session.id}

@@ -1,46 +1,43 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../../../components/user/common/Navbar';
-import Footer from '../../../components/user/common/Footer';
-import { Globe, Users, Shield, ChevronRight, Check, Star, Video, MessageCircle, Sparkles } from 'lucide-react';
+import Layout from '../../../components/user/layout/Layout';
+import { Globe, Users, Shield, ChevronRight, Check, Star, Video, MessageCircle, Sparkles, ArrowRight } from 'lucide-react';
 
 const AboutUs = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-  
-      {/* Hero Section with Abstract Background */}
-      <section className="pt-28 pb-16 relative overflow-hidden">
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px)] bg-[size:14px_14px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
-        </div>
-        <div className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80">
-          <div className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[36.125rem] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#ff80b5] to-[#9089fc] opacity-20 sm:left-[calc(50%-30rem)] sm:w-[72.1875rem]"></div>
-        </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full text-blue-700 text-sm font-medium mb-6">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-              </span>
-              Trusted by 25k+ Students
+    <Layout>
+      {/* Hero Section */}
+      <section className="pt-28 pb-16 bg-blue-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
+        <div className="relative">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium mb-8 hover:bg-white/20 transition-colors cursor-pointer group">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                </span>
+                Trusted by 25k+ Students
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-8 leading-tight">
+                Bridging Cultures Through
+                <span className="relative inline-block">
+                  <span className="relative text-blue-100"> Language Learning</span>
+                </span>
+              </h1>
+              <p className="text-xl text-blue-50 leading-relaxed">
+                Founded with a vision to make language learning accessible to everyone, SpeakIn connects passionate learners with expert tutors worldwide. We believe that understanding a language opens doors to new cultures, perspectives, and opportunities.
+              </p>
             </div>
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-              Transforming Language Learning Through
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent"> Human Connection</span>
-            </h1>
-            <p className="text-xl text-gray-600 leading-relaxed">
-              We're on a mission to make language learning more personal, effective, and enjoyable through real conversations with expert tutors.
-            </p>
           </div>
         </div>
       </section>
 
-      {/* Stats Section with Modern Cards */}
-      <section className="py-16">
+      {/* Stats Section */}
+      <section className="py-20 bg-gray-50/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -49,12 +46,13 @@ const AboutUs = () => {
               { number: '25k+', label: 'Active Students', icon: <Star className="w-5 h-5 text-blue-600" /> },
               { number: '100k+', label: 'Lessons Completed', icon: <Video className="w-5 h-5 text-blue-600" /> },
             ].map((stat, index) => (
-              <div key={index} className="relative group">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg blur opacity-5 group-hover:opacity-10 transition duration-200"></div>
-                <div className="relative bg-white p-6 rounded-lg border border-gray-100">
+              <div key={index} className="group cursor-pointer transform hover:-translate-y-1 transition-all duration-200">
+                <div className="bg-white p-6 rounded-xl border border-gray-200 shadow hover:shadow-lg">
                   <div className="flex items-center gap-4 mb-2">
-                    {stat.icon}
-                    <div className="text-3xl font-bold text-gray-900">{stat.number}</div>
+                    <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors">
+                      {stat.icon}
+                    </div>
+                    <div className="text-3xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{stat.number}</div>
                   </div>
                   <div className="text-sm text-gray-600">{stat.label}</div>
                 </div>
@@ -64,13 +62,16 @@ const AboutUs = () => {
         </div>
       </section>
 
-      {/* Mission Section with Gradient Border */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative group rounded-2xl p-8 bg-gradient-to-r from-blue-50 via-indigo-50 to-white">
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 to-indigo-500 opacity-10 blur-xl"></div>
+      {/* Mission Section */}
+      <section className="bg-white relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808008_1px,transparent_1px)] bg-[size:14px_14px]"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200 p-8 md:p-12 shadow-lg">
             <div className="relative">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">Our Mission</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-12 flex items-center">
+                Our Mission
+                <div className="ml-6 h-px flex-1 bg-gradient-to-r from-blue-200 to-transparent"></div>
+              </h2>
               <div className="grid md:grid-cols-2 gap-12">
                 <div className="space-y-6">
                   {[
@@ -79,15 +80,15 @@ const AboutUs = () => {
                     "Make language learning accessible and affordable",
                     "Foster cultural exchange and understanding"
                   ].map((item, index) => (
-                    <div key={index} className="flex items-start gap-4">
-                      <div className="flex-shrink-0 p-1 bg-blue-100 rounded-full">
+                    <div key={index} className="flex items-start gap-4 group/item transform hover:translate-x-1 transition-all duration-200">
+                      <div className="flex-shrink-0 p-1.5 bg-blue-50 rounded-full group-hover/item:bg-blue-100 transition-colors shadow-sm">
                         <Check className="w-5 h-5 text-blue-600" />
                       </div>
-                      <p className="text-gray-600">{item}</p>
+                      <p className="text-gray-600 group-hover/item:text-gray-900 transition-colors">{item}</p>
                     </div>
                   ))}
                 </div>
-                <div className="space-y-6">
+                <div className="space-y-8">
                   <h3 className="text-xl font-semibold text-gray-900">Why Choose Us?</h3>
                   <div className="space-y-4">
                     {[
@@ -104,9 +105,14 @@ const AboutUs = () => {
                         description: "Regular quality checks and student feedback system"
                       }
                     ].map((item, index) => (
-                      <div key={index} className="p-4 bg-white rounded-xl shadow-sm">
-                        <h4 className="font-medium text-gray-900 mb-2">{item.title}</h4>
-                        <p className="text-sm text-gray-600">{item.description}</p>
+                      <div key={index} className="group/card cursor-pointer">
+                        <div className="p-6 bg-gray-50 rounded-xl shadow hover:shadow-md hover:bg-blue-50/50 transition-all duration-200">
+                          <div className="flex items-center gap-3 mb-2">
+                            <div className="w-1 h-8 bg-blue-600/20 rounded-full group-hover/card:h-12 transition-all"></div>
+                            <h4 className="font-medium text-gray-900 group-hover/card:text-blue-600 transition-colors">{item.title}</h4>
+                          </div>
+                          <p className="text-sm text-gray-600 ml-4">{item.description}</p>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -117,10 +123,13 @@ const AboutUs = () => {
         </div>
       </section>
 
-      {/* Core Values Section with Modern Cards */}
-      <section className="py-16 bg-gray-50">
+      {/* Core Values Section */}
+      <section className="py-20 bg-gray-50/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Our Core Values</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">Our Core Values</h2>
+          <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
+            The principles that guide us in creating the best language learning experience
+          </p>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
@@ -139,13 +148,12 @@ const AboutUs = () => {
                 description: "We believe in clear, open communication and continuous feedback."
               }
             ].map((value, index) => (
-              <div key={index} className="group relative">
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl blur opacity-5 group-hover:opacity-10 transition duration-200"></div>
-                <div className="relative p-6 bg-white rounded-xl border border-gray-100 hover:border-blue-100 transition-all duration-200">
-                  <div className="p-3 bg-blue-50 rounded-lg w-fit mb-4 group-hover:bg-blue-100 transition-colors">
+              <div key={index} className="group cursor-pointer transform hover:-translate-y-1 transition-all duration-200">
+                <div className="h-full p-8 bg-white rounded-xl border border-gray-200 shadow hover:shadow-lg">
+                  <div className="p-3 bg-blue-50 rounded-lg w-fit mb-6 group-hover:bg-blue-100 transition-colors">
                     {value.icon}
                   </div>
-                  <h3 className="text-xl font-semibold mb-3 text-gray-900">{value.title}</h3>
+                  <h3 className="text-xl font-semibold mb-4 text-gray-900 group-hover:text-blue-600 transition-colors">{value.title}</h3>
                   <p className="text-gray-600">{value.description}</p>
                 </div>
               </div>
@@ -154,31 +162,29 @@ const AboutUs = () => {
         </div>
       </section>
 
-      {/* CTA Section with Enhanced Design */}
-      <section className="py-16 bg-gradient-to-br from-blue-600 to-indigo-600 relative overflow-hidden">
+      {/* CTA Section */}
+      <section className="py-20 bg-blue-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
               Ready to Start Your Language Learning Journey?
             </h2>
-            <p className="text-xl text-blue-100 mb-8">
+            <p className="text-xl text-blue-100 mb-12">
               Join thousands of students already learning with SpeakIn
             </p>
             <button 
               onClick={() => navigate('/sign-up')}
-              className="px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-all duration-200 flex items-center mx-auto group"
+              className="px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-colors flex items-center gap-2 mx-auto group shadow-lg hover:shadow-xl"
             >
               Get Started
-              <ChevronRight className="ml-2 group-hover:translate-x-1 transition-transform" />
+              <ChevronRight className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 
-export default AboutUs; 
+export default AboutUs;

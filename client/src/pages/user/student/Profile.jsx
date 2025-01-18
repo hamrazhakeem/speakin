@@ -467,7 +467,7 @@ const Profile = () => {
                         {formErrors.spokenLanguages && (
                                   <p className="text-red-500 text-sm mt-1">{formErrors.spokenLanguages}</p>
                                 )}
-  <div className="max-h-[200px] overflow-y-auto bg-white border border-gray-100 rounded-lg p-4">
+  <div className="max-h-[200px] overflow-y-auto bg-white border border-gray-100 rounded-lg p-4 scrollbar-thin">
 
                         {spokenLanguages.length === 0 ? (
                           <div className="bg-gray-50 p-6 rounded-lg text-center">

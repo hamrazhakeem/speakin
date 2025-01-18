@@ -17,17 +17,17 @@ module.exports = {
         },
         '.scrollbar-thin': {
           '&::-webkit-scrollbar': {
-            width: '2px',
+            width: '6px',
           },
           '&::-webkit-scrollbar-track': {
-            background: '#1F2937',
-            borderRadius: '100vh',
+            background: '#f1f5f9',
+            borderRadius: '8px',
           },
           '&::-webkit-scrollbar-thumb': {
-            background: '#374151',
-            borderRadius: '100vh',
+            background: '#94a3b8',
+            borderRadius: '8px',
             '&:hover': {
-              background: '#4B5563'
+              background: '#64748b'
             }
           }
         }

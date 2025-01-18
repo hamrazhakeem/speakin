@@ -1,7 +1,6 @@
 import React from 'react';
-import Navbar from '../../../components/user/common/Navbar';
-import Footer from '../../../components/user/common/Footer';
-import { Lock, MessageCircle } from 'lucide-react';
+import Layout from '../../../components/user/layout/Layout';
+import { Lock, MessageCircle, ChevronRight, ArrowRight, Shield } from 'lucide-react';
 
 const PrivacyPolicy = () => {
   const sections = [
@@ -98,54 +97,60 @@ const PrivacyPolicy = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white">
-      <Navbar />
-
+    <Layout>
       {/* Hero Section */}
-      <section className="pt-24 pb-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e510_1px,transparent_1px)] bg-[size:24px_24px]"></div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full text-blue-700 text-sm font-medium mb-8">
-            <Lock className="w-4 h-4" />
-            Privacy Policy
+      <section className="pt-28 pb-16 bg-blue-600 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
+        <div className="relative">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium mb-8 hover:bg-white/20 transition-colors cursor-pointer group">
+                <Lock className="w-4 h-4" />
+                Last Updated: {new Date().toLocaleDateString()}
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
+                Your Privacy Matters
+              </h1>
+              <p className="text-xl text-blue-50 max-w-2xl mx-auto">
+                We take your privacy seriously. Learn how we protect your data.
+              </p>
+            </div>
           </div>
-          
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Your Privacy Matters
-          </h1>
-          <p className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-            Last updated: {new Date().toLocaleDateString()}
-          </p>
         </div>
       </section>
 
       {/* Privacy Policy Content */}
-      <section className="py-12">
+      <section className="py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="space-y-8">
             {sections.map((section, index) => (
-              <div key={index} className="border-b border-gray-100 last:border-0">
-                <div className="p-8">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                    {section.title}
-                  </h2>
-                  <div className="space-y-8">
-                    {section.content.map((subsection, idx) => (
-                      <div key={idx} className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {subsection.subtitle}
-                        </h3>
-                        <ul className="space-y-2">
-                          {subsection.details.map((detail, detailIdx) => (
-                            <li key={detailIdx} className="text-gray-600 leading-relaxed flex items-start">
-                              <div className="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-blue-600 mt-2 mr-3"></div>
-                              {detail}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+              <div key={index} className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow p-8 border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-100 text-blue-600 text-sm font-bold">
+                    {index + 1}
                   </div>
+                  {section.title.substring(2)}
+                </h2>
+                <div className="space-y-8">
+                  {section.content.map((subsection, idx) => (
+                    <div key={idx} className="space-y-4">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Shield className="w-4 h-4 text-blue-600" />
+                        {subsection.subtitle.substring(4)}
+                      </h3>
+                      <ul className="space-y-3">
+                        {subsection.details.map((detail, detailIdx) => (
+                          <li key={detailIdx} className="flex items-start gap-3 group">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-600 mt-2.5"></div>
+                            <p className="text-gray-600 leading-relaxed group-hover:text-gray-900 transition-colors">
+                              {detail}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
@@ -154,28 +159,29 @@ const PrivacyPolicy = () => {
       </section>
 
       {/* Contact Section */}
-      <section className="py-20 bg-gradient-to-br from-blue-600 to-indigo-600 relative overflow-hidden">
+      <section className="py-20 bg-blue-600 relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-white/90 text-sm font-medium mb-8">
-            <MessageCircle className="w-4 h-4" />
-            Questions about privacy?
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium mb-8">
+              <MessageCircle className="w-4 h-4" />
+              Questions about privacy?
+            </div>
+            <h2 className="text-3xl font-bold text-white mb-4">
+              Privacy Concerns?
+            </h2>
+            <p className="text-xl text-blue-100 mb-8">
+              Contact our privacy team for any questions or concerns
+            </p>
+            <button className="group px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-colors flex items-center gap-2 mx-auto">
+              Contact Support
+              <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Privacy Concerns?
-          </h2>
-          <p className="text-xl text-blue-100 mb-8">
-            Contact our privacy team for any questions or concerns
-          </p>
-          <button className="px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-105 transform">
-            Contact Support
-          </button>
         </div>
       </section>
-      <Footer />
-    </div>
+    </Layout>
   );
 };
 
-export default PrivacyPolicy; 
+export default PrivacyPolicy;
