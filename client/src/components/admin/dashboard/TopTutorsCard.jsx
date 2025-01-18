@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Award } from 'lucide-react';
-import LoadingSpinner from '../common/LoadingSpinner';
-import useAxios from '../../hooks/useAxios';
+import LoadingSpinner from '../../common/LoadingSpinner';
+import useAxios from '../../../hooks/useAxios';
 
 const TopTutorsCard = ({ bookings, availabilities }) => {
   const [tutorDetails, setTutorDetails] = useState({});

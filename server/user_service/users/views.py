@@ -223,6 +223,10 @@ def tutor_verify_email(request):
     if not email:
         return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
     
+    # Check if email already exists
+    if User.objects.filter(email=email).exists():
+        return Response({'error': 'This email address is already registered. Please use a different email.'}, status=status.HTTP_400_BAD_REQUEST)
+
     # Send email with OTP
     cache_key = EmailService.send_tutor_verification_email(email)
     

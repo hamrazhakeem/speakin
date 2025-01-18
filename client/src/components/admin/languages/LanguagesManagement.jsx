@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useAxios from '../../../hooks/useAxios';
 import LoadingSpinner from '../../common/LoadingSpinner';
+import LanguageSection from './LanguageSection';
 
 const LanguagesManagement = () => {
   const [languages, setLanguages] = useState([]);
@@ -42,48 +43,18 @@ const LanguagesManagement = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Languages Section */}
-          <div className="bg-zinc-900/50 backdrop-blur border border-zinc-800/50 rounded-lg overflow-hidden">
-            <div className="p-6 border-b border-zinc-800/50">
-              <h3 className="text-lg font-medium text-white">Available Languages</h3>
-              <p className="text-sm text-zinc-400 mt-1">Languages currently supported on the platform</p>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {languages && languages.map((language) => (
-                  <div
-                    key={language.id}
-                    className="flex items-center justify-between p-4 bg-black/50 backdrop-blur rounded-lg border border-zinc-800/50 hover:border-zinc-700/50 transition-colors"
-                  >
-                    <span className="text-white">{language.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Proficiencies Section */}
-          <div className="bg-zinc-900/50 backdrop-blur border border-zinc-800/50 rounded-lg overflow-hidden">
-            <div className="p-6 border-b border-zinc-800/50">
-              <h3 className="text-lg font-medium text-white">Proficiency Levels</h3>
-              <p className="text-sm text-zinc-400 mt-1">Available language proficiency levels</p>
-            </div>
-            <div className="p-6">
-              <div className="space-y-4">
-                {proficiencies && proficiencies.map((proficiency) => (
-                  <div
-                    key={proficiency.level}
-                    className="flex items-center justify-between p-4 bg-black/50 backdrop-blur rounded-lg border border-zinc-800/50 hover:border-zinc-700/50 transition-colors"
-                  >
-                    <div>
-                      <span className="text-white font-medium">{proficiency.level}</span>
-                      <p className="text-sm text-zinc-400 mt-1">{proficiency.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <LanguageSection
+            title="Available Languages"
+            subtitle="Languages currently supported on the platform"
+            items={languages}
+            type="language"
+          />
+          <LanguageSection
+            title="Proficiency Levels"
+            subtitle="Available language proficiency levels"
+            items={proficiencies}
+            type="proficiency"
+          />
         </div>
       )}
     </div>

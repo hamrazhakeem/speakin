@@ -1,7 +1,7 @@
 import React from 'react';
 import { Home, Languages, Users, Video } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import AdminButton from './ui/AdminButton';
+import AdminButton from '../ui/AdminButton';
 
 const AdminSidebar = ({ items, isOpen, onClose }) => {
   const navigate = useNavigate(); // React Router hook for navigation

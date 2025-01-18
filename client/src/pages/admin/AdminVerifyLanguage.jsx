@@ -1,6 +1,6 @@
 import React from 'react';
-import AdminLayout from '../../components/admin/AdminLayout';
-import LanguageVerificationContent from '../../components/admin/languages/LanguageVerificationContent';
+import AdminLayout from '../../components/admin/layout/AdminLayout';
+import LanguageVerificationContent from '../../components/admin/users/LanguageVerificationContent';
 
 const AdminVerifyLanguage = () => {
   return (

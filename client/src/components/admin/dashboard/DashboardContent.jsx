@@ -1,45 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { DollarSign, ArrowUp, ArrowDown, TrendingDown, AlertTriangle, TrendingUp } from 'lucide-react';
+import { DollarSign, TrendingDown, AlertTriangle, TrendingUp } from 'lucide-react';
 import LoadingSpinner from '../../common/LoadingSpinner';
 import useAxios from '../../../hooks/useAxios';
-import { Bars3Icon } from '@heroicons/react/24/outline';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as XLSX from 'xlsx';
-import EscrowDashboard from '../EscrowDashboard';
-import TopTutorsCard from '../TopTutorsCard';
-import TopStudentsCard from '../TopStudentsCard';
-import LanguageStatsCard from '../LanguageStatsCard';
-import TransactionDistributionChart from '../TransactionDistributionChart';
-
-const CustomBarTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-3 shadow-lg">
-        <p className="text-white font-medium mb-2">{label}</p>
-        {payload.map((entry, index) => (
-          <div key={index} className="flex items-center justify-between gap-4">
-            <span className="text-zinc-400">{entry.name}:</span>
-            <span className="text-white font-medium">
-              {new Intl.NumberFormat('en-IN', {
-                style: 'currency',
-                currency: 'INR',
-                maximumFractionDigits: 0
-              }).format(entry.value)}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
+import EscrowDashboard from './EscrowDashboard';
+import TopUsersCard from './TopUsersCard';
+import LanguageStatsCard from './LanguageStatsCard';
+import TransactionDistributionChart from './TransactionDistributionChart';
+import CustomBarTooltip from './CustomBarTooltip';
+import StatCard from './StatCard';
+import AdminTable from '../ui/AdminTable';
+import AdminButton from '../ui/AdminButton';
 
 const DashboardContent = () => {
   const axiosInstance = useAxios();
   const [loading, setLoading] = useState(true);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [availabilities, setAvailabilities] = useState({});
@@ -291,37 +269,6 @@ const DashboardContent = () => {
   const transactionTypeData = getTransactionTypeData();
   const filteredTransactions = filterByTimeframe(transactions, 'transaction_date');
 
-  const StatCard = ({ title, value, icon: Icon, trend, trendValue }) => (
-    <div className="bg-black rounded-lg border border-zinc-800 p-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-zinc-400">{title}</p>
-          <h3 className="text-2xl font-bold text-white mt-2">
-            {typeof value === 'number' ? value : value}
-          </h3>
-          {trend && (
-            <div className="flex items-center mt-2">
-              {trendValue >= 0 ? (
-                <ArrowUp className="w-4 h-4 text-emerald-500" />
-              ) : (
-                <ArrowDown className="w-4 h-4 text-red-500" />
-              )}
-              <span className={`text-sm font-medium ${
-                trendValue >= 0 ? 'text-emerald-500' : 'text-red-500'
-              }`}>
-                {Math.abs(trendValue)}%
-              </span>
-              <span className="text-zinc-400 text-sm ml-1">vs last month</span>
-            </div>
-          )}
-        </div>
-        <div className="p-3 bg-zinc-900 rounded-lg">
-          <Icon className="w-6 h-6 text-white" />
-        </div>
-      </div>
-    </div>
-  );
-
   const exportToPDF = () => {
     const doc = new jsPDF();
     
@@ -523,99 +470,47 @@ const DashboardContent = () => {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </div>
-  
+            </div>  
             <TransactionDistributionChart data={transactionTypeData} />
           </div>
   
-          <div className="bg-black rounded-lg border border-zinc-800 overflow-hidden mb-6">
-            <div className="px-4 lg:px-6 py-4 border-b border-zinc-800">
-              <h3 className="text-base lg:text-lg font-semibold text-white">Transactions</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <div className="max-h-[400px] lg:max-h-[500px] overflow-y-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-zinc-900 border-b border-zinc-800">
-                      <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Date</th>
-                      <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Reference ID</th>
-                      <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Type</th>
-                      <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Amount</th>
-                      <th className="px-3 lg:px-6 py-3 text-left text-xs font-semibold text-zinc-400">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-800">
-                    {filteredTransactions.map((transaction, index) => (
-                      <tr key={index} className="hover:bg-zinc-900/50">
-                        <td className="px-6 py-4 text-sm text-zinc-300">
-                          {new Date(transaction.transaction_date).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-zinc-300">
-                          {transaction.reference_id || '-'}
-                        </td>
-                        <td className="px-6 py-4 text-sm">
-                          <span className={`inline-flex items-center px-3 py-1 text-xs font-medium ${
-                            transaction.transaction_type === 'credit_purchase' 
-                              ? 'text-green-600'
-                              : ' text-red-600 borde'
-                          }`}>
-                            {transaction.transaction_type === 'credit_purchase' ? 'Credit Purchase' : 'Withdrawal'}
-                          </span>
-                        </td>
-                        <td className={`px-6 py-4 text-sm font-medium ${
-                          transaction.transaction_type === 'credit_purchase' 
-                            ? 'text-green-600' 
-                            : 'text-red-600'
-                        }`}>
-                          {transaction.transaction_type === 'credit_purchase' ? '+' : '-'}
-                          ₹{parseFloat(transaction.amount).toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium ${
-                            transaction.status === 'completed' ? 'text-green-600' :
-                            transaction.status === 'refunded' ? 'text-blue-600' :
-                            transaction.status === 'pending' ? 'text-orange-600' :
-                            transaction.status === 'failed' ? 'text-red-600' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+          <AdminTable
+            title="Transactions"
+            columns={['Date', 'Reference ID', 'Type', 'Amount', 'Status']}
+            data={filteredTransactions.map((transaction, index) => ({
+              date: new Date(transaction.transaction_date).toLocaleDateString(),
+              referenceId: transaction.reference_id || '-',
+              type: transaction.transaction_type === 'credit_purchase' ? 'Credit Purchase' : 'Withdrawal',
+              amount: `${transaction.transaction_type === 'credit_purchase' ? '+' : '-'}₹${parseFloat(transaction.amount).toFixed(2)}`,
+              status: transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1),
+              isTransaction: true
+            }))}
+          />
   
           <div className="flex flex-col sm:flex-row gap-4 px-4 lg:px-6 py-4">
-            <button
+            <AdminButton
               onClick={exportToPDF}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-center"
+              variant="secondary"
+              size="md"
             >
               Download as PDF
-            </button>
-            <button
+            </AdminButton>
+            <AdminButton
               onClick={exportToExcel}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center"
+              variant="secondary"
+              size="md"
             >
               Download Excel
-            </button>
+            </AdminButton>
           </div>
   
           <div className="mb-6">
             <EscrowDashboard escrowData={escrowData} />
           </div>
   
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-6">
-            <TopTutorsCard
-              bookings={bookings} 
-              availabilities={availabilities} 
-            />
-            <TopStudentsCard
-              bookings={bookings} 
-            />
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6 mb-5">
+            <TopUsersCard bookings={bookings} type="student" />
+            <TopUsersCard bookings={bookings} availabilities={availabilities} type="tutor" />
           </div>
   
           <LanguageStatsCard />

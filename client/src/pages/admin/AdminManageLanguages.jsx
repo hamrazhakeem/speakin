@@ -1,5 +1,5 @@
 import React from 'react';
-import AdminLayout from '../../components/admin/AdminLayout';
+import AdminLayout from '../../components/admin/layout/AdminLayout';
 import LanguagesManagement from '../../components/admin/languages/LanguagesManagement';
 
 const AdminManageLanguages = () => {

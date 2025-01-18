@@ -1,6 +1,6 @@
 import React from 'react';
-import AdminLayout from '../../components/admin/AdminLayout';
-import TutorVerificationContent from '../../components/admin/tutors/TutorVerificationContent';
+import AdminLayout from '../../components/admin/layout/AdminLayout';
+import TutorVerificationContent from '../../components/admin/users/TutorVerificationContent';
 
 const AdminVerifyTutor = () => {
   return (

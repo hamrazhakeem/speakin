@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { LogOut, ChevronDown } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
-import { clearTokens } from '../../redux/authSlice';
+import { clearTokens } from '../../../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import Avatar from '../common/Avatar';
+import Avatar from '../../common/Avatar';
 
 const AdminNavbar = ({ children }) => {
   const { userName } = useSelector((state) => state.auth);
