@@ -1,11 +1,11 @@
 import React from 'react';
 import AdminLayout from '../../components/admin/layout/AdminLayout';
-import TutorVerificationContent from '../../components/admin/users/TutorVerificationContent';
+import TutorVerificationReview from '../../components/admin/users/TutorVerificationReview';
 
 const AdminVerifyTutor = () => {
   return (
     <AdminLayout showSidebar={false}>
-      <TutorVerificationContent />
+      <TutorVerificationReview />
     </AdminLayout>
   );
 };

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import useAxios from '../../../hooks/useAxios';
-import LoadingSpinner from '../../common/LoadingSpinner';
+import LoadingSpinner from '../../common/ui/LoadingSpinner';
 import LanguageSection from './LanguageSection';
 
 const LanguagesManagement = () => {

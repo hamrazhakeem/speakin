@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { clearTokens } from '../../../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
-import Avatar from '../../common/Avatar';
+import Avatar from '../../common/ui/Avatar';
 
 const AdminNavbar = ({ children }) => {
   const { userName } = useSelector((state) => state.auth);

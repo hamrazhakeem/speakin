@@ -32,12 +32,12 @@ import TutorTeachingLanguages from '../../pages/user/tutor/TutorTeachingLanguage
 import TutorSessions from '../../pages/user/tutor/TutorSessions';
 
 // Common Protected Pages
-import VideoCall from '../../pages/user/common/VideoCall';
-import VideoCallSetup from '../../pages/user/common/VideoCallSetup';
-import VideoCallSummary from '../../pages/user/common/VideoCallSummary';
-import Messages from '../../pages/user/common/Messages';
-import Withdraw from '../../pages/user/common/Withdraw';
-import StripeRefresh from '../../pages/user/common/StripeRefresh';
+import VideoCall from '../../pages/user/shared/VideoCall';
+import VideoCallSetup from '../../pages/user/shared/VideoCallSetup';
+import VideoCallSummary from '../../pages/user/shared/VideoCallSummary';
+import Messages from '../../pages/user/shared/Messages';
+import Withdraw from '../../pages/user/shared/Withdraw';
+import StripeRefresh from '../../pages/user/shared/StripeRefresh';
 
 // Public Pages
 import Landing from '../../pages/user/student/Landing';
@@ -49,17 +49,17 @@ import TutorSignIn from '../../pages/user/tutor/TutorSignIn';
 import TutorVerifyEmail from '../../pages/user/tutor/TutorVerifyEmail';
 import TutorRequest from '../../pages/user/tutor/TutorRequest';
 import TutorRequestApplicationConfirmation from '../../pages/user/tutor/TutorRequestApplicationConfirmation';
-import ForgotPassword from '../../pages/user/common/ForgotPassword';
-import ForgotPasswordVerifyOtp from '../../pages/user/common/ForgotPasswordVerifyOtp';
-import ForgotPasswordSetNewPassword from '../../pages/user/common/ForgotPasswordSetNewPassword';
+import ForgotPassword from '../../pages/user/shared/ForgotPassword';
+import ForgotPasswordVerifyOtp from '../../pages/user/shared/ForgotPasswordVerifyOtp';
+import ForgotPasswordSetNewPassword from '../../pages/user/shared/ForgotPasswordSetNewPassword';
 import AdminSignIn from '../../pages/admin/AdminSignIn';
 
 // Static Pages
-import AboutUs from '../../pages/user/static/AboutUs';
-import HowItWorks from '../../pages/user/static/HowItWorks';
-import Faq from '../../pages/user/static/Faq';
-import TermsAndConditions from '../../pages/user/static/TermsAndConditions';
-import PrivacyPolicy from '../../pages/user/static/PrivacyPolicy';
+import AboutUs from '../../pages/user/shared/static/AboutUs';
+import HowItWorks from '../../pages/user/shared/static/HowItWorks';
+import Faq from '../../pages/user/shared/static/Faq';
+import TermsAndConditions from '../../pages/user/shared/static/TermsAndConditions';
+import PrivacyPolicy from '../../pages/user/shared/static/PrivacyPolicy';
 
 const AppRoutes = () => {
   return (

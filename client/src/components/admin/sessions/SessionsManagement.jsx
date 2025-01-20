@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { format, isValid } from 'date-fns';
 import AdminButton from '../ui/AdminButton';
 import useAxios from '../../../hooks/useAxios';
-import LoadingSpinner from '../../common/LoadingSpinner';
+import LoadingSpinner from '../../common/ui/LoadingSpinner';
 import SessionCard from './SessionCard';
 
 const SessionsManagement = () => {

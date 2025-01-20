@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Award } from 'lucide-react';
-import LoadingSpinner from '../../common/LoadingSpinner';
+import LoadingSpinner from '../../common/ui/LoadingSpinner';
 import useAxios from '../../../hooks/useAxios';
 
 const TopUsersCard = ({ bookings, availabilities, type = 'student' }) => {

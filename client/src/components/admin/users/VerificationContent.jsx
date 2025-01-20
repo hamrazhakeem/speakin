@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { ArrowLeft } from 'lucide-react';
-import LoadingSpinner from '../../common/LoadingSpinner';
+import LoadingSpinner from '../../common/ui/LoadingSpinner';
 
 const Section = ({ title, children }) => (
   <div className="bg-black border border-zinc-800 rounded-lg overflow-hidden mb-6">

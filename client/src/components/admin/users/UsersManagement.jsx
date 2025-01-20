@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import AdminTable from '../ui/AdminTable';
 import useAxios from '../../../hooks/useAxios';
-import LoadingSpinner from '../../common/LoadingSpinner';
+import LoadingSpinner from '../../common/ui/LoadingSpinner';
 
 const UsersManagement = () => {
   const axiosInstance = useAxios();

@@ -1,11 +1,11 @@
 import React from 'react';
 import AdminLayout from '../../components/admin/layout/AdminLayout';
-import DashboardContent from '../../components/admin/dashboard/DashboardContent';
+import FinancialDashboard from '../../components/admin/dashboard/FinancialDashboard';
 
 const AdminDashboard = () => {
   return (
     <AdminLayout>
-      <DashboardContent />
+      <FinancialDashboard />
     </AdminLayout>
   );
 };

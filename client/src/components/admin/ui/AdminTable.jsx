@@ -1,6 +1,6 @@
 import React from 'react';
 import { Star } from 'lucide-react';
-import Avatar from '../../common/Avatar';
+import Avatar from '../../common/ui/Avatar';
 
 const AdminTable = ({ title, columns, data, showRating, isPending }) => {
   return (
@@ -16,7 +16,7 @@ const AdminTable = ({ title, columns, data, showRating, isPending }) => {
 
       <div className="overflow-x-auto">
         {data.length > 0 ? (
-          <div className="max-h-[500px] overflow-y-auto">
+          <div className="max-h-[500px] overflow-y-auto scrollbar-thin">
             <table className="w-full">
               <thead>
                 <tr className="bg-zinc-900 border-b border-zinc-800">

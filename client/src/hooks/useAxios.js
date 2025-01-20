@@ -11,7 +11,7 @@ const useAxios = () => {
   const instance = axios.create({
     baseURL: import.meta.env.VITE_API_GATEWAY_URL,
   });
-
+ 
   instance.interceptors.request.use(
     (config) => {
       if (accessToken){
