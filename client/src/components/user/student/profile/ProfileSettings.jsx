@@ -8,6 +8,10 @@ import { useSelector } from 'react-redux';
 import Avatar from '../../../common/ui/Avatar';
 import useAxios from '../../../../hooks/useAxios';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import NavigationTabs from '../../common/ui/profile/NavigationTabs';
+import ProfilePicture from '../../common/ui/profile/ProfilePicture';
+import FormInput from '../../common/ui/input/FormInput';
+import LanguageList from '../../common/ui/profile/LanguageList';
 
 const ProfileSettings = () => {
     const axiosInstance = useAxios();
@@ -254,6 +258,22 @@ const ProfileSettings = () => {
 
     const { email, profile_image, balance_credits, name } = studentData || {};
     
+    const tabs = [
+      { label: 'Profile', path: '/profile', active: true },
+      { label: 'Security', path: '/password' },
+      { label: 'Bookings', path: '/bookings' },
+    ];
+  
+    const getProficiencyColor = (proficiency) => {
+      const colors = {
+        'Native': 'bg-green-100 text-green-800',
+        'Advanced': 'bg-blue-100 text-blue-800',
+        'Intermediate': 'bg-yellow-100 text-yellow-800',
+        'Beginner': 'bg-gray-100 text-gray-800'
+      };
+      return colors[proficiency] || 'bg-gray-100 text-gray-800';
+    };
+
     return (
         <div className="flex-1 bg-gradient-to-b from-blue-50 to-white">
           <main className="container mx-auto px-4 py-8">
@@ -272,93 +292,22 @@ const ProfileSettings = () => {
                 </div>
     
                 {/* Navigation Tabs */}
-                <nav className="max-w-4xl mx-auto mb-8 flex space-x-1 rounded-xl bg-blue-50 p-1">
-                {[
-                    { label: 'Profile', path: '/profile', active: true },
-                    { label: 'Security', path: '/password' },
-                    { label: 'Bookings', path: '/bookings' },
-                ].map((tab) => (
-                    <button
-                    key={tab.label}
-                    onClick={() => navigate(tab.path)}
-                    className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200
-                        ${tab.active 
-                        ? 'bg-white text-blue-600 shadow-sm' 
-                        : 'text-gray-600 hover:text-blue-600'}`}
-                    >
-                    {tab.label}
-                    </button>
-                ))}
-                </nav>
-    
+                <NavigationTabs tabs={tabs} />
+
                 {/* Main Content */}
                 <div className="max-w-6xl mx-auto">
                 <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Profile Picture Card */}
                 <div className="lg:col-span-1">
-                  <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h2>
-                    <div className="flex flex-col items-center gap-4">
-                      <div className="w-32 h-32 rounded-full overflow-hidden">
-                        {imagePreview ? (
-                          <img 
-                            src={imagePreview} 
-                            alt="Profile Preview" 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <Avatar 
-                            src={deleteImage ? null : profile_image} 
-                            name={name || ''} 
-                            size={128} 
-                          />
-                        )}
-                      </div>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleProfileImageChange}
-                        className="hidden"
-                        id="profile-upload"
-                        disabled={!editMode}
-                      />
-                      {editMode && (
-                        <div className="flex flex-col w-full gap-2">
-                          <label 
-                            htmlFor="profile-upload"
-                            className="px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 cursor-pointer text-center"
-                          >
-                            Change Profile Picture
-                          </label>
-                          {editMode && (profileImage || (!deleteImage && profile_image)) && (
-                            <button
-                              type="button"
-                              onClick={handleDeleteImage}
-                              className="px-4 py-2 text-sm text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                            >
-                              <FaTrash className="w-4 h-4" />
-                              Delete Image
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Credits Display */}
-                    <div className="mt-6 p-4 bg-blue-50 rounded-xl">
-                      <div className="text-center mb-3">
-                        <p className="text-sm text-gray-600 mb-1">Available Credits</p>
-                        <p className="text-3xl font-bold text-blue-600">{balance_credits}</p>
-                      </div>
-                      <button
-                        onClick={() => navigate('/withdraw')}
-                        className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
-                      >
-                        <span>Withdraw Credits</span>
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+                  <ProfilePicture
+                    profileImage={deleteImage ? null : profile_image}
+                    name={name || ''}
+                    editMode={editMode}
+                    size={200}
+                    onImageChange={handleProfileImageChange}
+                    onImageDelete={handleDeleteImage}
+                    imagePreview={imagePreview}
+                  />
                 </div>
 
                 {/* Profile Info Card */}
@@ -405,53 +354,38 @@ const ProfileSettings = () => {
                     </div>
 
                     <div className="space-y-6">
-                      {/* Basic Info Fields */}
+                      {/* Basic Info Fields using FormInput */}
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
-                        <input
-                          type="text"
+                        <FormInput
                           {...register('name', { required: 'Name is required' })}
-                          className={`w-full px-4 py-3 rounded-xl border ${
-                            editMode 
-                              ? 'bg-white border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
-                              : 'bg-gray-50 border-gray-200 cursor-not-allowed'
-                          } transition-colors`}
+                          label="Full Name"
                           disabled={!editMode}
+                          error={errors.name}
                         />
-                        {errors.name && (
-                          <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-                        )}
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input
+                        <FormInput
                           type="email"
                           value={email ?? "N/A"}
-                          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 cursor-not-allowed"
+                          label="Email"
                           readOnly
+                          className="bg-gray-50 cursor-not-allowed"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
-                        {editMode ? (
-                          <select
-                            {...register("country")}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50"
-                          >
-                            {countries.map(([name, code]) => (
-                              <option key={code} value={name}>{name}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type="text"
-                            value={studentData?.country ?? "N/A"}
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 cursor-not-allowed"
-                            readOnly
-                          />
-                        )}
+                        <FormInput
+                          {...register("country")}
+                          label="Country"
+                          type={editMode ? "select" : "text"}
+                          value={studentData?.country ?? "N/A"}
+                          disabled={!editMode}
+                          options={countries.map(([name, code]) => ({
+                            value: name,
+                            label: name
+                          }))}
+                        />
                       </div>
 
                       {/* Languages Spoken Section */}
@@ -462,98 +396,106 @@ const ProfileSettings = () => {
                         </div>
 
                         {formErrors.spokenLanguages && (
-                                  <p className="text-red-500 text-sm mt-1">{formErrors.spokenLanguages}</p>
-                                )}
-  <div className="max-h-[200px] overflow-y-auto bg-white border border-gray-100 rounded-lg p-4 scrollbar-thin">
+                          <p className="text-red-500 text-sm mt-1">{formErrors.spokenLanguages}</p>
+                        )}
 
-                        {spokenLanguages.length === 0 ? (
-                          <div className="bg-gray-50 p-6 rounded-lg text-center">
-                            <p className="text-gray-500">No languages selected</p>
+                        {editMode ? (
+                          <div className="max-h-[200px] overflow-y-auto bg-white border border-gray-100 rounded-lg p-4 scrollbar-thin">
+                            <div className="space-y-4">
+                              {spokenLanguages.length === 0 ? (
+                                <div className="bg-gray-50 p-6 rounded-lg text-center">
+                                  <p className="text-gray-500">No languages selected</p>
+                                </div>
+                              ) : (
+                                spokenLanguages.map((lang, index) => (
+                                  <div key={index} className="space-y-2">
+                                    <div className="flex flex-col sm:flex-row gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
+                                      <div className="flex-1 w-full">
+                                        <select
+                                          value={lang.language}
+                                          onChange={(e) => handleSpokenLanguageChange(index, 'language', e.target.value)}
+                                          disabled={!editMode}
+                                          className={`w-full px-4 py-2 rounded-lg border ${
+                                            editMode ? 'bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
+                                            : 'bg-gray-50 cursor-not-allowed'
+                                          } ${languageErrors[index]?.language ? 'border-red-500' : ''} transition-colors`}
+                                        >
+                                          <option value="">Select Language</option>
+                                          {availableLanguages.map((l) => (
+                                            <option 
+                                              key={l.id || l} 
+                                              value={l.name || l}
+                                              disabled={spokenLanguages.some((existing, i) => 
+                                                i !== index && existing.language === (l.name || l)
+                                              )}
+                                            >
+                                              {l.name || l}
+                                            </option>
+                                          ))}
+                                        </select>
+                                        {languageErrors[index]?.language && (
+                                          <p className="text-red-500 text-sm mt-1">{languageErrors[index].language}</p>
+                                        )}
+                                      </div>
+                                      
+                                      <div className="flex-1 w-full">
+                                        <select
+                                          value={lang.proficiency}
+                                          onChange={(e) => handleSpokenLanguageChange(index, 'proficiency', e.target.value)}
+                                          disabled={!editMode || index === 0}
+                                          className={`w-full px-4 py-2 rounded-lg border ${
+                                            index === 0 || !editMode ? 'bg-gray-50 cursor-not-allowed' 
+                                            : 'bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
+                                          } ${languageErrors[index]?.proficiency ? 'border-red-500' : ''} transition-colors`}
+                                        >
+                                          {index === 0 ? (
+                                            <option value="Native">Native</option>
+                                          ) : (
+                                            spokenProficiencyLevels
+                                              .filter(level => level.level !== 'Native')
+                                              .map((level) => (
+                                                <option key={level.level} value={level.level}>
+                                                  {level.description}
+                                                </option>
+                                              ))
+                                          )}
+                                        </select>
+                                        {languageErrors[index]?.proficiency && (
+                                          <p className="text-red-500 text-sm mt-1">{languageErrors[index].proficiency}</p>
+                                        )}
+                                      </div>
+                                      
+                                      {editMode && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleRemoveSpokenLanguage(index)}
+                                          className="bg-red-100 text-red-600 p-2 rounded-lg hover:bg-red-200 transition-colors mt-2 sm:mt-0"
+                                          aria-label="Remove language"
+                                        >
+                                          <FaTrash />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                            
+                            {editMode && (
+                              <button
+                                type="button"
+                                onClick={handleAddSpokenLanguage}
+                                className="mt-4 bg-blue-50 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 font-medium"
+                              >
+                                + Add Language
+                              </button>
+                            )}
                           </div>
                         ) : (
-                          
-                          spokenLanguages.map((lang, index) => (
-                            <div key={index} className="space-y-2">
-                              <div className="flex flex-col sm:flex-row gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
-                                <div className="flex-1 w-full">
-                                  <select
-                                    value={lang.language}
-                                    onChange={(e) => handleSpokenLanguageChange(index, 'language', e.target.value)}
-                                    disabled={!editMode}
-                                    className={`w-full px-4 py-2 rounded-lg border ${
-                                      editMode ? 'bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
-                                      : 'bg-gray-50 cursor-not-allowed'
-                                    } ${languageErrors[index]?.language ? 'border-red-500' : ''} transition-colors`}
-                                  >
-                                    <option value="">Select Language</option>
-                                    {availableLanguages.map((l) => (
-                                      <option 
-                                        key={l.id || l} 
-                                        value={l.name || l}
-                                        disabled={spokenLanguages.some((existing, i) => 
-                                          i !== index && existing.language === (l.name || l)
-                                        )}
-                                      >
-                                        {l.name || l}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  {languageErrors[index]?.language && (
-                                    <p className="text-red-500 text-sm mt-1">{languageErrors[index].language}</p>
-                                  )}
-                                </div>
-                                
-                                <div className="flex-1 w-full">
-                                  <select
-                                    value={lang.proficiency}
-                                    onChange={(e) => handleSpokenLanguageChange(index, 'proficiency', e.target.value)}
-                                    disabled={!editMode || index === 0}
-                                    className={`w-full px-4 py-2 rounded-lg border ${
-                                      index === 0 || !editMode ? 'bg-gray-50 cursor-not-allowed' 
-                                      : 'bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200'
-                                    } ${languageErrors[index]?.proficiency ? 'border-red-500' : ''} transition-colors`}
-                                  >
-                                    {index === 0 ? (
-                                      <option value="Native">Native</option>
-                                    ) : (
-                                      spokenProficiencyLevels
-                                        .filter(level => level.level !== 'Native')
-                                        .map((level) => (
-                                          <option key={level.level} value={level.level}>
-                                            {level.description}
-                                          </option>
-                                        ))
-                                    )}
-                                  </select>
-                                  {languageErrors[index]?.proficiency && (
-                                    <p className="text-red-500 text-sm mt-1">{languageErrors[index].proficiency}</p>
-                                  )}
-                                </div>
-                                
-                                {editMode && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveSpokenLanguage(index)}
-                                    className="bg-red-100 text-red-600 p-2 rounded-lg hover:bg-red-200 transition-colors mt-2 sm:mt-0"
-                                    aria-label="Remove language"
-                                  >
-                                    <FaTrash />
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ))
-                        )}
-                        </div>
-                        
-                        {editMode && (
-                          <button
-                            type="button"
-                            onClick={handleAddSpokenLanguage}
-                            className="mt-4 bg-blue-50 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 font-medium"
-                          >
-                            + Add Language
-                          </button>
+                          <LanguageList 
+                            languages={spokenLanguages} 
+                            getProficiencyColor={getProficiencyColor} 
+                          />
                         )}
                       </div>
 

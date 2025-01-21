@@ -1,10 +1,77 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Globe, Video, Star, ChevronRight, MessageCircle, Shield, Lock } from 'lucide-react'
+import { Globe, Video, Star, MessageCircle, Shield, Lock } from 'lucide-react'
+import TrustBadge from '../../common/ui/landing/TrustBadge'
+import LandingButton from '../../common/ui/buttons/LandingButton'
+import BenefitCard from '../../common/ui/landing/BenefitCard'
+import LanguageCard from './LanguageCard'
 
 const LandingContent = () => {
   const navigate = useNavigate();
   
+  const benefits = [
+    {
+      icon: Globe,
+      title: "Verified Native Speakers",
+      description: "Learn from tutors verified with government ID for authentic language experience"
+    },
+    {
+      icon: Video,
+      title: "1-on-1 Video Sessions",
+      description: "Personalized video lessons tailored to your learning goals and schedule"
+    },
+    {
+      icon: MessageCircle,
+      title: "Chat with Tutors",
+      description: "Direct messaging with tutors for questions, scheduling, and learning support"
+    }
+  ];
+
+  const languages = [
+    {
+      language: "English",
+      icon: "🇬🇧",
+      learners: "8.5k+ learners",
+      percentage: "34%",
+      color: "bg-blue-50 hover:bg-blue-100"
+    },
+    {
+      language: "Mandarin",
+      icon: "🇨🇳",
+      learners: "5k+ learners",
+      percentage: "20%",
+      color: "bg-orange-50 hover:bg-orange-100"
+    },
+    {
+      language: "Hindi",
+      icon: "🇮🇳",
+      learners: "4k+ learners",
+      percentage: "16%",
+      color: "bg-purple-50 hover:bg-purple-100"
+    },
+    {
+      language: "Spanish",
+      icon: "🇪🇸",
+      learners: "3.5k+ learners",
+      percentage: "14%",
+      color: "bg-yellow-50 hover:bg-yellow-100"
+    },
+    {
+      language: "Arabic",
+      icon: "🇦🇪",
+      learners: "2.5k+ learners",
+      percentage: "10%",
+      color: "bg-green-50 hover:bg-green-100"
+    },
+    {
+      language: "French",
+      icon: "🇫🇷",
+      learners: "1.5k+ learners",
+      percentage: "6%",
+      color: "bg-red-50 hover:bg-red-100"
+    }
+  ];
+
   return (
     <div className='flex-1 bg-gradient-to-b from-blue-50 to-white'>
       {/* Hero Section - Reduced top padding */}
@@ -21,14 +88,7 @@ const LandingContent = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center text-center">
-            {/* Trust Badge */}
-            <div className="inline-flex items-center gap-2 bg-blue-50 px-3 py-1 rounded-full text-blue-700 text-sm font-medium mb-8 group cursor-pointer hover:bg-blue-100 transition-colors">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-              </span>
-              Trusted by 25k+ Students Worldwide
-            </div>
+            <TrustBadge text="Trusted by 25k+ Students Worldwide" />
 
             {/* Main Heading */}
             <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 tracking-tight mb-8 max-w-4xl">
@@ -43,34 +103,32 @@ const LandingContent = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 w-full justify-center">
-              <button
+              <LandingButton 
                 onClick={() => navigate('/sign-up')}
-                className="px-8 py-4 bg-blue-600 text-white rounded-full font-semibold hover:bg-blue-700 transition-all duration-200 flex items-center justify-center group shadow-lg shadow-blue-500/25"
+                variant="primary"
               >
                 Start Learning
-                <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button
+              </LandingButton>
+              <LandingButton 
                 onClick={() => navigate('/tutor')}
-                className="px-8 py-4 bg-white text-gray-700 rounded-full font-semibold hover:bg-gray-50 transition-all duration-200 flex items-center justify-center group border border-gray-200"
+                variant="white"
               >
                 Become a Tutor
-                <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
+              </LandingButton>
             </div>
 
             {/* Trust Features */}
             <div className="mt-16 grid grid-cols-2 md:grid-cols-5 gap-8 max-w-4xl mx-auto">
               {[
-                { icon: <Shield className="w-5 h-5" />, text: "Verified Tutors" },
-                { icon: <Video className="w-5 h-5" />, text: "HD Video Chat" },
-                { icon: <Star className="w-5 h-5" />, text: "Expert Teachers" },
-                { icon: <MessageCircle className="w-5 h-5" />, text: "Direct Messaging" },
-                { icon: <Lock className="w-5 h-5" />, text: "Secure Payments" }
+                { icon: Shield, text: "Verified Tutors" },
+                { icon: Video, text: "HD Video Chat" },
+                { icon: Star, text: "Expert Teachers" },
+                { icon: MessageCircle, text: "Direct Messaging" },
+                { icon: Lock, text: "Secure Payments" }
               ].map((feature, index) => (
                 <div key={index} className="flex items-center justify-center gap-2 text-gray-600">
                   <div className="p-2 bg-blue-50 rounded-lg">
-                    {feature.icon}
+                    <feature.icon className="w-5 h-5" />
                   </div>
                   <span className="text-sm font-medium">{feature.text}</span>
                 </div>
@@ -91,30 +149,8 @@ const LandingContent = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Globe className="w-8 h-8 text-blue-600" />,
-                title: "Verified Native Speakers",
-                description: "Learn from tutors verified with government ID for authentic language experience"
-              },
-              {
-                icon: <Video className="w-8 h-8 text-blue-600" />,
-                title: "1-on-1 Video Sessions",
-                description: "Personalized video lessons tailored to your learning goals and schedule"
-              },
-              {
-                icon: <MessageCircle className="w-8 h-8 text-blue-600" />,
-                title: "Chat with Tutors",
-                description: "Direct messaging with tutors for questions, scheduling, and learning support"
-              }
-            ].map((feature, index) => (
-              <div key={index} className="group p-8 rounded-3xl bg-white border border-gray-100 hover:border-blue-100 hover:shadow-xl hover:shadow-blue-500/5 transition-all duration-200">
-                <div className="p-3 bg-blue-50 rounded-2xl w-fit mb-6 group-hover:bg-blue-100 transition-colors">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold mb-3 text-gray-900">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
+            {benefits.map((benefit, index) => (
+              <BenefitCard key={index} {...benefit} />
             ))}
           </div>
         </div>
@@ -129,65 +165,8 @@ const LandingContent = () => {
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8">
-            {[
-              {
-                language: "English",
-                icon: "🇬🇧",
-                learners: "8.5k+ learners",
-                percentage: "34%",
-                color: "bg-blue-50 hover:bg-blue-100"
-              },
-              {
-                language: "Mandarin",
-                icon: "🇨🇳",
-                learners: "5k+ learners",
-                percentage: "20%",
-                color: "bg-orange-50 hover:bg-orange-100"
-              },
-              {
-                language: "Hindi",
-                icon: "🇮🇳",
-                learners: "4k+ learners",
-                percentage: "16%",
-                color: "bg-purple-50 hover:bg-purple-100"
-              },
-              {
-                language: "Spanish",
-                icon: "🇪🇸",
-                learners: "3.5k+ learners",
-                percentage: "14%",
-                color: "bg-yellow-50 hover:bg-yellow-100"
-              },
-              {
-                language: "Arabic",
-                icon: "🇦🇪",
-                learners: "2.5k+ learners",
-                percentage: "10%",
-                color: "bg-green-50 hover:bg-green-100"
-              },
-              {
-                language: "French",
-                icon: "🇫🇷",
-                learners: "1.5k+ learners",
-                percentage: "6%",
-                color: "bg-red-50 hover:bg-red-100"
-              }
-            ].map((lang, index) => (
-              <div
-                key={index}
-                className={`${lang.color} rounded-2xl p-6 text-center cursor-pointer transition-all duration-200 transform hover:scale-105 hover:shadow-lg`}
-              >
-                <div className="text-4xl mb-3">{lang.icon}</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">{lang.language}</h3>
-                <p className="text-sm text-gray-600 mb-1">{lang.learners}</p>
-                <div className="w-full bg-gray-200 rounded-full h-1.5 mb-1">
-                  <div 
-                    className="bg-blue-600 h-1.5 rounded-full" 
-                    style={{ width: lang.percentage }}
-                  ></div>
-                </div>
-                <p className="text-xs text-gray-500">{lang.percentage} of students</p>
-              </div>
+            {languages.map((lang, index) => (
+              <LanguageCard key={index} {...lang} />
             ))}
           </div>
         </div>
@@ -259,12 +238,12 @@ const LandingContent = () => {
           <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
             Share your language expertise and earn money by becoming a tutor on our platform
           </p>
-          <button 
+          <LandingButton 
             onClick={() => navigate('/tutor')}
-            className="px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-colors duration-200 shadow-lg"
+            variant="white"
           >
             Become a Tutor
-          </button>
+          </LandingButton>
         </div>
       </section>
     </div>  

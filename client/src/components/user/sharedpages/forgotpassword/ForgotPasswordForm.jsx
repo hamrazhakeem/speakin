@@ -4,6 +4,8 @@ import { ArrowLeft, Mail, ChevronRight, ShieldQuestion } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
+import FormInput from '../../common/ui/input/FormInput';
 
 const ForgotPasswordForm = () => {
     const [email, setEmail] = useState(''); 
@@ -28,6 +30,7 @@ const ForgotPasswordForm = () => {
             toast.success('OTP sent successfully! Please check your email.');
             navigate('/forgot-password/verify-otp', { state: { email, cache_key: response.data.cache_key } });
         } catch (error) {
+            toast.error(error.response?.data?.error || 'An unknown error occurred.')
             console.error(error.response?.data);
             setError(error.response?.data?.error || 'An unknown error occurred.');
         } finally {
@@ -64,53 +67,30 @@ const ForgotPasswordForm = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                        <Mail className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <input
-                        type="email"
-                        placeholder="Enter your email"
-                        required
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={`w-full pl-11 pr-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none ${
-                            error ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                        }`}
-                    />
-                </div>
+                            <FormInput
+                                type="email"
+                                placeholder="Enter your email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                icon={Mail}
+                                required
+                            />
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
-                >
-                    {loading ? (
-                        <div className="h-5 flex items-center">
-                            <LoadingSpinner size="sm"/>
-                        </div>
-                    ) : (
-                        <>
-                            Send OTP
-                            <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </>
-                    )}
-                </button>
+                            <PrimaryButton
+                                type="submit"
+                                loading={loading}
+                            >
+                                Send OTP
+                            </PrimaryButton>
 
-                {error && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-start">
-                        <span className="shrink-0 mr-2">⚠️</span>
-                        {error}
-                    </div>
-                )}
-            </form>
+                            <p className="mt-6 text-center text-sm text-gray-600">
+                                Remember your password?{' '}
+                                <Link to="/sign-in" className="text-blue-600 hover:text-blue-700 font-medium">
+                                    Sign in
+                                </Link>
+                            </p>
+                        </form>
 
-            <p className="mt-6 text-center text-sm text-gray-600">
-                Remember your password?{' '}
-                <Link to="/sign-in" className="text-blue-600 hover:text-blue-700 font-medium">
-                    Sign in
-                </Link>
-            </p>
         </div>
     </div>
     </main>

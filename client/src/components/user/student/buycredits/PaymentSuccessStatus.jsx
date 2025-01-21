@@ -6,11 +6,14 @@ import { updateCredits } from '../../../../redux/authSlice';
 import useAxios from '../../../../hooks/useAxios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 
 const PaymentSuccessStatus = () => {
   const [searchParams] = useSearchParams();
   const { credits, userId } = useSelector(state => state.auth);
   const [updatedCredits, setUpdatedCredits] = useState(credits);
+  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const amount = queryParams.get('amount');
@@ -41,6 +44,8 @@ const PaymentSuccessStatus = () => {
     fetchUpdatedCredits();
   }, [dispatch, navigate, searchParams]);
 
+
+  
   return (
     <div className="flex-1 bg-gray-50">
       <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4">
@@ -90,13 +95,15 @@ const PaymentSuccessStatus = () => {
           </div>
 
           {/* Return Home Button */}
-          <Link 
-            to="/"
-            className="w-full bg-blue-600 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-blue-700 transition duration-200"
-          >
-            <Home className="w-5 h-5" />
-            Go to Home
-          </Link>
+          <div className="space-y-4">
+            <PrimaryButton
+              onClick={() => navigate('/home')}
+              showChevron={false}
+            >
+              <Home className="w-5 h-5 mr-2" />
+              Return to Home
+            </PrimaryButton>
+          </div>
 
           {/* Success Note */}
           <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500">

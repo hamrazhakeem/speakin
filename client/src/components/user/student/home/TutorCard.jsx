@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, Globe, IdCard, GraduationCap, CreditCard, MessageCircle } from 'lucide-react';
+import { Globe, IdCard, GraduationCap, CreditCard, MessageCircle } from 'lucide-react';
 import Avatar from '../../../common/ui/Avatar';
 import AvailabilityModal from './AvailabilityModal';
 import { useNavigate } from 'react-router-dom';
@@ -10,8 +10,6 @@ const TutorCard = ({ name, profileImage, tutorDetails, languageSpoken, languageT
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
-  const rating = tutorDetails?.rating || 4.0;
-  const totalReviews = tutorDetails?.total_reviews || 0;
   const speakinName = tutorDetails?.speakin_name;
 
   const spokenLanguages = languageSpoken
@@ -84,15 +82,6 @@ const TutorCard = ({ name, profileImage, tutorDetails, languageSpoken, languageT
           <Avatar src={profileImage} name={speakinName || name} size={56} />
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-gray-900">{speakinName}</h3>
-            
-            {/* Improved Rating Design */}
-            <div className="flex items-center mt-2 space-x-2">
-              <div className="flex items-center px-2.5 py-1 bg-yellow-50 rounded-full">
-                <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                <span className="ml-1 text-sm font-medium text-yellow-700">{rating}</span>
-              </div>
-              <span className="text-sm text-gray-500">({totalReviews} reviews)</span>
-            </div>
 
             {/* Credits Section */}
             <div className="mt-2 flex items-center text-lg font-bold text-gray-900">

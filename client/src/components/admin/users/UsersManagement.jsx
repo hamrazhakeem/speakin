@@ -46,7 +46,7 @@ const UsersManagement = () => {
   }, []);
 
   const studentColumns = ['No.', 'User Info', 'Language to Learn', 'Balance Credits', 'Status', 'Action'];
-  const tutorColumns = ['No.', 'User Info', 'Language to Teach', 'Balance Credits', 'Rating', 'Status', 'Action'];
+  const tutorColumns = ['No.', 'User Info', 'Language to Teach', 'Balance Credits', 'Status', 'Action'];
   const pendingColumns = ['No.', 'User Info', 'Language to Teach', 'Required Credits', 'Action'];
   const languageRequestColumns = ['No.', 'User Info', 'Current Language', 'Requested Language', 'Action'];
 
@@ -137,7 +137,6 @@ const UsersManagement = () => {
               avatar: tutor.profile_image,
               language: tutor.tutor_language_to_teach.map(lang => lang.language).join(', ') || 'N/A',
               credits: `${tutor.balance_credits} Credits`,
-              rating: tutor.tutor_details.rating,
               status: tutor.is_active ? 'Active' : 'Inactive',
               action: (
                 <button
@@ -152,7 +151,6 @@ const UsersManagement = () => {
                 </button>
               ),
             }))}
-            showRating={true}
           />
 
           <AdminTable

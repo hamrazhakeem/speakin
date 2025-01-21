@@ -3,6 +3,8 @@ import TutorCard from "./TutorCard";
 import LoadingSpinner from "../../../common/ui/LoadingSpinner";
 import useAxios from "../../../../hooks/useAxios";
 import { useEffect, useState } from "react";
+import HomeEmptyState from "./HomeEmptyState";
+import FilterSelect from "./FilterSelect";
 
 const TutorBrowse = () => {
     const axiosInstance = useAxios();
@@ -97,59 +99,21 @@ const TutorBrowse = () => {
                 
                 {/* Language Filters */}
                 <div className="flex flex-col sm:flex-row gap-4">
-                  {/* Teaching Language Filter */}
-                  <div className="flex-1 relative">
-                    <GraduationCap className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
-                    <select
-                      value={selectedTeachLanguage}
-                      onChange={(e) => setSelectedTeachLanguage(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 
-                        bg-white/90 backdrop-blur-sm
-                        text-gray-900 
-                        focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
-                        transition-colors shadow-sm
-                        appearance-none cursor-pointer"
-                    >
-                      <option value="" className="text-gray-900">All Teaching Languages</option>
-                      {teachingLanguages?.map(language => (
-                        <option key={language} value={language} className="text-gray-900">
-                          {language}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  </div>
+                  <FilterSelect
+                    icon={<GraduationCap className="h-5 w-5" />}
+                    value={selectedTeachLanguage}
+                    onChange={(e) => setSelectedTeachLanguage(e.target.value)}
+                    options={teachingLanguages}
+                    placeholder="All Teaching Languages"
+                  />
                   
-                  {/* Spoken Language Filter */}
-                  <div className="flex-1 relative">
-                    <MessageCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-5 w-5" />
-                    <select
-                      value={selectedSpokenLanguage}
-                      onChange={(e) => setSelectedSpokenLanguage(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-300 
-                        bg-white/90 backdrop-blur-sm
-                        text-gray-900
-                        focus:border-blue-500 focus:ring-2 focus:ring-blue-200 
-                        transition-colors shadow-sm
-                        appearance-none cursor-pointer"
-                    >
-                      <option value="" className="text-gray-900">All Spoken Languages</option>
-                      {spokenLanguages?.map(language => (
-                        <option key={language} value={language} className="text-gray-900">
-                          {language}
-                        </option>
-                      ))}
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                      <svg className="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  </div>
+                  <FilterSelect
+                    icon={<MessageCircle className="h-5 w-5" />}
+                    value={selectedSpokenLanguage}
+                    onChange={(e) => setSelectedSpokenLanguage(e.target.value)}
+                    options={spokenLanguages}
+                    placeholder="All Spoken Languages"
+                  />
                 </div>
               </div>
             </div>
@@ -186,21 +150,18 @@ const TutorBrowse = () => {
                 <LoadingSpinner size="lg" className="text-blue-600" />
               </div>
             ) : error ? (
-              <div className="bg-red-50 text-red-600 p-6 rounded-xl text-center">
-                <p className="font-medium">{error}</p>
-              </div>
+              <HomeEmptyState
+                icon="error"
+                title="Error Loading Tutors"
+                description={error}
+                className="bg-red-50"
+              />
             ) : filteredTutors.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Search className="h-12 w-12 mx-auto" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No tutors found
-                </h3>
-                <p className="text-gray-600">
-                  Try adjusting your search or filters to find more tutors
-                </p>
-              </div>
+              <HomeEmptyState
+                icon="search"
+                title="No tutors found"
+                description="Try adjusting your search or filters to find more tutors"
+              />
             ) : (
               <div className="grid gap-6 max-h-[600px] scrollbar-thin overflow-y-auto pr-2 bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                 {filteredTutors.map((tutor) => (

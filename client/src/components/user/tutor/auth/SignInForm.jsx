@@ -4,20 +4,22 @@ import { useDispatch } from 'react-redux';
 import { setTokens } from '../../../../redux/authSlice';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { ChevronRight, User, GraduationCap, Eye, EyeOff } from 'lucide-react';
-import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import UserTypeSelector from '../../common/ui/profile/UserTypeSelector';
+import FormInput from '../../common/ui/input/FormInput';
+import PasswordInput from '../../common/ui/input/PasswordInput';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 
 const SignInForm = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errorMessage, setErrorMessage] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [userType, setUserType] = useState('tutor');
     const navigate = useNavigate();
     const dispatch = useDispatch();
   
-    const handleStudentClick = () => {
-      navigate('/sign-in');
+    const handleUserTypeChange = (type) => {
+      setUserType(type);
     };
   
     const handleSubmit = async (e) => {
@@ -55,77 +57,39 @@ const SignInForm = () => {
         <div className="w-full max-w-md">
           <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 mt-10 mb-10">
             <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back, Tutor</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
               <p className="text-gray-600">Sign in to your SpeakIn account</p>
             </div>
 
-            {/* User Type Selector */}
-            <div className="flex gap-4 mb-8">
-              <button
-                onClick={handleStudentClick}
-                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border transition-all duration-200 border-gray-200 hover:bg-gray-50"
-              >
-                <GraduationCap size={20} />
-                <span className="font-medium">Student</span>
-              </button>
-              <button
-                className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border transition-all duration-200 bg-blue-50 border-blue-200 text-blue-600"
-              >
-                <User size={20} />
-                <span className="font-medium">Tutor</span>
-              </button>
-            </div>
+            <UserTypeSelector
+              selectedType={userType} 
+              onTypeChange={handleUserTypeChange} 
+            />
 
-            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <input
-                  type="email"
-                  placeholder="Email address"
-                  required
-                  className={`w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none ${
-                    errorMessage ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                  }`}
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Password"
-                  required
-                  className={`w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none pr-12 ${
-                    errorMessage ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                  }`}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                </button>
-              </div>
+              <FormInput
+                type="email"
+                placeholder="Email address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                error={errorMessage}
+                required
+              />
 
-              <button
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                error={errorMessage}
+                required
+              />
+
+              <PrimaryButton
                 type="submit"
+                loading={isLoading}
                 disabled={isLoading}
-                className="w-full h-12 py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-xl font-medium transition-colors duration-200 flex items-center justify-center group"
               >
-                {isLoading ? (
-                  <div className="h-5 flex items-center">
-                    <LoadingSpinner size="sm"/>
-                  </div>
-                ) : (
-                  <>
-                    Sign In
-                    <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                  </>
-                )}
-              </button>
+                Sign In
+              </PrimaryButton>
 
               {errorMessage && (
                 <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">

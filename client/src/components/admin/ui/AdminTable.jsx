@@ -2,7 +2,7 @@ import React from 'react';
 import { Star } from 'lucide-react';
 import Avatar from '../../common/ui/Avatar';
 
-const AdminTable = ({ title, columns, data, showRating, isPending }) => {
+const AdminTable = ({ title, columns, data, isPending }) => {
   return (
     <div className="bg-black rounded-lg border border-zinc-800 overflow-hidden">
       <div className="px-4 md:px-6 py-4 border-b border-zinc-800">
@@ -123,14 +123,6 @@ const AdminTable = ({ title, columns, data, showRating, isPending }) => {
                             <span className="text-sm font-medium text-white">
                               {item.credits}
                             </span>
-                          </td>
-                        )}
-                        {showRating && (
-                          <td className="px-3 md:px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <span className="text-sm font-medium text-white">{item.rating}</span>
-                              <Star className="w-4 h-4 text-yellow-400 ml-1 fill-current" />
-                            </div>
                           </td>
                         )}
                         {!isPending && title !== "Language Change Requests" && (

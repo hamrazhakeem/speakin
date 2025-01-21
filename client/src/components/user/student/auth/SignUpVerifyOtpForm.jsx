@@ -4,8 +4,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { setTokens } from '../../../../redux/authSlice';
-import { ChevronRight, ChevronLeft, Shield, Timer } from 'lucide-react';
+import { ChevronLeft, Shield, Timer } from 'lucide-react';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
+import OtpInput from '../../common/ui/input/OtpInput';
 
 const SignUpVerifyOtpForm = () => {
     const location = useLocation();
@@ -50,7 +52,7 @@ const SignUpVerifyOtpForm = () => {
         } else {
             navigate('/sign-up');
         }
-    }, [location.state]);
+    }, [location.state, navigate]);
 
     useEffect(() => {
         if (timer > 0) {
@@ -206,21 +208,11 @@ const SignUpVerifyOtpForm = () => {
                     </div>
 
                     <form onSubmit={handleVerifyOtp} className="space-y-6">
-                        <div className="flex justify-between gap-2">
-                            {otp.map((digit, index) => (
-                                <input
-                                    key={index}
-                                    type="text"
-                                    name={`otp-${index}`}
-                                    maxLength="1"
-                                    value={digit}
-                                    onChange={(e) => handleOtpChange(index, e.target.value, e)}
-                                    onKeyDown={(e) => handleKeyDown(index, e)}
-                                    onPaste={(e) => handleOtpChange(index, '', e)}
-                                    className="w-12 h-12 text-center text-xl font-semibold border rounded-xl bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-colors duration-200"
-                                />
-                            ))}
-                        </div>
+                        <OtpInput 
+                            otp={otp}
+                            handleOtpChange={handleOtpChange}
+                            handleKeyDown={handleKeyDown}
+                        />
 
                         {error && (
                             <div className="text-red-500 text-sm text-center">
@@ -228,22 +220,22 @@ const SignUpVerifyOtpForm = () => {
                             </div>
                         )}
 
-                        <button
+                        <PrimaryButton
                             type="submit"
                             disabled={verifyLoading}
-                            className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
+                            className="w-full"
+                            loading={verifyLoading}
                         >
                             {verifyLoading ? (
-                                <div className="h-5 flex items-center gap-3">
+                                <div className="h-5 flex items-center">
                                     <LoadingSpinner size="sm"/>
                                 </div>
                             ) : (
                                 <>
                                     Verify OTP
-                                    <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                                 </>
                             )}
-                        </button>
+                        </PrimaryButton>
 
                         <div className="flex justify-center items-center gap-2">
                             {showTimer ? (

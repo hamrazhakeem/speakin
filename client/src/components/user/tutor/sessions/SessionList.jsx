@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Clock, CreditCard, RotateCw, VideoIcon, Filter, ChevronDown, ChevronUp, AlertCircle, Plus } from 'lucide-react';
-import EmptyState from '../../common/ui/EmptyState';
+import EmptyState from '../../common/ui/bookings/EmptyState';
 import useAxios from '../../../../hooks/useAxios';
 import { toast } from 'react-hot-toast';
 import Avatar from '../../../common/ui/Avatar';
@@ -283,7 +283,6 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
 
   const getRoomNameStatus = (session) => {
     const sessionStartTime = new Date(session.start_time);
-    const sessionEndTime = new Date(session.end_time);
     const currentTime = new Date();
     const fiveMinutesBefore = new Date(sessionStartTime.getTime() - 5 * 60000);
     const fiveMinutesAfter = new Date(sessionStartTime.getTime() + 5 * 60000);
@@ -370,11 +369,6 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
             ) : (
               'Cancel Session'
             )}
-          </button>
-        )}
-        {session.bookings?.[0]?.booking_status === 'completed' && (
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-medium transition-colors duration-200">
-            View Review
           </button>
         )}
       </div>
@@ -538,7 +532,7 @@ const SessionsList = ({ sessions, onAddSession, fetchTutorAvailability }) => {
                 <div className="flex items-center space-x-2">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-600 flex-shrink-0" />
                   <p className="text-gray-600 text-sm">
-                    For your no-shows, the student will receive a <span className="font-medium">full refund plus 10% bonus credits</span> as compensation, and this may affect your tutor rating.
+                    For your no-shows, the student will receive a <span className="font-medium">full refund plus 10% bonus credits</span> as compensation.
                   </p>
                 </div>
                 <div className="flex items-center space-x-2">

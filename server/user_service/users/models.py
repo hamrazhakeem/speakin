@@ -85,8 +85,6 @@ class TutorDetails(models.Model):
     intro_video = models.FileField(storage=S3Boto3Storage(), upload_to='tutor_intro_videos/')
     certificate = models.ImageField(storage=S3Boto3Storage(), upload_to='tutor_certificate_images/', blank=True, null=True)
     govt_id = models.ImageField(storage=S3Boto3Storage(), upload_to='tutor_govt_id_images/', blank=True, null=True)
-    rating = models.DecimalField(max_digits=3, decimal_places=2, default=0.0)
-    total_reviews = models.PositiveIntegerField(default=0)
     status = models.CharField(max_length=10, default='pending') 
  
 class LanguageSpoken(models.Model):

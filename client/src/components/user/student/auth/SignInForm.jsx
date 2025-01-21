@@ -5,28 +5,33 @@ import { setTokens } from '../../../../redux/authSlice';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import SignInWithGoogleButton from './SignInWithGoogleButton';
-import { ChevronRight, User, GraduationCap, Eye, EyeOff } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import { useForm } from 'react-hook-form';
+import FormInput from '../../common/ui/input/FormInput';
+import PasswordInput from '../../common/ui/input/PasswordInput';
+import UserTypeSelector from '../../common/ui/profile/UserTypeSelector';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 
 const SignInForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const handleTutorClick = () => {
-    navigate('/tutor/sign-in');
-  };
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      email: '',
+      password: ''
+    }
+  });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setErrorMessage('');
+  const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}sign-in/`, { email, password });
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_GATEWAY_URL}sign-in/`, 
+        data
+      );
       const { access, refresh, name, id, credits } = response.data;
 
       dispatch(setTokens({ 
@@ -45,7 +50,7 @@ const SignInForm = () => {
     } catch (error) {
       const message = error.response?.data?.detail || 'Login failed. Please try again.';
       toast.error(message);
-      console.error('Login failed', message);
+      console.error('Login failed:', error);
     } finally {
       setIsLoading(false);
     }
@@ -60,21 +65,7 @@ const SignInForm = () => {
             <p className="text-gray-600">Sign in to your SpeakIn account</p>
           </div>
 
-          <div className="flex gap-4 mb-8">
-            <button
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border transition-all duration-200 bg-blue-50 border-blue-200 text-blue-600"
-            >
-              <GraduationCap size={20} />
-              <span className="font-medium">Student</span>
-            </button>
-            <button
-              onClick={handleTutorClick}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl border transition-all duration-200 border-gray-200 hover:bg-gray-50"
-            >
-              <User size={20} />
-              <span className="font-medium">Tutor</span>
-            </button>
-          </div>
+          <UserTypeSelector selectedType="student" />
 
           <div className="mb-6">
             <SignInWithGoogleButton />
@@ -89,43 +80,36 @@ const SignInForm = () => {
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <input
+              <FormInput
                 type="email"
                 placeholder="Email address"
-                required
-                className={`w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none ${
-                  errorMessage ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                }`}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Invalid email address'
+                  }
+                })}
+                error={errors.email}
               />
-            </div>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                required
-                className={`w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none pr-12 ${
-                  errorMessage ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                }`}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
             </div>
 
-            <button
+            <div>
+              <PasswordInput
+                {...register('password', {
+                  required: 'Password is required'
+                })}
+                error={errors.password}
+              />
+            </div>
+
+            <PrimaryButton
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-xl font-medium transition-colors duration-200 flex items-center justify-center group"
+              className="w-full"
+              loading={isLoading}
             >
               {isLoading ? (
                 <div className="h-5 flex items-center">
@@ -134,16 +118,9 @@ const SignInForm = () => {
               ) : (
                 <>
                   Sign In
-                  <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
-            </button>
-
-            {errorMessage && (
-              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-                {errorMessage}
-              </div>
-            )}
+            </PrimaryButton>
           </form>
 
           <div className="mt-6 space-y-4">

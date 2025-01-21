@@ -25,7 +25,7 @@ class TutorDetailsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TutorDetails
-        fields = ['id','user','speakin_name', 'about', 'required_credits', 'intro_video', 'certificate', 'govt_id', 'status', 'rating', 'total_reviews', 'language_spoken']
+        fields = ['id','user','speakin_name', 'about', 'required_credits', 'intro_video', 'certificate', 'govt_id', 'status', 'language_spoken']
 
     def create(self, validated_data):
         user_id = validated_data.pop('user_id')  # Assuming user_id is passed in the request

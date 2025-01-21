@@ -5,6 +5,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { Eye, EyeOff, ChevronRight, UserCircle } from 'lucide-react';
+import InputField from '../../common/ui/input/InputField';
+import SelectField from './SelectField';
+import RadioButton from '../../common/ui/buttons/RadioButton';
+import FileUpload from '../../common/ui/input/FileUpload';
+import SpokenLanguageInput from './SpokenLanguageInput';
+import FormInput from '../../common/ui/input/FormInput';
+import PasswordInput from '../../common/ui/input/PasswordInput';
 
 const TutorApplicationForm = () => {
     const { control, handleSubmit, watch, setValue, formState: { errors } } = useForm({
@@ -214,13 +221,12 @@ const TutorApplicationForm = () => {
                     },
                   }}
                   render={({ field }) => (
-                    <InputField
+                    <FormInput
                       {...field}
                       type="text"
                       placeholder="SpeakIn Name (lowercase letters only)"
                       error={errors.speakinName}
                       onChange={(e) => {
-                        // Convert to lowercase before updating
                         field.onChange(e.target.value.toLowerCase())
                       }}
                     />
@@ -241,7 +247,7 @@ const TutorApplicationForm = () => {
                     },
                   }}
                   render={({ field }) => (
-                    <InputField
+                    <FormInput
                       {...field}
                       type="text"
                       placeholder="Full Name as in Govt ID/Certificate"
@@ -252,36 +258,31 @@ const TutorApplicationForm = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Controller
-                  name="password"
-                  control={control}
-                  rules={{
-                    required: 'Password is required',
-                    // ... other rules ...
-                  }}
-                  render={({ field }) => (
-                    <div className="relative">
-                      <input
+                <div>
+                  <Controller
+                    name="password"
+                    control={control}
+                    rules={{
+                      required: 'Password is required',
+                      minLength: {
+                        value: 8,
+                        message: 'Password must be at least 8 characters'
+                      },
+                      pattern: {
+                        value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                        message: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character'
+                      }
+                    }}
+                    render={({ field }) => (
+                      <PasswordInput
                         {...field}
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Password"
-                        className={`w-full p-3 border-2 rounded-lg transition-all duration-200 focus:ring-2 outline-none pr-12 ${
-                          errors.password 
-                            ? 'border-red-300 focus:ring-red-100' 
-                            : 'border-gray-200 focus:ring-blue-100 focus:border-blue-400'
-                        }`}
+                        placeholder="Enter a strong password"
+                        error={errors.password}
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                      >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                      </button>
-                      {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
-                    </div>
-                  )}
-                />
+                    )}
+                  />
+                  
+                </div>
               <Controller
                 name="country"
                 control={control}
@@ -523,152 +524,5 @@ const TutorApplicationForm = () => {
     </div>
   )
 }
-
-const InputField = forwardRef(({ error, ...props }, ref) => (
-    <div className="relative">
-      <input
-        {...props}
-        ref={ref}
-        className={`w-full p-3 border-2 rounded-lg transition-all duration-200 focus:ring-2 outline-none ${
-          error 
-            ? 'border-red-300 focus:ring-red-100' 
-            : 'border-gray-200 focus:ring-blue-100 focus:border-blue-400'
-        }`}
-      />
-      {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
-    </div>
-  ));
-  
-  const SelectField = forwardRef(({ options, placeholder, error, ...props }, ref) => (
-    <div className="relative">
-      <select
-        {...props}
-        ref={ref}
-        className={`w-full p-3 border-2 rounded-lg appearance-none bg-white transition-all duration-200 focus:ring-2 outline-none ${
-          error 
-            ? 'border-red-300 focus:ring-red-100' 
-            : 'border-gray-200 focus:ring-blue-100 focus:border-blue-400'
-        }`}
-      >
-        <option value="" disabled>{placeholder}</option>
-        {options.map((option, index) => (
-          <option key={index} value={option.value}>
-            {option.label}
-          </option>
-        ))}
-      </select>
-      <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-        <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-        </svg>
-      </div>
-      {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
-    </div>
-  ));
-  
-  const RadioButton = forwardRef(({ checked, onChange, label }, ref) => (
-    <label className="flex items-center space-x-2 cursor-pointer">
-      <input
-        type="radio"
-        className="form-radio"
-        checked={checked}
-        onChange={onChange}
-        ref={ref}
-      />
-      <span>{label}</span>
-    </label>
-  ));
-  
-  const FileUpload = forwardRef(({ onChange, accept, label, error }, ref) => (
-    <div className="space-y-2">
-      <label className="font-medium block text-gray-700">{label}</label>
-      <div className="relative">
-        <input
-          type="file"
-          onChange={onChange}
-          accept={accept}
-          ref={ref}
-          className="w-full p-3 border-2 border-dashed rounded-lg focus:ring-2 outline-none border-gray-300 focus:ring-blue-100 focus:border-blue-400 transition-all duration-200"
-        />
-      </div>
-      {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
-    </div>
-  ));
-  
-  const SpokenLanguageInput = ({ index, languagesSpoken, proficiencies, control, onRemove, errors }) => (
-    <div className="flex flex-col sm:flex-row items-center gap-3 p-3 bg-gray-50 rounded-lg">
-      <Controller
-        name={`spokenLanguages.${index}.language`}
-        control={control}
-        rules={{ required: 'Language is required' }}
-        render={({ field }) => (
-          <>
-            <select
-              {...field}
-              className="w-full sm:w-2/5 p-2 border rounded focus:ring-2 outline-none border-gray-300 focus:ring-blue-500"
-            >
-              <option value="" disabled>Select Language</option>
-              {languagesSpoken.map((spokenLang) => (
-                <option key={spokenLang.id} value={spokenLang.name}>
-                  {spokenLang.name}
-                </option>
-              ))}
-            </select>
-            {/* Display error message for language */}
-            {errors?.spokenLanguages?.[index]?.language && (
-              <p className="text-red-500 text-sm">{errors.spokenLanguages[index].language.message}</p>
-            )}
-          </>
-        )}
-      />
-  
-  <Controller
-    name={`spokenLanguages.${index}.proficiency`}
-    control={control}
-    rules={{ required: 'Proficiency is required' }}
-    render={({ field }) => (
-      <>
-        <select
-          {...field}
-          className="w-full sm:w-2/5 p-2 border rounded focus:ring-2 outline-none border-gray-300 focus:ring-blue-500"
-          disabled={index === 0}  // Disable if this is the first language
-        >
-          {index === 0 ? (
-            <option value="Native">Native</option>
-          ) : (
-            <>
-              <option value="" disabled>Select Proficiency</option>
-              {proficiencies.map((prof, i) => (
-                <option key={i} value={prof.level}>
-                  {prof.description}
-                </option>
-              ))}
-            </>
-          )}
-        </select>
-        {/* Display error message for proficiency */}
-        {errors?.spokenLanguages?.[index]?.proficiency && (
-          <p className="text-red-500 text-sm">{errors.spokenLanguages[index].proficiency.message}</p>
-        )}
-      </>
-    )}
-  />
-  
-  
-      {index !== 0 && (
-        <button
-          type="button"
-          className="w-full sm:w-auto px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all duration-200 flex items-center justify-center gap-2"
-          onClick={onRemove}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          Remove
-        </button>
-      )}
-    </div>
-  );
-  
 
 export default TutorApplicationForm

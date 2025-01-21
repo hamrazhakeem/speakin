@@ -8,7 +8,7 @@ import { setTokens } from '../../../../redux/authSlice';
 import { toast } from 'react-hot-toast';
 
 const SignInWithGoogleButton = () => {
-    const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 

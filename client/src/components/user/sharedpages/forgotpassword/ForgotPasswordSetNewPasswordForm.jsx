@@ -5,6 +5,9 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import PasswordRequirements from '../../common/ui/input/PasswordRequirements';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
+import PasswordInput from '../../common/ui/input/PasswordInput';
 
 const ForgotPasswordSetNewPasswordForm = () => {
     const location = useLocation();
@@ -83,14 +86,9 @@ const ForgotPasswordSetNewPasswordForm = () => {
 
                         {/* Form */}
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                            {/* New Password Input */}
-                            <div className="relative">
-                                <input
-                                    type={showPassword ? "text" : "password"}
+                            <div>
+                                <PasswordInput
                                     placeholder="Enter new password"
-                                    className={`w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none pr-12 ${
-                                        errors.newPassword ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                                    }`}
                                     {...register('newPassword', {
                                         required: 'Password is required',
                                         minLength: {
@@ -102,79 +100,38 @@ const ForgotPasswordSetNewPasswordForm = () => {
                                             message: 'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character',
                                         },
                                     })}
+                                    error={errors.newPassword}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                >
-                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
                             </div>
-                            {errors.newPassword && (
-                                <p className="text-red-500 text-sm">{errors.newPassword.message}</p>
-                            )}
 
-                            {/* Confirm Password Input */}
-                            <div className="relative">
-                                <input
-                                    type={showConfirmPassword ? "text" : "password"}
+                            <div>
+                                <PasswordInput
                                     placeholder="Confirm new password"
-                                    className={`w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none pr-12 ${
-                                        errors.confirmPassword ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                                    }`}
                                     {...register('confirmPassword', {
                                         required: 'Please confirm your password',
                                         validate: value => value === watch('newPassword') || 'Passwords do not match'
                                     })}
+                                    error={errors.confirmPassword}
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                                >
-                                    {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                                </button>
                             </div>
-                            {errors.confirmPassword && (
-                                <p className="text-red-500 text-sm">{errors.confirmPassword.message}</p>
-                            )}
 
-                            {/* Submit Button */}
-                            <button
+                            <PrimaryButton
                                 type="submit"
+                                loading={loading}
                                 disabled={loading}
-                                className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
                             >
-                                {loading ? (
-                                    <div className="h-5 flex items-center">
-                                        <LoadingSpinner size="sm"/>
-                                    </div>
-                                ) : (
-                                    <>
-                                        Set New Password
-                                        <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                    </>
-                                )}
-                            </button>
+                                Set New Password
+                            </PrimaryButton>
                         </form>
 
-                        {/* Password Requirements */}
-                        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <h3 className="text-sm font-medium text-gray-700 mb-2">Password must contain:</h3>
-                            <ul className="text-sm text-gray-600 space-y-1">
-                                <li>• At least 8 characters</li>
-                                <li>• One uppercase letter</li>
-                                <li>• One lowercase letter</li>
-                                <li>• One number</li>
-                                <li>• One special character</li>
-                            </ul>
+                        <div className="mt-6">
+                            <PasswordRequirements />
                         </div>
                     </div>
                 </div>
-        </main>
-    </div>
-  )
-}
+            </main>
+        </div>
+    );
+};
 
-export default ForgotPasswordSetNewPasswordForm
+export default ForgotPasswordSetNewPasswordForm;

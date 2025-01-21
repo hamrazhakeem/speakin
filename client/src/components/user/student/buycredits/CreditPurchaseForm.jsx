@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { CreditCard, Minus, Plus, Wallet, Info } from 'lucide-react';
+import { CreditCard, Wallet, Info } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import useAxios from '../../../../hooks/useAxios';
 import { useSelector } from 'react-redux';
+import CreditAmountSelector from '../../common/ui/credits/CreditAmountSelector';
+import GradientButton from '../../common/ui/buttons/GradientButton';
 
 // Initialize Stripe with your publishable key
 const stripePromise = loadStripe(`${import.meta.env.VITE_STRIPE_PK}`);
@@ -15,83 +17,38 @@ const CreditPurchaseForm = () => {
     const pricePerCredit = 150;
     const axiosInstance = useAxios();
 
-    const incrementCredits = () => {
-    const newValue = credits + 1;
-    setCredits(newValue);
-    setInputValue(newValue.toString());
-    };
-
-    const decrementCredits = () => {
-    if (credits > 1) {
-        const newValue = credits - 1;
-        setCredits(newValue);
-        setInputValue(newValue.toString());
-    }
-    };
-
-    const handleInputChange = (e) => {
-    const value = e.target.value;
-    setInputValue(value); // Always update input value
-
-    // Only update credits if value is valid
-    if (value === '') {
-        setCredits(1); // Keep credits at 1 even when input is empty
-    } else if (/^\d+$/.test(value)) {
-        const numValue = parseInt(value);
-        if (numValue >= 1) {
-        setCredits(numValue);
-        }
-    }
-    };
-
-    const handleBlur = () => {
-    if (!inputValue || parseInt(inputValue) < 1) {
-        setCredits(1);
-        setInputValue('1');
-    }
-    };
-
     const handleCheckout = async () => {
         try {
             setIsLoading(true);
-        
-            // Get Stripe instance
             const stripe = await stripePromise;
             if (!stripe) throw new Error('Stripe failed to initialize');
-        
-            // Create checkout session using Django backend
+
             const response = await axiosInstance.post(`${import.meta.env.VITE_API_GATEWAY_URL}create-checkout-session/`, {
-            user_id: userId,
-            amount: credits * pricePerCredit,  
-            transaction_type: 'credit_purchase', 
-            status: 'pending', 
-            purchased_credits: credits,  
-            price_per_credit: pricePerCredit, 
-            currency: 'inr', 
-            });
-        
-            const data = response.data; 
-        
-            if (!data.session_id) {
-            throw new Error('Failed to create checkout session');
-            }
-        
-            // Redirect to Stripe Checkout
-            const result = await stripe.redirectToCheckout({
-            sessionId: data.session_id,
+                user_id: userId,
+                amount: credits * pricePerCredit,
+                transaction_type: 'credit_purchase',
+                status: 'pending',
+                purchased_credits: credits,
+                price_per_credit: pricePerCredit,
+                currency: 'inr',
             });
 
+            const { session_id } = response.data;
+            if (!session_id) {
+                throw new Error('Failed to create checkout session');
+            }
+
+            const result = await stripe.redirectToCheckout({ sessionId: session_id });
             if (result.error) {
                 throw new Error(result.error.message);
             }
-
         } catch (error) {
             console.error('Checkout error:', error);
-            // You might want to show an error notification here
         } finally {
             setIsLoading(false);
         }
     };
+
     return (
         <div className="flex-1 flex items-center justify-center p-4 bg-gray-50 min-h-[calc(100vh-4rem-4rem)]">
             <div className="w-full sm:max-w-[400px] lg:max-w-[450px]">
@@ -113,33 +70,14 @@ const CreditPurchaseForm = () => {
                                 <span className="text-sm sm:text-base text-gray-900 font-medium">Credits</span>
                                 <div className="text-xs sm:text-sm text-gray-500 mt-1">₹{pricePerCredit} per credit</div>
                             </div>
-                            <div className="flex items-center gap-2 sm:gap-4">
-                                <button 
-                                    onClick={decrementCredits}
-                                    disabled={isLoading}
-                                    className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg sm:rounded-xl bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
-                                </button>
-                                
-                                <input
-                                    type="text"
-                                    value={inputValue}
-                                    onChange={handleInputChange}
-                                    onBlur={handleBlur}
-                                    disabled={isLoading}
-                                    className="font-semibold text-base sm:text-lg w-16 sm:w-20 text-center bg-white border border-gray-200 rounded-lg sm:rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-                                    placeholder="1"
-                                />
-
-                                <button 
-                                    onClick={incrementCredits}
-                                    disabled={isLoading}
-                                    className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-lg sm:rounded-xl bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
-                                </button>
-                            </div>
+                            
+                            <CreditAmountSelector 
+                                credits={credits}
+                                setCredits={setCredits}
+                                inputValue={inputValue}
+                                setInputValue={setInputValue}
+                                isLoading={isLoading}
+                            />
                         </div>
 
                         {/* Total Calculation */}
@@ -167,19 +105,16 @@ const CreditPurchaseForm = () => {
                     </div>
 
                     {/* Purchase Button */}
-                    <div className="relative group">
-                        <div className="absolute -inset-[1px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl opacity-0 group-hover:opacity-100 blur-sm transition-all duration-500"></div>
-                        <button 
-                            className="relative w-full px-6 sm:px-8 py-3 sm:py-4 bg-[#6772E5] text-white border border-[#6772E5] hover:bg-white hover:text-[#6772E5] rounded-xl transition-all duration-300 flex items-center justify-center gap-2 sm:gap-3 group-hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                            onClick={handleCheckout}
-                            disabled={isLoading}
-                        >
-                            <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#6772E5] transition-colors duration-300" />
-                            <span className="text-sm sm:text-base font-medium text-white group-hover:text-[#6772E5] transition-colors duration-300">
-                                {isLoading ? 'Processing...' : `Pay ₹${(credits * pricePerCredit).toLocaleString()} with Stripe`}
-                            </span>
-                        </button>
-                    </div>
+                    <GradientButton
+                        onClick={handleCheckout}
+                        isLoading={isLoading}
+                        disabled={isLoading}
+                    >
+                        <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:text-[#6772E5] transition-colors duration-300" />
+                        <span className="text-sm sm:text-base font-medium text-white group-hover:text-[#6772E5] transition-colors duration-300">
+                            Pay ₹{(credits * pricePerCredit).toLocaleString()} with Stripe
+                        </span>
+                    </GradientButton>
 
                     {/* Security Note */}
                     <div className="mt-3 sm:mt-4 flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-500">

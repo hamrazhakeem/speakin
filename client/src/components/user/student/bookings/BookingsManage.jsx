@@ -4,6 +4,7 @@ import useAxios from '../../../../hooks/useAxios';
 import { useSelector } from 'react-redux';
 import StudentBookingsList from './StudentBookingsList';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import NavigationTabs from '../../common/ui/profile/NavigationTabs';
 
 const BookingsManage = () => {
     const navigate = useNavigate();
@@ -12,6 +13,12 @@ const BookingsManage = () => {
     const [sessions, setSessions] = useState(null);
     const [loading, setLoading] = useState(true);
   
+    const tabs = [
+      { label: 'Profile', path: '/profile' },
+      { label: 'Security', path: '/password' },
+      { label: 'Bookings', path: '/bookings', active: true },
+    ];
+
     const fetchStudentSessions = async () => {
       setLoading(true);
       try {
@@ -65,24 +72,7 @@ const BookingsManage = () => {
             </div>
     
             {/* Navigation Tabs */}
-            <nav className="max-w-4xl mx-auto mb-8 flex space-x-1 rounded-xl bg-blue-50 p-1">
-              {[
-                { label: 'Profile', path: '/profile' },
-                { label: 'Security', path: '/password' },
-                { label: 'Bookings', path: '/bookings', active: true },
-              ].map((tab) => (
-                <button
-                  key={tab.label}
-                  onClick={() => navigate(tab.path)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200
-                    ${tab.active 
-                      ? 'bg-white text-blue-600 shadow-sm' 
-                      : 'text-gray-600 hover:text-blue-600'}`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
+            <NavigationTabs tabs={tabs} />
     
             {/* Main Content */}
             <div className="max-w-6xl mx-auto">

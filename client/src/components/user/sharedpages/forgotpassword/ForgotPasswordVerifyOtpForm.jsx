@@ -3,7 +3,8 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ChevronRight, Shield, Timer } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
-import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
+import OtpInput from '../../common/ui/input/OtpInput';
 
 const ForgotPasswordVerifyOtpForm = () => {
     const location = useLocation();
@@ -139,6 +140,7 @@ const ForgotPasswordVerifyOtpForm = () => {
             toast.success('OTP verified successfully!');
             navigate('/forgot-password/set-new-password', { state: { email, cache_key } });
         } catch (error) {
+            toast.error(error.response?.data?.message || 'Invalid OTP. Please try again.');
             console.error(error.response?.data);
             setError(error.response?.data?.message || 'Invalid OTP. Please try again.');
         } finally {
@@ -168,108 +170,68 @@ const ForgotPasswordVerifyOtpForm = () => {
         }
     };
 
-  return (
-    <div className="flex-1 flex justify-center items-center p-4 ">
-        <div className="w-full max-w-md mt-10 mb-16">
-            {/* Back Link */}
-            <Link 
-                to="/forgot-password" 
-                className="inline-flex items-center text-gray-600 hover:text-gray-800 mb-6 group"
-            >
-                <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                Back to Forgot Password
-            </Link>
+    return (
+        <div className="flex-1 flex justify-center items-center p-4">
+            <div className="w-full max-w-md mt-10 mb-16">
+                <Link 
+                    to="/forgot-password" 
+                    className="inline-flex items-center text-gray-600 hover:text-gray-800 mb-6 group"
+                >
+                    <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                    Back to Forgot Password
+                </Link>
 
-            {/* Main Card */}
-            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-                {/* Icon Header */}
-                <div className="flex justify-center mb-6">
-                    <div className="p-3 bg-blue-50 rounded-full">
-                        <Shield className="w-8 h-8 text-blue-600" />
-                    </div>
-                </div>
-
-                {/* Header Text */}
-                <div className="text-center mb-8">
-                    <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Verify OTP</h2>
-                    <p className="text-gray-600">
-                        Enter the 6-digit code sent to<br />
-                        <span className="font-medium text-gray-900">{email}</span>
-                    </p>
-                </div>
-
-                {/* OTP Form */}
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="flex justify-center gap-2">
-                        {otp.map((digit, index) => (
-                            <input
-                                key={index}
-                                type="text"
-                                name={`otp-${index}`}
-                                maxLength={1}
-                                value={digit}
-                                onChange={(e) => handleOtpChange(index, e.target.value)}
-                                onPaste={(e) => handleOtpChange(index, '', e)}
-                                onKeyDown={(e) => handleKeyDown(index, e)}
-                                className="w-12 h-12 text-center text-xl font-semibold border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
-                            />
-                        ))}
+                <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+                    <div className="flex justify-center mb-6">
+                        <div className="p-3 bg-blue-50 rounded-full">
+                            <Shield className="w-8 h-8 text-blue-600" />
+                        </div>
                     </div>
 
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        disabled={verifyLoading}
-                        className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
-                    >
-                        {verifyLoading ? (
-                            <div className="h-5 flex items-center">
-                                <LoadingSpinner size="sm"/>
+                    <div className="text-center mb-8">
+                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Verify OTP</h2>
+                        <p className="text-gray-600">
+                            Enter the 6-digit code sent to<br />
+                            <span className="font-medium text-gray-900">{email}</span>
+                        </p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <OtpInput
+                            otp={otp}
+                            handleOtpChange={handleOtpChange}
+                            handleKeyDown={handleKeyDown}
+                        />
+
+                        <PrimaryButton
+                            type="submit"
+                            loading={verifyLoading}
+                            disabled={verifyLoading}
+                        >
+                            Verify OTP
+                        </PrimaryButton>
+                    </form>
+
+                    <div className="mt-6 text-center">
+                        {showTimer ? (
+                            <div className="flex items-center justify-center text-gray-600">
+                                <Timer className="w-4 h-4 mr-2" />
+                                Resend OTP in {timer} seconds
                             </div>
                         ) : (
-                            <>
-                                Verify OTP
-                                <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                            </>
-                        )}
-                    </button>
-
-                    {/* Error Message */}
-                    {error && (
-                        <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm flex items-start">
-                            <span className="shrink-0 mr-2">⚠️</span>
-                            {error}
-                        </div>
-                    )}
-                </form>
-
-                {/* Resend OTP Section */}
-                <div className="mt-6 text-center">
-                    {showTimer ? (
-                        <div className="flex items-center justify-center text-gray-600">
-                            <Timer className="w-4 h-4 mr-2" />
-                            Resend OTP in {timer} seconds
-                        </div>
-                    ) : (
-                        <div className="flex justify-center">
                             <button
                                 onClick={handleResendOtp}
                                 disabled={resendLoading}
-                                className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
+                                className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                {resendLoading ? (
-                                    <LoadingSpinner size="sm" className="text-blue-600" />
-                                ) : (
-                                    'Resend OTP'
-                                )}
+                                Resend OTP
                             </button>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-  )
-}
+    );
+};
 
-export default ForgotPasswordVerifyOtpForm
+export default ForgotPasswordVerifyOtpForm;

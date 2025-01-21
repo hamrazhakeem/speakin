@@ -67,6 +67,8 @@ const LanguageStatsCard = () => {
           .sort((a, b) => b.value - a.value)
           .slice(0, 5);
 
+        console.log('learningData', learningData)
+
         setLanguageStats({
           teaching: teachingData,
           learning: learningData,

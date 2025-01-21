@@ -1,9 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ChevronRight, Timer } from 'lucide-react';
+import { Shield, Timer } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import OtpInput from '../../common/ui/input/OtpInput';
+import FormInput from '../../common/ui/input/FormInput';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
+
 
 const TutorEmailVerificationForm = () => {
     const [email, setEmail] = useState('');
@@ -154,35 +158,18 @@ const TutorEmailVerificationForm = () => {
 
             {showOtpInput ? (
             <div className="space-y-6">
-                <div className="flex justify-center gap-2">
-                {otp.map((digit, index) => (
-                <input
-                key={index}
-                type="text"
-                name={`otp-${index}`}
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleOtpChange(index, e.target.value)}
-                onPaste={(e) => handleOtpChange(index, '', e)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className="w-12 h-12 text-center text-xl font-semibold border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                <OtpInput
+                    otp={otp}
+                    handleOtpChange={handleOtpChange}
+                    handleKeyDown={handleKeyDown}
                 />
-            ))}
-                </div>
-                <button
-                onClick={handleVerifyOtp}
-                disabled={loading}
-                className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
+                <PrimaryButton
+                    onClick={handleVerifyOtp}
+                    loading={loading}
+                    disabled={loading}
                 >
-                {loading ? (
-                    <LoadingSpinner size="sm"/>
-                ) : (
-                    <>
                     Verify OTP
-                    <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
-                )}
-                </button>
+                </PrimaryButton>
                 <div className="mt-6 text-center">
                 {showTimer ? (
                     <div className="flex items-center justify-center text-gray-600">
@@ -208,30 +195,20 @@ const TutorEmailVerificationForm = () => {
             </div>
             ) : (
             <form onSubmit={handleSendOtp} className="space-y-4">
-                <div>
-                <input
+                <FormInput
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
-                    className="w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none border-gray-200 focus:border-blue-500"
                     required
                 />
-                </div>
-                <button
-                type="submit"
-                disabled={loading}
-                className="w-full h-12 py-3 px-4 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 flex items-center justify-center group"
+                <PrimaryButton
+                    type="submit"
+                    loading={loading}
+                    disabled={loading}
                 >
-                {loading ? (
-                    <LoadingSpinner size="sm"/>
-                ) : (
-                    <>
                     Send OTP
-                    <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </>
-                )}
-                </button>
+                </PrimaryButton>
             </form>
             )}
 

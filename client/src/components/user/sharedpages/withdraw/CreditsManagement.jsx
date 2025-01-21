@@ -6,21 +6,24 @@ import useAxios from '../../../../hooks/useAxios';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateCredits } from '../../../../redux/authSlice';
 import { useNavigate } from 'react-router-dom';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
+import GradientButton from '../../common/ui/buttons/GradientButton';
+import CreditAmountSelector from '../../common/ui/credits/CreditAmountSelector';
 
 const Card = ({ children, className = '' }) => (
-    <div className={`bg-white rounded-xl border border-gray-200 shadow-sm ${className}`}>
+    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-shadow duration-200 ${className}`}>
         {children}
     </div>
     );
 
-    const CardHeader = ({ children, className = '' }) => (
-    <div className={`p-6 ${className}`}>
+    const CardHeader = ({ children }) => (
+    <div className="p-6 border-b border-gray-100">
         {children}
     </div>
     );
 
-    const CardTitle = ({ children, className = '' }) => (
-    <h3 className={`text-lg font-semibold text-gray-900 ${className}`}>
+    const CardTitle = ({ children }) => (
+    <h3 className="text-lg font-semibold text-gray-900">
         {children}
     </h3>
     );
@@ -120,9 +123,11 @@ const Card = ({ children, className = '' }) => (
     };
 
 const CreditsManagement = () => {
-    const [credits, setCredits] = useState('');
+    const [credits, setCredits] = useState(0);
+    const [inputValue, setInputValue] = useState('');
     const [balance_credits, setBalanceCredits] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isStripeConnecting, setIsStripeConnecting] = useState(false);
     const [isVerified, setIsVerified] = useState(false);
     const [transactions, setTransactions] = useState([]);
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
@@ -168,7 +173,7 @@ const CreditsManagement = () => {
 
     const handleConnectStripe = async () => {
         try {
-        setIsLoading(true);
+        setIsStripeConnecting(true);
         const email_response = await axiosInstance.get(`users/${userId}/`);
         const response = await axiosInstance.post('stripe-account/', {
             user_id: userId,
@@ -181,21 +186,20 @@ const CreditsManagement = () => {
         console.error('Error connecting Stripe account:', error);
         toast.error('Failed to connect Stripe account');
         } finally {
-        setIsLoading(false);
+        setIsStripeConnecting(false);
         }
     };
 
-    const handleWithdraw = async (e) => {
-        e.preventDefault();
-        if (!credits || isNaN(credits) || credits <= 0) {
+    const handleWithdraw = async () => {
+        if (!credits || credits <= 0) {
         toast.error('Please enter a valid amount of credits');
         return;
         }
-        if (isTutor && parseInt(credits) <= 10) {
+        if (isTutor && credits <= 10) {
         toast.error('Enter more than 10 credits to withdraw.');
         return;
         }
-        if (parseInt(credits) > balance_credits) {
+        if (credits > balance_credits) {
         toast.error('Insufficient credits');
         return;
         }
@@ -205,10 +209,11 @@ const CreditsManagement = () => {
         const response = await axiosInstance.post('withdraw/', {
             user_id: userId,
             balance_credits: balance_credits,
-            credits: parseInt(credits),
+            credits: credits,
         });
         if (response.data) {
-            setCredits('');
+            setCredits(0);
+            setInputValue('');
             toast.success(`Withdrawal successful! Amount: ₹${response.data.amount_inr} (USD ${response.data.amount_usd.toFixed(2)})`);
             fetchTransactions();
             checkStripeAccount();
@@ -244,23 +249,19 @@ const CreditsManagement = () => {
 
           {/* Button to navigate back */}
           <div className="max-w-sm mx-auto mt-6">
-            <button
+            <PrimaryButton
               onClick={() => navigate(isTutor ? '/tutor/dashboard' : '/profile')}
-              className="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
             >
-              <span>{isTutor ? 'Go to Dashboard' : 'Go to Profile'}</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
+              {isTutor ? 'Go to Dashboard' : 'Go to Profile'}
+            </PrimaryButton>
           </div>
         </div>
 
         <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className={`${isVerified ? 'lg:col-span-1' : 'lg:col-span-3'}`}>
-            <Card className="hover:shadow-lg transition-shadow duration-200">
+            <Card>
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Available Credits</span>
-                </CardTitle>
+                <CardTitle>Available Credits</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-center mb-6">
@@ -276,79 +277,37 @@ const CreditsManagement = () => {
                 </div>
 
                 {!isVerified ? (
-                  <div className="space-y-4">
-                    {/* Gradient Effect Container */}
-                    <div className="relative group">
-                      {/* Gradient background effect */}
-                      <div className="absolute -inset-[1px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl opacity-0 group-hover:opacity-100 blur-sm transition-all duration-500"></div>
-
-                      {/* Button Container */}
-                      <button
-                        onClick={handleConnectStripe}
-                        disabled={isLoading}
-                        className="relative w-full px-8 py-4 bg-[#6772E5] text-white border border-[#6772E5] hover:bg-white hover:text-[#6772E5] rounded-xl transition-all duration-300 flex items-center justify-center gap-3 group-hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {/* Loading or Text */}
-                        {isLoading ? (
-                          'Processing...'
-                        ) : (
-                          'Connect with Stripe'
-                        )}
-                        </button>
-                    </div>  
-                  </div>
+                  <GradientButton
+                    onClick={handleConnectStripe}
+                    loading={isStripeConnecting}
+                    disabled={isStripeConnecting}
+                    className="w-full"
+                  >
+                    {isStripeConnecting
+                      ? 'Processing...'
+                      : 'Connect with Stripe'}
+                  </GradientButton>
                 ) : (
                   <div className="space-y-4">
-                    <div className="flex items-center justify-center gap-4">
-                      {/* Decrement Button */}
-                      <button
-                        onClick={() => setCredits((prev) => Math.max(0, prev - 1))}
-                        disabled={isLoading || credits <= 0}
-                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Minus className="w-4 h-4" />
-                      </button>
+                    <CreditAmountSelector
+                      credits={credits}
+                      setCredits={setCredits}
+                      inputValue={inputValue}
+                      setInputValue={setInputValue}
+                      maxCredits={balance_credits}
+                      isLoading={isLoading}
+                    />
 
-                      {/* Input Field */}
-                      <input
-                        type="text"
-                        value={credits}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (/^\d*$/.test(value)) setCredits(value); // Allows only digits
-                        }}
-                        disabled={isLoading}
-                        className="font-semibold text-lg w-20 text-center bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
-                        placeholder="0"
-                      />
-
-                      {/* Increment Button */}
-                      <button
-                        onClick={() => setCredits((prev) => Math.min(balance_credits, +prev + 1))}
-                        disabled={isLoading || credits >= balance_credits}
-                        className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-gray-200 hover:border-blue-500 hover:text-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="relative group">
-                      {/* Gradient background effect */}
-                      <div className="absolute -inset-[1px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl opacity-0 group-hover:opacity-100 blur-sm transition-all duration-500"></div>
-
-                      {/* Button */}
-                      <button
-                        onClick={handleWithdraw}
-                        disabled={!credits || isLoading || credits > balance_credits}
-                        className="relative w-full px-8 py-4 bg-[#6772E5] text-white border border-[#6772E5] hover:bg-white hover:text-[#6772E5] rounded-xl transition-all duration-300 flex items-center justify-center gap-3 group-hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {/* Text */}
-                        <span className="font-medium text-white group-hover:text-[#6772E5] transition-colors duration-300">
-                          {isLoading
-                            ? 'Processing...'
-                            : `Withdraw ₹${credits ? (credits * 150).toLocaleString() : '0'}`}
-                        </span>
-                      </button>
-                    </div>
+                    <GradientButton
+                      onClick={handleWithdraw}
+                      loading={isLoading}
+                      disabled={!credits || isLoading || credits > balance_credits || credits <= 0}
+                      className="w-full"
+                    >
+                      {isLoading
+                        ? 'Processing...'
+                        : `Withdraw ₹${credits ? (credits * 150).toLocaleString() : '0'}`}
+                    </GradientButton>
                   </div>
                 )}
               </CardContent>
@@ -357,7 +316,7 @@ const CreditsManagement = () => {
 
           {isVerified && (
             <div className="lg:col-span-2">
-              <Card className="hover:shadow-lg transition-shadow duration-200">
+              <Card>
                 <CardHeader>
                   <div className="flex items-center justify-between">
                     <CardTitle>Transaction History</CardTitle>

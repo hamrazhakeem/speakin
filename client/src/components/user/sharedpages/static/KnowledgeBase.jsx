@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Search, MessageCircle, Book, Settings, Users, ArrowRight, ChevronRight } from 'lucide-react';
-import FaqItem from '../../common/ui/FaqItem';
+import { Search, MessageCircle, Book, Settings, Users, ChevronRight } from 'lucide-react';
+import { HeroSection, ContentSection, CTASection } from './PageSection';
+import FaqItem from './FaqItem';
+import TrustBadge from '../../common/ui/landing/TrustBadge';
 
 const KnowledgeBase = () => {
     const [activeIndex, setActiveIndex] = useState(null);
@@ -117,41 +119,26 @@ const KnowledgeBase = () => {
 
   return (
     <div>
-      {/* Hero Section */}
-      <section className="pt-20 pb-16 bg-blue-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
-        <div className="relative">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium mb-8 hover:bg-white/20 transition-colors cursor-pointer group">
-                <MessageCircle className="w-4 h-4" />
-                Get Quick Answers
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                How can we help you?
-              </h1>
-              <p className="text-xl text-blue-50 max-w-2xl mx-auto mb-12">
-                Everything you need to know about our language learning platform
-              </p>
-              
-              {/* Search Bar */}
-              <div className="max-w-2xl mx-auto relative">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 w-5 h-5 z-10" />
-                  <input
-                    type="text"
-                    placeholder="Type your question here..."
-                    className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-white/20 bg-white/10 backdrop-blur-sm focus:border-white/40 focus:outline-none focus:ring-4 focus:ring-white/10 transition-all duration-200 text-lg text-white placeholder-white/60"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
+      <HeroSection
+
+        title="How can we help you?"
+        description="Everything you need to know about our language learning platform"
+        badge={<TrustBadge text="Get Quick Answers" />}
+        icon={MessageCircle}
+      >
+        <div className="max-w-2xl mx-auto relative mt-12">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/60 w-5 h-5 z-10" />
+            <input
+              type="text"
+              placeholder="Type your question here..."
+              className="w-full pl-12 pr-4 py-4 rounded-xl border-2 border-white/20 bg-white/10 backdrop-blur-sm focus:border-white/40 focus:outline-none focus:ring-4 focus:ring-white/10 transition-all duration-200 text-lg text-white placeholder-white/60"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
-      </section>
+      </HeroSection>
 
       {/* Category Tabs */}
       <section className="py-12">
@@ -193,28 +180,16 @@ const KnowledgeBase = () => {
         </div>
       </section>
 
-      {/* Contact Section */}
-      <section className="py-20 bg-blue-600 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px)] bg-[size:14px_14px]"></div>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="text-center">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-full text-white text-sm font-medium mb-8">
-              <MessageCircle className="w-4 h-4" />
-              Still have questions?
-            </div>
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Can't find what you're looking for?
-            </h2>
-            <p className="text-xl text-blue-50 mb-8">
-              Our support team is here to help you with any questions
-            </p>
-            <button className="group px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-colors flex items-center gap-2 mx-auto">
-              Contact Support
-              <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
-        </div>
-      </section>
+      <CTASection
+        title="Can't find what you're looking for?"
+        description="Our support team is here to help you with any questions"
+        badge="Still have questions?"
+      >
+        <button className="group px-8 py-4 bg-white text-blue-600 rounded-full font-semibold hover:bg-blue-50 transition-colors flex items-center gap-2 mx-auto">
+          Contact Support
+          <ChevronRight className="group-hover:translate-x-1 transition-transform" />
+        </button>
+      </CTASection>
     </div>
   )
 }

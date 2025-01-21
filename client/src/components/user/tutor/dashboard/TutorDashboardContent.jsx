@@ -5,11 +5,14 @@ import { useForm } from "react-hook-form";
 import { toast } from 'react-hot-toast';
 import { useDispatch } from "react-redux";
 import { updateRequiredCredits } from "../../../../redux/authSlice";
-import { ChevronRight } from "lucide-react";
-import { FaEdit, FaStar, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 import useAxios from "../../../../hooks/useAxios";
 import LoadingSpinner from "../../../common/ui/LoadingSpinner";
-import Avatar from "../../../common/ui/Avatar";
+import NavigationTabs from "../../common/ui/profile/NavigationTabs";
+import LanguageList from "../../common/ui/profile/LanguageList";
+import ConfirmationModal from "./ConfirmationModal";
+import FormInput from '../../common/ui/input/FormInput';
+import ProfilePicture from '../../common/ui/profile/ProfilePicture';
 
 const TutorDashboardContent = () => {
     const axiosInstance = useAxios();
@@ -34,6 +37,13 @@ const TutorDashboardContent = () => {
       setValue,     // Set default values dynamically
       formState: { errors }  // Get validation errors
     } = useForm();
+  
+    const tabs = [
+      { label: 'Profile', path: '/tutor/dashboard', active: true },
+      { label: 'Security', path: '/tutor/password' },
+      { label: 'Sessions', path: '/tutor/sessions' },
+      { label: 'Payments', path: '/withdraw' }
+    ];
   
     async function fetchUserData() {
       try {
@@ -165,7 +175,7 @@ const TutorDashboardContent = () => {
     };
   
     const { email, profile_image, tutor_language_to_teach = [], tutor_details, language_spoken = [] } = tutorData || {};
-    const { rating, total_reviews, about } = tutor_details || {};
+    const { about } = tutor_details || {};
   
     const getProficiencyColor = (level) => {
       const colors = {
@@ -176,48 +186,6 @@ const TutorDashboardContent = () => {
         'Native': 'bg-purple-100 text-purple-800',
       };
       return colors[level] || 'bg-gray-100 text-gray-800';
-    };
-  
-    const LanguageChangeModal = () => {
-      if (!showLanguageChangeModal) return null;
-  
-      return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
-            {/* Header */}
-            <div className="text-center sm:text-left">
-              <h3 className="text-xl font-semibold text-gray-900">
-                Change Teaching Language Request
-              </h3>
-              <div className="mt-4 space-y-3 text-gray-600">
-                <p>
-                  Please note that changing your teaching language requires admin verification, which typically takes 1-2 business days.
-                </p>
-                <p className="font-medium text-blue-600">
-                  During the verification period, you can continue teaching your current language.
-                </p>
-              </div>
-            </div>
-  
-            {/* Buttons */}
-            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
-              <button
-                onClick={() => setShowLanguageChangeModal(false)}
-                className="px-4 py-2 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleProceedToLanguageEdit}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-              >
-                Proceed to Change
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      );
     };
 
   return (
@@ -238,55 +206,18 @@ const TutorDashboardContent = () => {
             </div>
 
             {/* Navigation Tabs */}
-            <nav className="max-w-4xl mx-auto mb-8 flex space-x-1 rounded-xl bg-blue-50 p-1">
-              {[
-                { label: 'Profile', path: '/tutor/dashboard', active: true },
-                { label: 'Security', path: '/tutor/password' },
-                { label: 'Sessions', path: '/tutor/sessions' },
-                { label: 'Payments', path: '/withdraw' }
-              ].map((tab) => (
-                <button
-                  key={tab.label}
-                  onClick={() => navigate(tab.path)}
-                  className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200
-                    ${tab.active 
-                      ? 'bg-white text-blue-600 shadow-sm' 
-                      : 'text-gray-600 hover:text-blue-600'}`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </nav>
+            <NavigationTabs tabs={tabs} />
             
             {/* Main Content */}
             <div className="max-w-6xl mx-auto">
               <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Profile Picture Card */}
                 <div className="lg:col-span-1">
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-shadow duration-200">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">Profile Picture</h2>
-                <div className="flex justify-center">
-                  <Avatar src={profile_image} name={tutorData?.name || ''} size={200} />
-                </div>
-                    {/* Profile Image Info */}
-                    {editMode && (
-                    <p className="mt-4 text-sm text-gray-600 text-center">
-                      To update your profile picture, please include it in your teaching language update request. This helps us maintain professional standards across the platform.
-                    </p>
-                    )}
-
-                    {/* Ratings Display */}
-                    <div className="mt-6 p-4 bg-blue-50 rounded-xl text-center">
-                      <p className="text-sm text-gray-600 mb-1">Your Rating</p>
-                      <div className="flex items-center justify-center">
-                        <span className="text-3xl font-bold text-blue-600 mr-2">
-                          {rating ?? 'N/A'}
-                        </span>
-                        <FaStar className="text-yellow-400 text-2xl" />
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">({total_reviews ?? 0} reviews)</p>
-                    </div>
-                  </div>
+                  <ProfilePicture 
+                    profileImage={profile_image}
+                    name={tutorData?.name || ''}
+                    editMode={editMode}
+                  />
                 </div>
 
                 {/* Profile Info Card - Adjusted button and text sizes */}
@@ -327,8 +258,7 @@ const TutorDashboardContent = () => {
                     <div className="space-y-6">
                       <div>
                         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">SpeakIn Name</label>
-                        <input
-                          type="text"
+                        <FormInput
                           {...register('speakinName', {
                             required: 'SpeakIn Name is required',
                             validate: {
@@ -340,13 +270,9 @@ const TutorDashboardContent = () => {
                                 value === value.toLowerCase() || 'Name must be in lowercase',
                             },
                           })}
-                          className={`w-full px-3 sm:px-4 py-2 sm:py-3 rounded-xl border text-xs sm:text-sm ${
-                            editMode 
-                              ? 'bg-white border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200' 
-                              : 'bg-gray-50 border-gray-200 cursor-not-allowed'
-                          } transition-colors`}
-                          disabled={!editMode}
                           placeholder="Lowercase letters only"
+                          disabled={!editMode}
+                          error={errors.speakinName}
                           onChange={(e) => {
                             // Convert to lowercase before updating
                             const value = e.target.value.toLowerCase();
@@ -354,16 +280,14 @@ const TutorDashboardContent = () => {
                             register('speakinName').onChange(e);
                           }}
                         />
-                        {errors.speakinName && (
-                          <p className="text-red-500 text-sm mt-1">{errors.speakinName.message}</p>
-                        )}
                       </div>
 
                       <div className="space-y-2">
                         <label className="block text-sm font-medium text-gray-700">About</label>
-                        <textarea
+                        <FormInput
+                          type="textarea"
                           value={about || "No description available"}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed resize-none"
+                          className="resize-none"
                           rows={4}
                           readOnly
                         />
@@ -371,10 +295,9 @@ const TutorDashboardContent = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input
+                        <FormInput
                           type="email"
                           value={email ?? "N/A"}
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
                           readOnly
                         />
                       </div>
@@ -384,7 +307,9 @@ const TutorDashboardContent = () => {
                         {editMode ? (
                           <select
                             {...register("country", { required: true })}
-                            className={`w-full px-4 py-2 rounded-lg border bg-gray-100 ${errors.country ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                            className={`w-full px-4 py-3 rounded-xl border bg-gray-50 ${
+                              errors.country ? 'border-red-300' : 'border-gray-200'
+                            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
                           >
                             {countries.map(([name, code]) => (
                               <option key={code} value={name}>
@@ -393,10 +318,9 @@ const TutorDashboardContent = () => {
                             ))}
                           </select>
                         ) : (
-                          <input
+                          <FormInput
                             type="text"
                             value={country ?? "N/A"}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
                             readOnly
                           />
                         )}
@@ -405,7 +329,7 @@ const TutorDashboardContent = () => {
 
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Required Credits</label>
-                        <input
+                        <FormInput
                           type="number"
                           {...register('requiredCredits', {
                             required: 'Credit is required',
@@ -417,106 +341,87 @@ const TutorDashboardContent = () => {
                           min="1"
                           step="1"
                           placeholder="Minimum 1 credit"
-                          className={`w-full px-4 py-2 rounded-lg border bg-gray-100 ${errors.requiredCredits ? 'border-red-500' : 'border-gray-300'} focus:outline-none focus:ring-2 focus:ring-blue-500`}
                           disabled={!editMode}
+                          error={errors.requiredCredits}
                         />
-                        {errors.requiredCredits && (
-                          <p className="text-red-500 text-sm mt-1">{errors.requiredCredits.message}</p>
-                        )}
+                      </div>
+
+                      {/* Languages section */}
+                      <div className="lg:col-span-2 space-y-6">
+                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                          <div className="space-y-6">
+                            {editMode ? (
+                              <div className="space-y-4 max-h-[200px] overflow-y-auto scrollbar-thin pr-2">
+                                {selectedLanguages.map((lang, index) => (
+                                  <div key={index} className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-sm">
+                                    <div className="flex-1">
+                                      <select
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+                                        value={lang.language}
+                                        onChange={(e) => handleLanguageChange(index, 'language', e.target.value)}
+                                      >
+                                        <option value="">Select a language</option>
+                                        {languages.map((language) => (
+                                          <option key={language.id} value={language.name}>
+                                            {language.name}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+
+                                    <div className="flex-1">
+                                      <select
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
+                                        value={index === 0 ? 'Native' : lang.proficiency}
+                                        onChange={(e) => handleLanguageChange(index, 'proficiency', e.target.value)}
+                                        disabled={index === 0}
+                                      >
+                                        <option value="">Select proficiency</option>
+                                        {proficiencies.map((prof) => (
+                                          <option 
+                                            key={prof.id} 
+                                            value={prof.level}
+                                            disabled={index === 0 && prof.level !== 'Native'}
+                                          >
+                                            {prof.description}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+
+                                    {index !== 0 && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveLanguage(index)}
+                                        className="text-red-600 hover:text-red-800 p-1.5 sm:p-2"
+                                      >
+                                        <FaTrash className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+
+                                <button
+                                  type="button"
+                                  onClick={handleAddLanguage}
+                                  className="mt-4 w-full bg-blue-50 text-blue-600 py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center text-xs sm:text-sm"
+                                >
+                                  + Add Language
+                                </button>
+                              </div>
+                            ) : (
+                              <LanguageList 
+                                languages={language_spoken} 
+                                getProficiencyColor={getProficiencyColor} 
+                              />
+                            )}
+                          </div>
+                        </div>
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Languages you can speak</label>
-                        <div className="max-h-[200px] overflow-y-auto bg-white border border-gray-100 rounded-lg p-4 scrollbar-thin">
-
-                        {editMode ? (
-                          <div className="space-y-4">
-
-                            {selectedLanguages.map((lang, index) => (
-                              <div key={index} className="flex items-center space-x-4 bg-white p-4 rounded-lg shadow-sm">
-                                <div className="flex-1">
-                                  <select
-                                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-                                    value={lang.language}
-                                    onChange={(e) => handleLanguageChange(index, 'language', e.target.value)}
-                                  >
-                                    <option value="">Select a language</option>
-                                    {languages.map((language) => (
-                                      <option key={language.id} value={language.name}>
-                                        {language.name}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-
-                                <div className="flex-1">
-                                  <select
-                                    className="w-full px-3 sm:px-4 py-2 sm:py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs sm:text-sm"
-                                    value={index === 0 ? 'Native' : lang.proficiency}
-                                    onChange={(e) => handleLanguageChange(index, 'proficiency', e.target.value)}
-                                    disabled={index === 0}
-                                  >
-                                    <option value="">Select proficiency</option>
-                                    {proficiencies.map((prof) => (
-                                      <option 
-                                        key={prof.id} 
-                                        value={prof.level}
-                                        disabled={index === 0 && prof.level !== 'Native'}
-                                      >
-                                        {prof.description}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-
-                                {index !== 0 && (
-                                  <button
-                                    type="button"
-                                    onClick={() => handleRemoveLanguage(index)}
-                                    className="text-red-600 hover:text-red-800 p-1.5 sm:p-2"
-                                  >
-                                    <FaTrash className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                                  </button>
-                                )}
-                              </div>
-                            ))}
-
-                            <button
-                              type="button"
-                              onClick={handleAddLanguage}
-                              className="mt-4 w-full bg-blue-50 text-blue-600 py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg hover:bg-blue-100 transition-colors flex items-center justify-center text-xs sm:text-sm"
-                            >
-                              + Add Language
-                            </button>
-                          </div>
-                        ) : (
-                            <div className="space-y-2">
-                              {language_spoken && language_spoken.length > 0 ? (
-                                language_spoken.map((lang, index) => (
-                                  <div key={index} className="flex items-center justify-between bg-white p-3 rounded-lg shadow-sm">
-                                    <span className="font-medium text-gray-800">
-                                      {typeof lang.language === 'object' ? lang.language.name : lang.language}
-                                    </span>
-                                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getProficiencyColor(
-                                      typeof lang.proficiency === 'object' ? lang.proficiency.level : lang.proficiency
-                                    )}`}>
-                                      {typeof lang.proficiency === 'object' ? lang.proficiency.description : lang.proficiency}
-                                    </span>
-                                  </div>
-                                ))
-                              ) : (
-                                <div className="bg-gray-100 p-4 rounded-lg">
-                                  <p className="text-gray-600">No languages specified</p>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          </div>
-                        </div>
-
-                      <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Language you Teach</label>
-                        <input
+                        <FormInput
                           type="text"
                           value={
                             tutor_language_to_teach.length > 0
@@ -525,7 +430,6 @@ const TutorDashboardContent = () => {
                                   .join(", ")
                               : "N/A"
                           }
-                          className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
                           readOnly
                         />
                         
@@ -548,7 +452,16 @@ const TutorDashboardContent = () => {
           </>
         )}
       </main>
-      <LanguageChangeModal />
+
+      <ConfirmationModal
+        show={showLanguageChangeModal}
+        title="Change Teaching Language Request"
+        description="Please note that changing your teaching language requires admin verification, which typically takes 1-2 business days."
+        additionalInfo="During the verification period, you can continue teaching your current language."
+        onCancel={() => setShowLanguageChangeModal(false)}
+        onConfirm={handleProceedToLanguageEdit}
+        confirmText="Proceed to Change"
+      />
     </div>
   )
 }

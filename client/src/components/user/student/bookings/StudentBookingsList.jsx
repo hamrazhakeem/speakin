@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Clock, CreditCard, RotateCw, VideoIcon, Filter, ChevronDown, ChevronUp, AlertCircle, Calendar } from 'lucide-react';
-import EmptyState from '../../common/ui/EmptyState';
+import EmptyState from '../../common/ui/bookings/EmptyState';
 import useAxios from '../../../../hooks/useAxios';
 import { toast } from 'react-hot-toast';
 import Avatar from '../../../common/ui/Avatar';
@@ -565,14 +565,6 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
                           </button>
                         );
                       })()}
-                      {session.booking_status === 'completed' && (
-                        <button 
-                          className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-4 
-                            rounded-xl font-medium transition-colors duration-200 touch-manipulation"
-                        >
-                          Leave Review
-                        </button>
-                      )}
                     </div>
                   )}
                 </div>

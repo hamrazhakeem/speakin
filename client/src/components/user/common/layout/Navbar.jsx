@@ -6,6 +6,7 @@ import { Bell, User, Menu, X, CreditCard, LogOut, Plus, MessageCircle, Star } fr
 import { clearTokens, updateCredits } from '../../../../redux/authSlice';
 import useAxios from '../../../../hooks/useAxios';
 import Avatar from '../../../common/ui/Avatar';
+import GradientButton from '../ui/buttons/GradientButton';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -56,18 +57,13 @@ const Navbar = () => {
       </div>
       {/* Only show Buy Credits button for students */}
       {!isTutor && (
-        <div className="relative group">
-          <div className="absolute -inset-[1px] bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full opacity-0 group-hover:opacity-100 blur-sm transition-all duration-500"></div>
-          <button
-            onClick={() => navigate('/buy-credits')}
-            className="relative px-4 py-1 bg-[#6772E5] text-white border border-[#6772E5] hover:bg-white rounded-full transition-all duration-300 flex items-center justify-center gap-1 group-hover:shadow-xl"
-          >
-            <Plus className="h-3 w-3 text-white group-hover:text-[#6772E5] transition-colors duration-300" />
-            <span className="text-sm font-medium text-white group-hover:text-[#6772E5] transition-colors duration-300">
-              Buy
-            </span>
-          </button>
-        </div>
+        <GradientButton
+          onClick={() => navigate('/buy-credits')}
+          className="!px-4 !py-1 !rounded-full !text-sm !font-medium"
+        >
+          <Plus className="h-3 w-3" />
+          <span className='mr-1'>Buy</span>
+        </GradientButton>
       )}
     </div>
   );
@@ -142,15 +138,6 @@ const Navbar = () => {
               <div className="flex items-center space-x-6">
                 {renderCreditsSection()}
   
-                {!isTutor && (
-                  <button
-                    onClick={() => navigate('/subscribe')}
-                    className="hidden lg:flex items-center px-5 py-2 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-100 rounded-full hover:bg-gray-100 hover:border-gray-200 transition-all duration-200"
-                  >
-                    Subscribe to SpeakIn+
-                  </button>
-                )}
-  
                 {/* Action Buttons */}
                 <div className="flex items-center space-x-2">
                   <button
@@ -158,15 +145,6 @@ const Navbar = () => {
                     className="p-2 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors relative group"
                   >
                     <MessageCircle className="h-5 w-5" />
-                  </button>
-  
-                  <button
-                    onClick={() => navigate('/notifications')}
-                    className="p-2 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors relative group"
-                  >
-                    <Bell className="h-5 w-5" />
-                    {/* Add notification dot if needed */}
-                    <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                   </button>
   
                   {/* User Menu */}
@@ -238,71 +216,52 @@ const Navbar = () => {
                     <p className="font-medium text-gray-900">{userName}</p>
                     <p className="text-sm text-gray-500">{isTutor ? 'Tutor' : 'Student'}</p>
                   </div>
+                  
                 </div>
 
-                {/* Credits Section */}
                 <div className="flex flex-col space-y-2">
-                  <div className="flex items-center gap-2 bg-gray-50 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 border border-gray-100">
-                    <CreditCard className="h-4 w-4 text-blue-600" />
-                    <span>{credits} Credits</span>
-                  </div>
-                  {!isTutor && (
-                    <button
-                      onClick={() => {
-                        navigate('/buy-credits');
-                        setIsMobileMenuOpen(false);
-                      }}
-                      className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-50 text-gray-700 rounded-xl border border-gray-100"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <span className="text-sm font-medium">Buy Credits</span>
-                    </button>
-                  )}
-                </div>
-
-                {/* Navigation Links */}
-                <div className="space-y-2">
+                <button
+                    onClick={() => {
+                      navigate(getProfilePath());
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl border border-gray-200"
+                  >
+                    <User className="h-5 w-5 mr-3" />
+                    Profile
+                  </button>
                   <button
                     onClick={() => {
                       navigate('/messages');
                       setIsMobileMenuOpen(false);
                     }}
-                    className="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl"
+                    className="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl border border-gray-200"
                   >
                     <MessageCircle className="h-5 w-5 mr-3" />
                     Messages
                   </button>
-                  <button
-                    onClick={() => {
-                      navigate('/notifications');
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl"
-                  >
-                    <Bell className="h-5 w-5 mr-3" />
-                    Notifications
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigate(getProfilePath());
-                      setIsMobileMenuOpen(false);
-                    }}
-                    className="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl"
-                  >
-                    <User className="h-5 w-5 mr-3" />
-                    Profile
-                  </button>
-                  {!isTutor && (
+                  {!isTutor ? (
                     <button
                       onClick={() => {
-                        navigate('/subscribe');
+                        navigate('/buy-credits');
                         setIsMobileMenuOpen(false);
                       }}
-                      className="flex w-full items-center px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl"
+                      className="flex w-full items-center justify-between px-4 py-3 text-gray-700 rounded-xl border border-gray-200"
                     >
-                      <Star className="h-5 w-5 mr-3" />
-                      Subscribe to SpeakIn+
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-blue-600" />
+                        <span className="text-sm font-medium">{credits} Credits</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-blue-600">
+                        <Plus className="h-4 w-4" />
+                        <span className="text-sm font-medium">Buy More</span>
+                      </div>
                     </button>
+                  ) : (
+                    <div className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 border border-gray-200">
+                      <CreditCard className="h-4 w-4 text-blue-600" />
+                      <span>{credits} Credits</span>
+                    </div>
                   )}
                 </div>
 
@@ -312,7 +271,7 @@ const Navbar = () => {
                     handleLogout();
                     setIsMobileMenuOpen(false);
                   }}
-                  className="flex w-full items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl"
+                  className="flex w-full items-center px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl border border-gray-200"
                 >
                   <LogOut className="h-5 w-5 mr-3" />
                   Logout

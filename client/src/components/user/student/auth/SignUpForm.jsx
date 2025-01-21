@@ -4,14 +4,17 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import axios from 'axios';
 import SignInWithGoogleButton from './SignInWithGoogleButton';
-import { ChevronRight, Eye, EyeOff } from 'lucide-react';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
 import { toast } from 'react-hot-toast';
+import FormInput from '../../common/ui/input/FormInput';
+import PasswordInput from '../../common/ui/input/PasswordInput';
+import UserTypeSelector from '../../common/ui/profile/UserTypeSelector';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
+import PasswordRequirements from '../../common/ui/input/PasswordRequirements';
 
 const SignUpForm = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const onSubmit = async (data) => {
@@ -24,9 +27,7 @@ const SignUpForm = () => {
         user_type: 'student'
       });
       
-      console.log('Sign up successful', response.data);
       reset();
-
       const { cache_key } = response.data;
       navigate('/sign-up/verify-otp', { 
         state: { 
@@ -54,6 +55,8 @@ const SignUpForm = () => {
             <p className="text-gray-600">Join SpeakIn to start learning</p>
           </div>
 
+          <UserTypeSelector selectedType="student" />
+
           <div className="mb-6">
             <SignInWithGoogleButton />
           </div>
@@ -68,14 +71,10 @@ const SignUpForm = () => {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {/* Name Input */}
             <div>
-              <input
+              <FormInput
                 type="text"
                 placeholder="Full Name"
-                className={`w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none ${
-                  errors.name ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                }`}
                 {...register('name', {
                   required: 'Name is required',
                   minLength: {
@@ -83,18 +82,14 @@ const SignUpForm = () => {
                     message: 'Name must be at least 2 characters'
                   }
                 })}
+                error={errors.name}
               />
-              {errors.name && <p className="mt-1 text-red-500 text-sm">{errors.name.message}</p>}
             </div>
 
-            {/* Email Input */}
             <div>
-              <input
+              <FormInput
                 type="email"
                 placeholder="Email address"
-                className={`w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none ${
-                  errors.email ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                }`}
                 {...register('email', {
                   required: 'Email is required',
                   pattern: {
@@ -102,18 +97,12 @@ const SignUpForm = () => {
                     message: 'Invalid email address'
                   }
                 })}
+                error={errors.email}
               />
-              {errors.email && <p className="mt-1 text-red-500 text-sm">{errors.email.message}</p>}
             </div>
 
-            {/* Password Input */}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                className={`w-full px-4 py-3 rounded-xl border bg-gray-50 focus:bg-white transition-colors duration-200 outline-none pr-12 ${
-                  errors.password ? 'border-red-300 focus:border-red-500' : 'border-gray-200 focus:border-blue-500'
-                }`}
+            <div>
+              <PasswordInput
                 {...register('password', {
                   required: 'Password is required',
                   minLength: {
@@ -125,22 +114,17 @@ const SignUpForm = () => {
                     message: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character'
                   }
                 })}
+                error={errors.password}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-              {errors.password && <p className="mt-1 text-red-500 text-sm">{errors.password.message}</p>}
             </div>
 
-            {/* Submit Button */}
-            <button
+            <PasswordRequirements />
+
+            <PrimaryButton
               type="submit"
               disabled={loading}
-              className="w-full h-12 py-3 px-4 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white rounded-xl font-medium transition-colors duration-200 flex items-center justify-center group"
+              className="w-full"
+              loading={loading}
             >
               {loading ? (
                 <div className="h-5 flex items-center">
@@ -149,10 +133,9 @@ const SignUpForm = () => {
               ) : (
                 <>
                   Create Account
-                  <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </>
               )}
-            </button>
+            </PrimaryButton>
           </form>
 
           <div className="mt-6 text-center text-gray-600">

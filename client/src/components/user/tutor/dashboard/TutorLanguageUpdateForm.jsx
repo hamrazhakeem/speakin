@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { FaArrowLeft, FaChevronRight } from 'react-icons/fa';
-import { UserCircle } from 'lucide-react';
+import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-hot-toast';
 import useAxios from '../../../../hooks/useAxios';
-import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import FormInput from '../../common/ui/input/FormInput';
+import FileUpload from '../../common/ui/input/FileUpload';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
+import ProfileImageUpload from '../../common/ui/input/ProfileImageUpload';
 
 const TutorLanguageUpdateForm = () => {
     const navigate = useNavigate();
@@ -13,6 +15,18 @@ const TutorLanguageUpdateForm = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [profilePreview, setProfilePreview] = useState(null);
     const [profileImageFile, setprofileImage] = useState(null);
+    const [languagesToTeach, setLanguagesToTeach] = useState([]);
+    const [imageFile, setImage] = useState(null);
+    const [videoFile, setVideo] = useState(null);
+
+    const { control, handleSubmit, register, watch, formState: { errors } } = useForm({
+      defaultValues: {
+        isNative: "true",
+        fullName: '',
+        teachingLanguage: '',
+        about: '',
+      },
+    });
   
     const handleProfileImage = (e) => {
       const file = e.target.files[0];
@@ -26,20 +40,6 @@ const TutorLanguageUpdateForm = () => {
       }
     };
   
-    // Set default values in useForm, setting isNative to "true" for native
-    const { control, handleSubmit, register, watch, formState: { errors } } = useForm({
-      defaultValues: {
-        isNative: "true",
-        fullName: '',
-        teachingLanguage: '',
-        about: '',
-      },
-    });
-  
-    const [languagesToTeach, setLanguagesToTeach] = useState([]);
-    const [imageFile, setImage] = useState(null);
-    const [videoFile, setVideo] = useState(null);
-    
     useEffect(() => {
       const fetchData = async () => {
         try {
@@ -157,63 +157,26 @@ const TutorLanguageUpdateForm = () => {
             </div>
             <form onSubmit={handleSubmit(onSubmit)} className="p-8">
               <div className="space-y-8">
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700">Full Name</label>
-                  <input
-                    type="text"
-                    {...register("fullName", {
-                      required: "Full Name is required",
-                      validate: {
-                        validChars: (value) =>
-                          /^[a-zA-Z\s'-]+$/.test(value) || 'Full Name must only contain letters, spaces, hyphens, and apostrophes',
-                        noMultipleSpaces: (value) =>
-                          !/\s{2,}/.test(value) || 'Full Name must not contain multiple spaces between names',
-                        noStartingOrEndingSpaces: (value) =>
-                          value.trim() === value || 'Full Name must not start or end with spaces',
-                      },
-                    })}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors text-sm"
-                    placeholder="Enter your full name"
-                  />
-                  {errors.fullName && (
-                    <p className="text-red-500 text-xs mt-1">{errors.fullName.message}</p>
-                  )}
-                </div>
+                <FormInput
+                  {...register("fullName", {
+                    required: "Full Name is required",
+                    validate: {
+                      validChars: (value) =>
+                        /^[a-zA-Z\s'-]+$/.test(value) || 'Full Name must only contain letters, spaces, hyphens, and apostrophes',
+                      noMultipleSpaces: (value) =>
+                        !/\s{2,}/.test(value) || 'Full Name must not contain multiple spaces between names',
+                      noStartingOrEndingSpaces: (value) =>
+                        value.trim() === value || 'Full Name must not start or end with spaces',
+                    },
+                  })}
+                  placeholder="Enter your full name"
+                  error={errors.fullName}
+                />
 
-                <div className="space-y-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Profile Picture</h2>
-                  <div className="flex flex-col items-center gap-4">
-                    <div className="w-32 h-32 rounded-full overflow-hidden">
-                      {profilePreview ? (
-                        <img 
-                          src={profilePreview} 
-                          alt="Profile Preview" 
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                          <UserCircle className="w-16 h-16 text-gray-400" />
-                        </div>
-                      )}
-                    </div>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleProfileImage}
-                      className="hidden"
-                      id="profile-upload"
-                    />
-                    <label 
-                      htmlFor="profile-upload"
-                      className="px-4 py-2 text-sm text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 cursor-pointer"
-                    >
-                      Upload Profile Picture
-                    </label>
-                    <p className="text-sm text-gray-500">
-                      Maximum file size: 5MB. Supported formats: JPG, PNG
-                    </p>
-                  </div>
-                </div>
+                <ProfileImageUpload
+                  profilePreview={profilePreview}
+                  handleProfileImage={handleProfileImage}
+                />
 
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-700">Language You Teach</label>
@@ -233,12 +196,12 @@ const TutorLanguageUpdateForm = () => {
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">Native Speaker</label>
-                  <Controller
-                    control={control}
-                    name="isNative"
-                    render={({ field }) => (
+                <Controller
+                  control={control}
+                  name="isNative"
+                  render={({ field }) => (
+                    <div className="space-y-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-3">Native Speaker</label>
                       <div className="flex gap-6">
                         <label className="relative flex items-center gap-3 cursor-pointer group">
                           <input
@@ -261,97 +224,70 @@ const TutorLanguageUpdateForm = () => {
                           <span className="text-sm text-gray-700 group-hover:text-gray-900">Non-Native</span>
                         </label>
                       </div>
-                    )}
-                  />
-                </div>
+                    </div>
+                  )}
+                />
 
                 <div className="space-y-6 bg-gray-50 rounded-xl p-6">
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
-                      {isNative === "true" ? 'Upload Your Government ID' : 'Upload Your Teaching Certificate'}
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        {...register("imageUpload", { required: "Image is required." })}
-                        onChange={(e) => {
-                          validateImage(e);
-                          register("imageUpload").onChange(e);
-                        }}
-                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100"
-                      />
-                    </div>
-                    {errors.imageUpload && (
-                      <p className="text-red-500 text-xs mt-1">{errors.imageUpload.message}</p>
-                    )}
-                  </div>
+                  <FileUpload
+                    label={isNative === "true" ? 'Upload Your Government ID' : 'Upload Your Teaching Certificate'}
+                    accept="image/*"
+                    onChange={(e) => {
+                      validateImage(e);
+                      register("imageUpload").onChange(e);
+                    }}
+                    error={errors.imageUpload}
+                  />
 
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">About</label>
-                    <Controller
-                      name="about"
-                      control={control}
-                      rules={{ 
-                        required: 'About section is required',
-                        maxLength: {
-                          value: 500,
-                          message: 'About section cannot exceed 500 characters'
-                        },
-                      }}
-                      render={({ field }) => (
+                  <Controller
+                    name="about"
+                    control={control}
+                    rules={{ 
+                      required: 'About section is required',
+                      maxLength: {
+                        value: 500,
+                        message: 'About section cannot exceed 500 characters'
+                      },
+                    }}
+                    render={({ field }) => (
+                      <div className="space-y-2">
+                        <label className="block text-sm font-medium text-gray-700">About</label>
                         <textarea
                           {...field}
                           placeholder="Tell us about yourself and your teaching experience"
                           className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors text-sm min-h-[120px]"
                           rows={4}
                         />
-                      )}
-                    />
-                    {errors.about && (
-                      <p className="text-red-500 text-xs mt-1">{errors.about.message}</p>
+                        {errors.about && (
+                          <p className="text-red-500 text-xs mt-1">{errors.about.message}</p>
+                        )}
+                      </div>
                     )}
-                  </div>
+                  />
 
-                  <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Introduction Video</label>
-                    <input
-                      type="file"
-                      accept="video/*"
-                      {...register("videoUpload", { required: "Video is required." })}
-                      onChange={(e) => {
-                        validateVideo(e);
-                        register("videoUpload").onChange(e);
-                      }}
-                      className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100"
-                    />
-                    {errors.videoUpload && (
-                      <p className="text-red-500 text-xs mt-1">{errors.videoUpload.message}</p>
-                    )}
-                  </div>
+                  <FileUpload
+                    label="Introduction Video"
+                    accept="video/*"
+                    onChange={(e) => {
+                      validateVideo(e);
+                      register("videoUpload").onChange(e);
+                    }}
+                    error={errors.videoUpload}
+                  />
                 </div>
 
                 <div className="flex justify-end pt-6">
-                  <button
+                  <PrimaryButton
                     type="submit"
+                    loading={isSubmitting}
                     disabled={isSubmitting}
-                    className="inline-flex items-center justify-center h-12 px-6 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200 group"
                   >
-                    {isSubmitting ? (
-                      <div className="h-5 flex items-center">
-                        <LoadingSpinner size="sm" className="text-white" />
-                      </div>
-                    ) : (
-                      <>
-                        Submit Request
-                        <FaChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                      </>
-                    )}
-                  </button>
+                    Submit Request
+                  </PrimaryButton>
                 </div>
               </div>
             </form>
-            </div>
+          </div>
         </div>
       </main>
     </div>

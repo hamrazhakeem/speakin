@@ -1,6 +1,8 @@
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { ClipboardCheck, Clock, Mail, ArrowLeft } from 'lucide-react';
+import StatusStep from './StatusStep';
+import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 
 const TutorApplicationStatus = () => {
     const navigate = useNavigate();
@@ -12,6 +14,24 @@ const TutorApplicationStatus = () => {
     }, [navigate, verifiedEmail]);
   
     if (!verifiedEmail) return null;
+
+  const steps = [
+    {
+      number: '1',
+      title: 'Application Review',
+      description: 'Our team will review your qualifications and documents'
+    },
+    {
+      number: '2',
+      title: 'Email Notification',
+      description: "You'll receive an email about your application status"
+    },
+    {
+      number: '3',
+      title: 'Platform Access',
+      description: "If approved, you'll get access to set up your tutor profile"
+    }
+  ];
 
   return (
     <div className="flex-1 bg-gray-50">
@@ -49,47 +69,25 @@ const TutorApplicationStatus = () => {
           <div className="space-y-6 mb-8">
             <h2 className="text-lg font-medium text-gray-900">What happens next?</h2>
             <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-medium">1</span>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Application Review</h3>
-                  <p className="text-sm text-gray-600">Our team will review your qualifications and documents</p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-medium">2</span>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Email Notification</h3>
-                  <p className="text-sm text-gray-600">You'll receive an email about your application status</p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-blue-600 font-medium">3</span>
-                </div>
-                <div>
-                  <h3 className="font-medium text-gray-900">Platform Access</h3>
-                  <p className="text-sm text-gray-600">If approved, you'll get access to set up your tutor profile</p>
-                </div>
-              </div>
+              {steps.map((step, index) => (
+                <StatusStep
+                  key={index}
+                  number={step.number}
+                  title={step.title}
+                  description={step.description}
+                />
+              ))}
             </div>
           </div>
 
           {/* Action Buttons */}
           <div className="space-y-4">
-            <button
+            <PrimaryButton
               onClick={() => navigate('/tutor')}
-              className="w-full bg-blue-600 text-white px-6 py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-blue-700 transition duration-200"
+              icon={ArrowLeft}
             >
-              <ArrowLeft className="w-5 h-5" />
               Return to Home
-            </button>
+            </PrimaryButton>
 
             <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
               <Mail className="w-4 h-4" />
