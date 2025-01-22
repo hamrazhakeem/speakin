@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import TutorAvailability, Bookings
+from django.utils import timezone
 
 class BookingsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,12 +27,12 @@ class BookingsSerializer(serializers.ModelSerializer):
                 ).first()
                 if existing_trial:
                     if existing_trial.booking_status == 'completed':
-                        message = "You have already completed a trial session with this tutor."
-                    elif existing_trial.booking_status == 'confirmed': 
-                        message = "You can only book one trial session per tutor. Please cancel your existing trial booking if you wish to book a different time slot."
+                        raise serializers.ValidationError("You have already completed a trial session with this tutor.")
+                    elif existing_trial.booking_status == 'confirmed':
+                        if existing_trial.availability.end_time > timezone.now():
+                            raise serializers.ValidationError("You can only book one trial session per tutor. Please cancel your existing trial booking if you wish to book a different time slot.")
                     else:
-                        message = "Your trial session with this tutor is currently in progress."
-                    raise serializers.ValidationError(message) 
+                        raise serializers.ValidationError("Your trial session with this tutor is currently in progress.")
 
             if session_type == 'standard':
                 completed_trials = Bookings.objects.filter(
