@@ -12,13 +12,16 @@ from protos.client import update_user_credits, lock_credits_in_escrow, refund_cr
 from .permissions import IsAdminOrOwnerPermission, ValidateRoomNamePermission
 from django.utils import timezone
 from datetime import timedelta
-from hashlib import sha256
-from django.utils.crypto import get_random_string
 from django.conf import settings
 from rest_framework.views import APIView
 from django.db.models import Q 
 from django.utils.timezone import now
 from .tasks import send_cancellation_notification, send_booking_notification
+from .utils import get_room_name
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Create your views here.
 
@@ -141,9 +144,7 @@ class BookingsList(generics.ListCreateAPIView):
             raise ValidationError("Failed to lock credits in escrow")
          
         # Generate a unique and secure room name
-        random_string = get_random_string(12)  # Generate a random 12-character string
-        room_name_hash = sha256(f"{booking_id}-{tutor_id}-{student_id}-{random_string}".encode()).hexdigest()
-        room_name = f"room_{room_name_hash[:16]}"  # Use a shorter part of the hash if needed
+        room_name = get_room_name(booking_id, tutor_id, student_id)
         
         # Update the booking with the room name
         booking.video_call_link = room_name  # Now `video_call_link` acts as `room_name`
@@ -238,7 +239,7 @@ class DailyRoomCreateView(APIView):
         :param properties: Additional room properties like `max_participants`
         :return: JSON response with room details
         """
-        DAILY_API_URL = "https://api.daily.co/v1/rooms"
+        DAILY_API_URL = os.getenv('DAILY_API_ROOM_URL')
 
         headers = {
             "Authorization": f"Bearer {settings.DAILY_API_KEY}",
@@ -277,7 +278,7 @@ class DailyRoomCreateView(APIView):
         """
         Generate a secure meeting token for the specified room.
         """
-        DAILY_API_URL = "https://api.daily.co/v1/meeting-tokens"
+        DAILY_API_URL = os.getenv('DAILY_API_MEETING_TOKEN_URL')
         headers = {
             "Authorization": f"Bearer {settings.DAILY_API_KEY}",
             "Content-Type": "application/json",
@@ -296,7 +297,7 @@ class DailyRoomCreateView(APIView):
     def post(self, request):
         try:
             room_name = request.data.get("room_name") 
-            BASE_VIDEO_CALL_URL = "https://speakin.daily.co/"
+            BASE_VIDEO_CALL_URL = os.getenv('BASE_VIDEO_CALL_URL')
             booking = Bookings.objects.get(
                 Q(video_call_link=room_name) | Q(video_call_link=BASE_VIDEO_CALL_URL + room_name),
             )

@@ -27,9 +27,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['host.docker.internal', '127.0.0.1', 'localhost'] 
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
  
 
 # Application definition
@@ -138,10 +138,10 @@ PAYMENT_SERVICE_URL = os.getenv('PAYMENT_SERVICE_URL')
 DAILY_API_KEY = os.getenv('DAILY_API_KEY')
 
 # Celery Configuration
-CELERY_BROKER_URL = 'redis://redis:6379/3'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/3'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json'
-CELERY_TIMEZONE = 'UTC'
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True 
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/3')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/3')
+CELERY_ACCEPT_CONTENT = ['json']  # This is a constant, no need to move to .env
+CELERY_TASK_SERIALIZER = 'json'   # This is a constant, no need to move to .env
+CELERY_RESULT_SERIALIZER = 'json' # This is a constant, no need to move to .env
+CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'UTC')
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = os.getenv('CELERY_BROKER_CONNECTION_RETRY', 'True') == 'True'

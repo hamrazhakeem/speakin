@@ -26,9 +26,11 @@ load_dotenv()
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['host.docker.internal', '127.0.0.1', 'localhost']  
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
+
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', '').split(',')
 
 
 # Application definition
@@ -45,11 +47,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'storages', 
     'rest_framework_simplejwt.token_blacklist',
-]
-
-CORS_ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
 ]
 
 MIDDLEWARE = [
@@ -152,23 +149,23 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL')
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': 'redis://redis:6379/1', 
+        'LOCATION': os.getenv('REDIS_CACHE_URL', 'redis://redis:6379/1'),
         'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CLIENT_CLASS': os.getenv('REDIS_CACHE_CLIENT_CLASS', 'django_redis.client.DefaultClient'),
         }
     }
 }
 
-CACHE_TTL = 300
+CACHE_TTL = int(os.getenv('CACHE_TTL', 300))  
 
 # Celery Settings
-CELERY_BROKER_URL = 'redis://redis:6379/2'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/2'
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
-CELERY_RESULT_SERIALIZER = 'json' 
-CELERY_TIMEZONE = 'UTC'
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True 
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://redis:6379/3')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://redis:6379/3')
+CELERY_ACCEPT_CONTENT = ['json']  # This is a constant, no need to move to .env
+CELERY_TASK_SERIALIZER = 'json'   # This is a constant, no need to move to .env
+CELERY_RESULT_SERIALIZER = 'json' # This is a constant, no need to move to .env
+CELERY_TIMEZONE = os.getenv('CELERY_TIMEZONE', 'UTC')
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = os.getenv('CELERY_BROKER_CONNECTION_RETRY', 'True') == 'True'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -177,32 +174,40 @@ REST_FRAMEWORK = {
 } 
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),  # Token validity period
-    "REFRESH_TOKEN_LIFETIME": timedelta(weeks=1),    # Refresh token validity
-    "ROTATE_REFRESH_TOKENS": True,                   # Rotate refresh tokens
-    "BLACKLIST_AFTER_ROTATION": True,                 # Blacklist old refresh token
-    "UPDATE_LAST_LOGIN": False,                       # Do not update last login on token use
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv('JWT_ACCESS_TOKEN_LIFETIME_MINUTES', 15))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(weeks=int(os.getenv('JWT_REFRESH_TOKEN_LIFETIME_WEEKS', 1))),
+    "ROTATE_REFRESH_TOKENS": os.getenv('JWT_ROTATE_REFRESH_TOKENS', 'True') == 'True',
+    "BLACKLIST_AFTER_ROTATION": os.getenv('JWT_BLACKLIST_AFTER_ROTATION', 'True') == 'True',
+    "UPDATE_LAST_LOGIN": os.getenv('JWT_UPDATE_LAST_LOGIN', 'False') == 'True',
 
-    "SIGNING_KEY": SECRET_KEY,          # Signing key for HS256
-    "ALGORITHM": "HS256",                              # Use symmetric signing algorithm
+    "SIGNING_KEY": SECRET_KEY,  # Using existing SECRET_KEY from env
+    "ALGORITHM": os.getenv('JWT_ALGORITHM', 'HS256'),
 
-    "AUTH_HEADER_TYPES": ("Bearer",),                 # Accept Bearer tokens
-    "AUTH_HEADER_NAME": "HTTP_AUTHORIZATION",         # Name of the auth header
+    "AUTH_HEADER_TYPES": (os.getenv('JWT_AUTH_HEADER_TYPES', 'Bearer'),),
+    "AUTH_HEADER_NAME": os.getenv('JWT_AUTH_HEADER_NAME', 'HTTP_AUTHORIZATION'),
 
-    "USER_ID_FIELD": "id",                            # User ID field in user model
-    "USER_ID_CLAIM": "user_id",                       # Claim name for user ID in token
+    "USER_ID_FIELD": os.getenv('JWT_USER_ID_FIELD', 'id'),
+    "USER_ID_CLAIM": os.getenv('JWT_USER_ID_CLAIM', 'user_id'),
 
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),  # Token types
+    # Keeping this constant as it's a specific implementation detail
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
 
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID') 
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME')
+AWS_DEFAULT_ACL = os.getenv('AWS_DEFAULT_ACL', None)
 
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+# Generate custom domain from template
+AWS_S3_CUSTOM_DOMAIN = os.getenv('AWS_S3_CUSTOM_DOMAIN_TEMPLATE', '{bucket_name}.s3.amazonaws.com').format(
+    bucket_name=AWS_STORAGE_BUCKET_NAME
+)
 
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# Set default file storage
+DEFAULT_FILE_STORAGE = os.getenv('DEFAULT_FILE_STORAGE', 'storages.backends.s3boto3.S3Boto3Storage')
 
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/user-service/' 
-AWS_DEFAULT_ACL = None
+# Generate media URL from template
+MEDIA_URL = os.getenv('MEDIA_URL_TEMPLATE', 'https://{custom_domain}/media/user-service/').format(
+    custom_domain=AWS_S3_CUSTOM_DOMAIN
+)
