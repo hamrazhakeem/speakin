@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import useAxios from '../../../hooks/useAxios';
 import { toast } from 'react-hot-toast';
 import { VerificationContent, InfoItem } from './VerificationContent';
+import { adminApi } from '../../../api/adminApi';
 
 const TutorVerificationReview = () => {
   const location = useLocation();
@@ -19,10 +20,10 @@ const TutorVerificationReview = () => {
     loadingSetter(true);
     try {
       if (isApprove) {
-        await axiosInstance.patch(`users/${userData.id}/verify-tutor/`, { action });
+        await adminApi.approveTutor(axiosInstance, userData.id);
         toast.success('Tutor Approved Successfully');
       } else {
-        await axiosInstance.delete(`users/${userData.id}/verify-tutor/`);
+        await adminApi.denyTutor(axiosInstance, userData.id);
         toast.success('Tutor Denied Successfully');
       }
       navigate('/admin/manage-users');

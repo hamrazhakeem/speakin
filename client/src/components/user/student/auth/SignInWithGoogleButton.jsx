@@ -6,6 +6,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { setTokens } from '../../../../redux/authSlice';
 import { toast } from 'react-hot-toast';
+import { studentApi } from '../../../../api/studentApi';
 
 const SignInWithGoogleButton = () => {
   const dispatch = useDispatch();
@@ -16,10 +17,8 @@ const SignInWithGoogleButton = () => {
 
   const handleSuccess = async (codeResponse) => {
     try {
-      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}google-sign-in/`, { 
-        "code": codeResponse.code 
-      });
-      const { access, refresh, name, id, credits } = response.data;
+      const { access, refresh, name, id, credits } = await studentApi.signInWithGoogle(axios, codeResponse.code);
+      // const { access, refresh, name, id, credits } = response.data;
       dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false, isStudent: true, credits: credits }));
       toast.success(`Welcome, ${name}!`);
       navigate('/home');

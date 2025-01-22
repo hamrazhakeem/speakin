@@ -5,17 +5,16 @@ import { ChevronRight } from 'lucide-react';
 import { FaGlobe, FaTrash } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { useSelector } from 'react-redux';
-import Avatar from '../../../common/ui/Avatar';
 import useAxios from '../../../../hooks/useAxios';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
 import NavigationTabs from '../../common/ui/profile/NavigationTabs';
 import ProfilePicture from '../../common/ui/profile/ProfilePicture';
 import FormInput from '../../common/ui/input/FormInput';
 import LanguageList from '../../common/ui/profile/LanguageList';
+import { studentApi } from '../../../../api/studentApi';
 
 const ProfileSettings = () => {
     const axiosInstance = useAxios();
-    const navigate = useNavigate();
 
     const [studentData, setStudentData] = useState(null);
     const [editMode, setEditMode] = useState(false);
@@ -78,39 +77,43 @@ const ProfileSettings = () => {
 
     async function fetchUserData() {
     try {
-        const response = await axiosInstance.get(`users/${userId}/`);
-        setStudentData(response.data);
-        console.log(response.data)
-        if (response.data.language_spoken?.length > 0) {
-        setSpokenLanguages(response.data.language_spoken);
+        const [
+            userResponse,
+            countriesResponse,
+            spokenLanguagesResponse,
+            platformLanguagesResponse
+        ] = await Promise.all([
+            studentApi.getUser(axiosInstance, userId),
+            studentApi.getCountries(axiosInstance),
+            studentApi.getSpokenLanguages(axiosInstance),
+            studentApi.getPlatformLanguages(axiosInstance)
+        ]);
+
+        setStudentData(userResponse);
+        
+        if (userResponse.language_spoken?.length > 0) {
+        setSpokenLanguages(userResponse.language_spoken);
         }
         
-        if (response.data.language_to_learn?.length > 0) {
-        setLanguageToLearn(response.data.language_to_learn[0]);
+        if (userResponse.language_to_learn?.length > 0) {
+        setLanguageToLearn(userResponse.language_to_learn[0]);
         }
         
-        setValue("name", response.data.name || "");
-        setValue("balance_credits", response.data.balance_credits || "");
-        setValue("email", response.data.email || "");
-        setValue("country", response.data.country || "");
+        setValue("name", userResponse.name || "");
+        setValue("balance_credits", userResponse.balance_credits || "");
+        setValue("email", userResponse.email || "");
+        setValue("country", userResponse.country || "");
 
-        // Fetch countries
-        const countriesResponse = await axiosInstance.get(`countries/`);
-        setCountries(countriesResponse.data);
-
-        // Fetch available languages and proficiency levels for speaking
-        const spokenLanguagesResponse = await axiosInstance.get(`spoken-languages/`);
-        setAvailableLanguages(spokenLanguagesResponse.data.languages);
-        setSpokenProficiencyLevels(spokenLanguagesResponse.data.proficiencies);
-
-        // Fetch platform languages and learning proficiency levels
-        const platformLanguagesResponse = await axiosInstance.get(`platform-languages/`);
-        setPlatformLanguages(platformLanguagesResponse.data.languages);
-        setLearningProficiencyLevels(platformLanguagesResponse.data.proficiencies);
+        setCountries(countriesResponse);
+        setAvailableLanguages(spokenLanguagesResponse.languages);
+        setSpokenProficiencyLevels(spokenLanguagesResponse.proficiencies);
+        setPlatformLanguages(platformLanguagesResponse.languages);
+        setLearningProficiencyLevels(platformLanguagesResponse.proficiencies);
         
         console.log('Spoken Languages:', spokenLanguagesResponse.data, 'Platform:', platformLanguagesResponse.data);
     } catch (error) {
         console.error('Error fetching data:', error);
+        toast.error('Failed to load profile data');
     } finally {
         setPageLoading(false);
     }
@@ -237,14 +240,10 @@ const ProfileSettings = () => {
     formData.append("name", data.name);
     formData.append("country", data.country);
     formData.append("language_spoken", JSON.stringify(spokenLanguages));
-    if (languageToLearn) {
-        formData.append("language_to_learn", JSON.stringify([languageToLearn]));
-    } else {
-        formData.append("language_to_learn", JSON.stringify([]));
-    }
+    formData.append("language_to_learn", JSON.stringify(languageToLearn ? [languageToLearn] : []));
 
     try {
-        await axiosInstance.patch(`users/${userId}/`, formData);
+        await studentApi.updateProfile(axiosInstance, userId, formData);
         setEditMode(false);
         fetchUserData();
         toast.success('Profile updated successfully');
@@ -256,7 +255,7 @@ const ProfileSettings = () => {
     }
     };
 
-    const { email, profile_image, balance_credits, name } = studentData || {};
+    const { email, profile_image, name } = studentData || {};
     
     const tabs = [
       { label: 'Profile', path: '/profile', active: true },

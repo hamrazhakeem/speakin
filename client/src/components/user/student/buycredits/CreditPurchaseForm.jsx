@@ -3,6 +3,7 @@ import { CreditCard, Wallet, Info } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import useAxios from '../../../../hooks/useAxios';
 import { useSelector } from 'react-redux';
+import { studentApi } from '../../../../api/studentApi';
 import CreditAmountSelector from '../../common/ui/credits/CreditAmountSelector';
 import GradientButton from '../../common/ui/buttons/GradientButton';
 
@@ -23,17 +24,14 @@ const CreditPurchaseForm = () => {
             const stripe = await stripePromise;
             if (!stripe) throw new Error('Stripe failed to initialize');
 
-            const response = await axiosInstance.post(`${import.meta.env.VITE_API_GATEWAY_URL}create-checkout-session/`, {
-                user_id: userId,
+            const response = await studentApi.createCheckoutSession(axiosInstance, {
+                userId,
                 amount: credits * pricePerCredit,
-                transaction_type: 'credit_purchase',
-                status: 'pending',
-                purchased_credits: credits,
-                price_per_credit: pricePerCredit,
-                currency: 'inr',
+                credits,
+                pricePerCredit
             });
 
-            const { session_id } = response.data;
+            const { session_id } = response;
             if (!session_id) {
                 throw new Error('Failed to create checkout session');
             }

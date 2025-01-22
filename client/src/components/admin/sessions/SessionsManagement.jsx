@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { format, isValid } from 'date-fns';
-import AdminButton from '../ui/AdminButton';
+import { useNavigate } from 'react-router-dom';
 import useAxios from '../../../hooks/useAxios';
 import LoadingSpinner from '../../common/ui/LoadingSpinner';
 import SessionCard from './SessionCard';
+import AdminButton from '../ui/AdminButton';
+import { adminApi } from '../../../api/adminApi';
 
 const SessionsManagement = () => {
   const [data, setData] = useState({ availabilities: [], bookings: [] });
@@ -15,24 +16,24 @@ const SessionsManagement = () => {
   const fetchSessions = async () => {
     try {
       const [availabilities, bookings] = await Promise.all([
-        axiosInstance.get('tutor-availabilities/'),
-        axiosInstance.get('bookings/')
+        adminApi.getTutorAvailabilities(axiosInstance),
+        adminApi.getBookings(axiosInstance)
       ]);
 
-      const tutorIds = new Set(availabilities.data.map(a => a.tutor_id));
-      const studentIds = new Set(bookings.data.map(b => b.student_id));
+      const tutorIds = new Set(availabilities.map(a => a.tutor_id));
+      const studentIds = new Set(bookings.map(b => b.student_id));
       
       const [tutorRes, studentRes] = await Promise.all([
-        Promise.all([...tutorIds].map(id => axiosInstance.get(`users/${id}/`))),
-        Promise.all([...studentIds].map(id => axiosInstance.get(`users/${id}/`)))
+        Promise.all([...tutorIds].map(id => adminApi.getUserDetails(axiosInstance, id))),
+        Promise.all([...studentIds].map(id => adminApi.getUserDetails(axiosInstance, id)))
       ]);
 
       setUsers({
-        tutors: Object.fromEntries(tutorRes.map(t => [t.data.id, t.data])),
-        students: Object.fromEntries(studentRes.map(s => [s.data.id, s.data]))
+        tutors: Object.fromEntries(tutorRes.map(t => [t.id, t])),
+        students: Object.fromEntries(studentRes.map(s => [s.id, s]))
       });
       
-      setData({ availabilities: availabilities.data, bookings: bookings.data });
+      setData({ availabilities, bookings });
       setLoading(false);
     } catch (error) {
       console.error('Error:', error);

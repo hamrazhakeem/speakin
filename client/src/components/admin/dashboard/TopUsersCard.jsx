@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Award } from 'lucide-react';
 import LoadingSpinner from '../../common/ui/LoadingSpinner';
 import useAxios from '../../../hooks/useAxios';
+import { adminApi } from '../../../api/adminApi';
 
 const TopUsersCard = ({ bookings, availabilities, type = 'student' }) => {
   const [loading, setLoading] = useState(true);
@@ -22,12 +23,12 @@ const TopUsersCard = ({ bookings, availabilities, type = 'student' }) => {
           const studentIds = Object.keys(studentCounts);
           const studentDetails = await Promise.all(
             studentIds.map(async (id) => {
-              const response = await axiosInstance.get(`users/${id}/`);
+              const userData = await adminApi.getUserDetails(axiosInstance, id);
               return {
                 userId: parseInt(id),
                 sessionCount: studentCounts[id],
-                name: response.data.name,
-                languages: response.data.language_to_learn.map(
+                name: userData.name,
+                languages: userData.language_to_learn.map(
                   (lang) => lang.language
                 ),
               };
@@ -54,12 +55,12 @@ const TopUsersCard = ({ bookings, availabilities, type = 'student' }) => {
           const tutorIds = Object.keys(tutorCounts);
           const tutorDetails = await Promise.all(
             tutorIds.map(async (id) => {
-              const response = await axiosInstance.get(`users/${id}/`);
+              const userData = await adminApi.getUserDetails(axiosInstance, id);
               return {
                 userId: parseInt(id),
                 sessionCount: tutorCounts[id],
-                name: response.data.tutor_details.speakin_name,
-                languages: response.data.tutor_language_to_teach.map(
+                name: userData.tutor_details.speakin_name,
+                languages: userData.tutor_language_to_teach.map(
                   (lang) => lang.language
                 ),
               };

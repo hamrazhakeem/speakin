@@ -3,6 +3,7 @@ import { FaLock } from 'react-icons/fa';
 import { useForm } from "react-hook-form";
 import { toast } from 'react-hot-toast';
 import useAxios from "../../../../hooks/useAxios";
+import { tutorApi } from "../../../../api/tutorApi";
 import LoadingSpinner from "../../../common/ui/LoadingSpinner";
 import PasswordInput from "../../common/ui/input/PasswordInput";
 import NavigationTabs from "../../common/ui/profile/NavigationTabs";
@@ -30,14 +31,12 @@ const TutorPasswordChangeForm = () => {
   const onSubmit = async (data) => {
     setLoading(true);
     try {
-      const response = await axiosInstance.post('change-password/', {
-        current_password: data.currentPassword,
-        new_password: data.newPassword
+      await tutorApi.changePassword(axiosInstance, {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword
       });
       reset();
-      if (response.status === 200) {
-        toast.success('Password changed successfully');
-      }
+      toast.success('Password changed successfully');
     } catch (error) {
       if (error.response?.status === 400 && error.response.data.current_password) {
         toast.error(error.response.data.current_password[0]);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import useAxios from '../../../../hooks/useAxios';
+import { tutorApi } from '../../../../api/tutorApi';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
 import SessionCreationModal from './SessionCreationModal';
 import SessionsList from './SessionList';
@@ -28,8 +29,8 @@ const TutorSessionsManage = () => {
   const fetchTutorAvailability = async () => {
     setLoading(true);
     try {
-      const response = await axiosInstance.get('tutor-availabilities/');
-      const tutorAvailabilities = response.data.filter(slot => slot.tutor_id === userId);
+      const response = await tutorApi.getTutorAvailabilities(axiosInstance);
+      const tutorAvailabilities = tutorApi.filterTutorAvailabilities(response, userId);
       setSessions(tutorAvailabilities);
     } catch (error) {
       console.error('Error fetching session availability:', error);
@@ -41,7 +42,7 @@ const TutorSessionsManage = () => {
 
   useEffect(() => {
     fetchTutorAvailability();
-    setTeachingLanguage(sessionStorage.getItem('teachingLanguage'));
+    setTeachingLanguage(tutorApi.getTeachingLanguage());
   }, []);
 
   return (

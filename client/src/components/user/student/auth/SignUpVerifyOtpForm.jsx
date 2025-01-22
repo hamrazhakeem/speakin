@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { setTokens } from '../../../../redux/authSlice';
 import { ChevronLeft, Shield, Timer } from 'lucide-react';
+import useAxios from '../../../../hooks/useAxios';
+import { studentApi } from '../../../../api/studentApi';
+
+// Component imports
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
 import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 import OtpInput from '../../common/ui/input/OtpInput';
@@ -13,6 +16,7 @@ const SignUpVerifyOtpForm = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const axiosInstance = useAxios();
 
     const [otp, setOtp] = useState(['', '', '', '', '', '']);
     const [email, setEmail] = useState('');
@@ -136,12 +140,23 @@ const SignUpVerifyOtpForm = () => {
         }
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}verify-otp/`, 
-                { email, otp: otpString, cache_key: cacheKey }
-            );
-            const { access, refresh, name, id, credits } = response.data;
+            const response = await studentApi.verifyOtp(axiosInstance, {
+                email,
+                otp: otpString,
+                cache_key: cacheKey
+            });
 
-            dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, isAdmin: false, userId: id, isStudent: true, credits: credits }));
+            const { access, refresh, name, id, credits } = response;
+
+            dispatch(setTokens({ 
+                accessToken: access, 
+                refreshToken: refresh, 
+                userName: name, 
+                isAdmin: false, 
+                userId: id, 
+                isStudent: true,
+                credits: credits 
+            }));
       
             toast.success(`Welcome, ${name}!`);
 
@@ -152,7 +167,7 @@ const SignUpVerifyOtpForm = () => {
             console.error(error.response?.data);
             setVerifyLoading(false);
             setTimeout(() => {
-                toast.error(error.response?.data?.message || 'Failed to verify OTP. Please try again.')
+                toast.error(error.response?.data?.message || 'Failed to verify OTP. Please try again.');
             }, 500);
         }
     };
@@ -162,17 +177,18 @@ const SignUpVerifyOtpForm = () => {
         setResendLoading(true);
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}resend-otp/`, 
-                { email, cache_key: cacheKey }
-            );
-            console.log('OTP resent successfully:', response.data);
+            await studentApi.resendOtp(axiosInstance, {
+                email,
+                cache_key: cacheKey
+            });
+            
             toast.success('New OTP sent to your email!');
             setTimer(30);
             setShowTimer(true);
             localStorage.setItem('otpTimerEnd', (Date.now() + 30 * 1000).toString());
             setOtp(['', '', '', '', '', '']);
         } catch (error) {
-            toast.error(error.response?.data?.message || 'Failed to resend OTP. Please try again.')
+            toast.error(error.response?.data?.message || 'Failed to resend OTP. Please try again.');
             console.error(error.response?.data);
         } finally {
             setResendLoading(false);

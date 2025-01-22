@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Calendar as Info, X, Clock, AlertCircle } from 'lucide-react';
 import { useSelector } from 'react-redux';
-import useAxios from '../../../../hooks/useAxios';
 import { toast } from 'react-hot-toast';
+import useAxios from '../../../../hooks/useAxios';
+import { tutorApi } from '../../../../api/tutorApi';
 
 const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailability, teachingLanguage }) => {
   const [step, setStep] = useState(1);
@@ -85,7 +86,7 @@ const SessionCreationModal = ({ isOpen, onClose, tutorCredits, fetchTutorAvailab
     };
 
     try {
-      const response = await axiosInstance.post('tutor-availabilities/', sessionData);
+      await tutorApi.createSession(axiosInstance, sessionData);
       toast.success('Session created successfully');
       fetchTutorAvailability();
       onClose();

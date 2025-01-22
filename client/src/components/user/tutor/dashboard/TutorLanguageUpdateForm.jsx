@@ -4,6 +4,7 @@ import { FaArrowLeft } from 'react-icons/fa';
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-hot-toast';
 import useAxios from '../../../../hooks/useAxios';
+import { tutorApi } from '../../../../api/tutorApi';
 import FormInput from '../../common/ui/input/FormInput';
 import FileUpload from '../../common/ui/input/FileUpload';
 import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
@@ -14,7 +15,7 @@ const TutorLanguageUpdateForm = () => {
     const axiosInstance = useAxios();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [profilePreview, setProfilePreview] = useState(null);
-    const [profileImageFile, setprofileImage] = useState(null);
+    const [profileImageFile, setProfileImage] = useState(null);
     const [languagesToTeach, setLanguagesToTeach] = useState([]);
     const [imageFile, setImage] = useState(null);
     const [videoFile, setVideo] = useState(null);
@@ -35,7 +36,7 @@ const TutorLanguageUpdateForm = () => {
           toast.error('Image size should be less than 5MB');
           return;
         }
-        setprofileImage(file);
+        setProfileImage(file);
         setProfilePreview(URL.createObjectURL(file));
       }
     };
@@ -43,13 +44,11 @@ const TutorLanguageUpdateForm = () => {
     useEffect(() => {
       const fetchData = async () => {
         try {
-          const languagesToTeachResponse = await fetch(`${import.meta.env.VITE_API_GATEWAY_URL}platform-languages/`);
-          if (!languagesToTeachResponse.ok) throw new Error('Failed to fetch languages to teach');
-          const languagesToTeachData = await languagesToTeachResponse.json();
-          console.log('languagesToTeachData:', languagesToTeachData);
-          setLanguagesToTeach(languagesToTeachData.languages);
+          const response = await tutorApi.getPlatformLanguages(axiosInstance);
+          setLanguagesToTeach(response.languages);
         } catch (error) {
           console.error('Error fetching languages:', error);
+          toast.error('Failed to fetch languages');
         }
       };
       fetchData();
@@ -58,46 +57,36 @@ const TutorLanguageUpdateForm = () => {
     const isNative = watch("isNative");
   
     const validateImage = useCallback((e) => {
-      console.log('helloooooo0')
       const file = e.target?.files?.[0];
-      console.log('helooooo1')
-      // Check if a file is selected
+      
       if (!file) {
         toast.error("Image is required.");
         return;
       }
     
-      // Validate file type
       if (!['image/jpeg', 'image/png', 'image/bmp'].includes(file.type)) {
         toast.error("Invalid file type. Please upload JPG, PNG, or BMP images.");
-        e.target.value = null;  // Reset input
+        e.target.value = null;
         return;
       }
   
       setImage(file);
     }, []);
     
-    
     const validateVideo = useCallback((e) => {
-      console.log('helloooooo0')
       const file = e.target?.files?.[0];
     
-      // Check if a file is selected
       if (!file) {
         toast.error("Video is required.");
         return;
       }
       
       setVideo(file);
-      console.log("Video uploaded:", file);
     }, []);
-    
   
     const onSubmit = async (data) => {
       setIsSubmitting(true);
   
-      // Log the languages array before stringifying (for debugging)
-      // Prepare form data
       try {
         const formData = new FormData();
         formData.append("full_name", data.fullName);
@@ -106,22 +95,13 @@ const TutorLanguageUpdateForm = () => {
         formData.append("about", data.about);
         formData.append("imageUpload", imageFile);
         formData.append("intro_video", videoFile);
-        if (imageFile) {
+        if (profileImageFile) {
           formData.append('profile_image', profileImageFile);
         }
   
-        const response = await axiosInstance.post(`teaching-language-change-requests/`, formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-        
-        if (response.data.error) {
-          toast.error(response.data.error);
-        } else {
-          toast.success("Request submitted successfully, the status will be notified.");
-          navigate('/tutor/dashboard');
-        }
+        await tutorApi.submitLanguageChangeRequest(axiosInstance, formData);
+        toast.success("Request submitted successfully, the status will be notified.");
+        navigate('/tutor/dashboard');
       } catch (error) {
         console.error('Error editing teaching language:', error);
         if (error.response && error.response.data) {

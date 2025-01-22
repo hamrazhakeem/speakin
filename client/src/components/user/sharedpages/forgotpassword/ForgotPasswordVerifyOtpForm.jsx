@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronRight, Shield, Timer } from 'lucide-react';
+import { ArrowLeft, Shield, Timer } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import axios from 'axios';
+import { commonApi } from '../../../../api/commonApi';
 import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 import OtpInput from '../../common/ui/input/OtpInput';
 
@@ -44,7 +45,6 @@ const ForgotPasswordVerifyOtpForm = () => {
 
     useEffect(() => {
         if (timer > 0) {
-            // Store end time in localStorage
             localStorage.setItem('otpTimerEnd', (Date.now() + timer * 1000).toString());
 
             const interval = setInterval(() => {
@@ -57,16 +57,13 @@ const ForgotPasswordVerifyOtpForm = () => {
                     return newTimer;
                 });
             }, 1000);
-            return () => {
-                clearInterval(interval);
-            };
+            return () => clearInterval(interval);
         } else {
             setShowTimer(false);
             localStorage.removeItem('otpTimerEnd');
         }
     }, [timer]);
 
-    // Clean up when component unmounts
     useEffect(() => {
         return () => {
             localStorage.removeItem('prevPath');
@@ -85,9 +82,7 @@ const ForgotPasswordVerifyOtpForm = () => {
 
             const newOtp = [...otp];
             pastedDigits.forEach((digit, idx) => {
-                if (idx < 6) {
-                    newOtp[idx] = digit;
-                }
+                if (idx < 6) newOtp[idx] = digit;
             });
             setOtp(newOtp);
 
@@ -133,15 +128,15 @@ const ForgotPasswordVerifyOtpForm = () => {
         }
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}forgot-password-verify-otp/`, 
-                { email, otp: otpString, cache_key }
-            );
-            console.log('OTP verified successfully:', response.data);
+            await commonApi.verifyOtp(axios, { 
+                email, 
+                otp: otpString, 
+                cache_key 
+            });
             toast.success('OTP verified successfully!');
             navigate('/forgot-password/set-new-password', { state: { email, cache_key } });
         } catch (error) {
             toast.error(error.response?.data?.message || 'Invalid OTP. Please try again.');
-            console.error(error.response?.data);
             setError(error.response?.data?.message || 'Invalid OTP. Please try again.');
         } finally {
             setVerifyLoading(false);
@@ -153,17 +148,13 @@ const ForgotPasswordVerifyOtpForm = () => {
         setResendLoading(true);
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}forgot-password-resend-otp/`, 
-                { email, cache_key }
-            );
-            console.log('OTP resent successfully:', response.data);
+            await commonApi.resendOtp(axios, { email, cache_key });
             toast.success('New OTP sent to your email!');
             setTimer(30);
             setShowTimer(true);
             localStorage.setItem('otpTimerEnd', (Date.now() + 30 * 1000).toString());
             setOtp(['', '', '', '', '', '']); // Clear OTP fields
         } catch (error) {
-            console.error(error.response?.data);
             setError(error.response?.data?.message || 'Failed to resend OTP. Please try again.');
         } finally {
             setResendLoading(false);

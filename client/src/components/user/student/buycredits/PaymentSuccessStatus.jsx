@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, Home } from 'lucide-react';
-import { useLocation, Link, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateCredits } from '../../../../redux/authSlice';
 import useAxios from '../../../../hooks/useAxios';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import { studentApi } from '../../../../api/studentApi';
 import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 
 const PaymentSuccessStatus = () => {
   const [searchParams] = useSearchParams();
   const { credits, userId } = useSelector(state => state.auth);
   const [updatedCredits, setUpdatedCredits] = useState(credits);
-  const [loading, setLoading] = useState(true);
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const amount = queryParams.get('amount');
@@ -30,8 +29,8 @@ const PaymentSuccessStatus = () => {
           throw new Error('No session ID found');
         }
 
-        const response = await axiosInstance.get(`users/${userId}/`);
-        const newCredits = response.data.balance_credits;
+        const response = await studentApi.getUser(axiosInstance, userId);
+        const newCredits = response.balance_credits;
 
         dispatch(updateCredits(newCredits));
         setUpdatedCredits(newCredits);
@@ -44,8 +43,6 @@ const PaymentSuccessStatus = () => {
     fetchUpdatedCredits();
   }, [dispatch, navigate, searchParams]);
 
-
-  
   return (
     <div className="flex-1 bg-gray-50">
       <div className="min-h-[calc(100vh-8rem)] flex items-center justify-center p-4">

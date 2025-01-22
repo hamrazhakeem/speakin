@@ -5,6 +5,7 @@ import useAxios from "../../../../hooks/useAxios";
 import { useEffect, useState } from "react";
 import HomeEmptyState from "./HomeEmptyState";
 import FilterSelect from "./FilterSelect";
+import { studentApi } from "../../../../api/studentApi";
 
 const TutorBrowse = () => {
     const axiosInstance = useAxios();
@@ -18,8 +19,8 @@ const TutorBrowse = () => {
     async function fetchTutorData() {
       try {
         setLoading(true);
-        const response = await axiosInstance.get('users/');
-        const tutorUsers = response.data.filter(
+        const response = await studentApi.getUsers(axiosInstance);
+        const tutorUsers = response.filter(
           user => user.user_type === "tutor" && user.is_active
         );
         setTutors(tutorUsers);

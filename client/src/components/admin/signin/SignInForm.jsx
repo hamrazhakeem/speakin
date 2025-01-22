@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Shield, AlertCircle, Lock, Mail } from 'lucide-react';
-import axios from 'axios';
 import { toast } from 'react-hot-toast';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import useAxios from '../../../hooks/useAxios';
 import { setTokens } from '../../../redux/authSlice';
+import { adminApi } from '../../../api/adminApi';
 import AdminButton from '../ui/AdminButton';
 import FormInput from '../ui/FormInput';
 import AlertBox from '../ui/AlertBox';
@@ -16,16 +17,15 @@ const SignInForm = () => {
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const axiosInstance = useAxios();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_GATEWAY_URL}admin/sign-in/`, 
-        { email, password }
-      );
-      const { access, refresh, name, id } = response.data;
+      const response = await adminApi.signIn(axiosInstance, { email, password });
+      const { access, refresh, name, id } = response;
+      
       dispatch(setTokens({ 
         accessToken: access, 
         refreshToken: refresh, 
@@ -33,6 +33,7 @@ const SignInForm = () => {
         userId: id, 
         isAdmin: true 
       }));
+      
       toast.success('Welcome back, Admin!');
       navigate('/admin/dashboard');
     } catch (error) {

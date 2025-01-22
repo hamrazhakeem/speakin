@@ -4,13 +4,15 @@ import { useDispatch } from 'react-redux';
 import { setTokens } from '../../../../redux/authSlice';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
+import { studentApi } from '../../../../api/studentApi';
+
+// Component imports
 import SignInWithGoogleButton from './SignInWithGoogleButton';
-import { ChevronRight } from 'lucide-react';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
 import { useForm } from 'react-hook-form';
 import FormInput from '../../common/ui/input/FormInput';
 import PasswordInput from '../../common/ui/input/PasswordInput';
-import UserTypeSelector from '../../common/ui/profile/UserTypeSelector';
+import UserTypeSelector from '../../common/ui/signin/UserTypeSelector';
 import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 
 const SignInForm = () => {
@@ -28,11 +30,8 @@ const SignInForm = () => {
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_API_GATEWAY_URL}sign-in/`, 
-        data
-      );
-      const { access, refresh, name, id, credits } = response.data;
+      const response = await studentApi.signIn(axios, data);
+      const { access, refresh, name, id, credits } = response;
 
       dispatch(setTokens({ 
         accessToken: access, 

@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import { updateRequiredCredits } from "../../../../redux/authSlice";
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import useAxios from "../../../../hooks/useAxios";
+import { tutorApi } from "../../../../api/tutorApi";
 import LoadingSpinner from "../../../common/ui/LoadingSpinner";
 import NavigationTabs from "../../common/ui/profile/NavigationTabs";
 import LanguageList from "../../common/ui/profile/LanguageList";
@@ -47,57 +48,43 @@ const TutorDashboardContent = () => {
   
     async function fetchUserData() {
       try {
-        const response = await axiosInstance.get(`users/${userId}/`);
-  
-        setTutorData(response.data);
-        if (response.data.language_spoken) {
-          setSelectedLanguages(response.data.language_spoken);
+        const [tutorResponse, countriesResponse, languagesResponse] = await Promise.all([
+          tutorApi.getUser(axiosInstance, userId),
+          tutorApi.getCountries(axiosInstance), 
+          tutorApi.getSpokenLanguages(axiosInstance)
+        ]);   
+
+        setTutorData(tutorResponse);
+        if (tutorResponse.language_spoken) {
+          setSelectedLanguages(tutorResponse.language_spoken);
         }
-        setValue("speakinName", response.data.tutor_details?.speakin_name || "");
-        setValue("country", response.data.country || "");
-        setValue("requiredCredits", response.data.tutor_details?.required_credits || "");
-        setValue("email", response.data.email || "");
-        setValue("name", response.data.name || "");
-        setCountry(response.data.country || "");
-        console.log('Tutor Data:', response.data)
-        sessionStorage.setItem('teachingLanguage', response.data.tutor_language_to_teach[0].language);
-        const countriesResponse = await axiosInstance.get(`countries/`);
-        setCountries(countriesResponse.data); 
+        setValue("speakinName", tutorResponse.tutor_details?.speakin_name || "");
+        setValue("country", tutorResponse.country || "");
+        setValue("requiredCredits", tutorResponse.tutor_details?.required_credits || "");
+        setValue("email", tutorResponse.email || "");
+        setValue("name", tutorResponse.name || "");
+        setCountry(tutorResponse.country || "");
+        console.log('Tutor Data:', tutorResponse)
+        sessionStorage.setItem('teachingLanguage', tutorResponse.tutor_language_to_teach[0].language);
+        setCountries(countriesResponse); 
   
-        const spokenLanguagesResponse = await axiosInstance.get(`spoken-languages/`);
-        const languagesWithIds = spokenLanguagesResponse.data.languages.map((lang, index) => {
-          if (typeof lang === 'string') {
-            return {
-              id: `lang-${index}`,
-              name: lang
-            };
-          }
-          return {
-            id: lang.id || `lang-${index}`,
-            name: lang.name || lang
-          };
-        });
+        const languagesWithIds = languagesResponse.languages.map((lang, index) => ({
+          id: typeof lang === 'string' ? `lang-${index}` : lang.id || `lang-${index}`,
+          name: typeof lang === 'string' ? lang : lang.name
+        }));
   
         // Ensure each proficiency has a unique id
-        const proficienciesWithIds = spokenLanguagesResponse.data.proficiencies.map((prof, index) => {
-          if (typeof prof === 'string') {
-            return {
-              id: `prof-${index}`,
-              level: prof,
-              description: prof
-            };
-          }
-          return {
-            id: prof.id || `prof-${index}`,
-            level: prof.level || prof,
-            description: prof.description || prof
-          };
-        });
+        const proficienciesWithIds = languagesResponse.proficiencies.map((prof, index) => ({
+          id: typeof prof === 'string' ? `prof-${index}` : prof.id || `prof-${index}`,
+          level: typeof prof === 'string' ? prof : prof.level,
+          description: typeof prof === 'string' ? prof : prof.description || prof.level
+        }));
   
         setLanguages(languagesWithIds);
         setProficiencies(proficienciesWithIds);
       } catch (error) {
         console.error('Error fetching user:', error);
+        toast.error('Failed to load profile data');
       } finally {
         setPageLoading(false);
       }
@@ -121,7 +108,7 @@ const TutorDashboardContent = () => {
       formData.append("language_spoken", JSON.stringify(selectedLanguages));
   
       try {
-        await axiosInstance.patch(`users/${userId}/`, formData);
+        await tutorApi.updateUser(axiosInstance, userId, formData);
         setEditMode(false);
         fetchUserData();
         dispatch(updateRequiredCredits(parseInt(data.requiredCredits)));

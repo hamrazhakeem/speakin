@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import AdminTable from '../ui/AdminTable';
 import useAxios from '../../../hooks/useAxios';
 import LoadingSpinner from '../../common/ui/LoadingSpinner';
+import { adminApi } from '../../../api/adminApi';
 
 const UsersManagement = () => {
   const axiosInstance = useAxios();
@@ -17,26 +18,28 @@ const UsersManagement = () => {
     try {
       setLoading(true);
       const [usersResponse, requestsResponse] = await Promise.all([
-        axiosInstance.get('users/'),
-        axiosInstance.get('teaching-language-change-requests/')
+        adminApi.getUsers(axiosInstance),
+        adminApi.getLanguageChangeRequests(axiosInstance)
       ]);
-      console.log(usersResponse.data)
-      const users = usersResponse.data;
-      const requests = requestsResponse.data;
 
-      setTimeout(() => {
-        const studentData = users.filter(user => user.user_type === 'student');
-        const approvedTutors = users.filter(user => user.user_type === 'tutor' && user.tutor_details.status === 'approved');
-        const pendingTutorsData = users.filter(user => user.user_type === 'tutor' && user.tutor_details.status === 'pending');
+      const users = usersResponse;
+      const requests = requestsResponse;
 
-        setStudents(studentData);
-        setTutors(approvedTutors);
-        setPendingTutors(pendingTutorsData);
-        setLanguageChangeRequests(requests);
-        setLoading(false);
-      }, 500);
+      const studentData = users.filter(user => user.user_type === 'student');
+      const approvedTutors = users.filter(user => 
+        user.user_type === 'tutor' && user.tutor_details.status === 'approved'
+      );
+      const pendingTutorsData = users.filter(user => 
+        user.user_type === 'tutor' && user.tutor_details.status === 'pending'
+      );
+
+      setStudents(studentData);
+      setTutors(approvedTutors);
+      setPendingTutors(pendingTutorsData);
+      setLanguageChangeRequests(requests);
     } catch (error) {
       console.error('Error fetching users:', error);
+    } finally {
       setLoading(false);
     }
   };
@@ -45,17 +48,9 @@ const UsersManagement = () => {
     fetchUsers();
   }, []);
 
-  const studentColumns = ['No.', 'User Info', 'Language to Learn', 'Balance Credits', 'Status', 'Action'];
-  const tutorColumns = ['No.', 'User Info', 'Language to Teach', 'Balance Credits', 'Status', 'Action'];
-  const pendingColumns = ['No.', 'User Info', 'Language to Teach', 'Required Credits', 'Action'];
-  const languageRequestColumns = ['No.', 'User Info', 'Current Language', 'Requested Language', 'Action'];
-
   const handleAction = async (userId, action) => {
     try {
-      await axiosInstance.patch(`users/${userId}/`, {
-        user_id: userId,
-        is_active: action,
-      });
+      await adminApi.updateUserStatus(axiosInstance, userId, action);
       fetchUsers();
     } catch (error) {
       console.error(`Error ${action}ing user:`, error);
@@ -64,8 +59,8 @@ const UsersManagement = () => {
 
   const handleVerify = async (userId) => {
     try {
-      const response = await axiosInstance.get(`users/${userId}/`);
-      navigate(`/admin/verify-tutor/${userId}`, { state: response.data });
+      const response = await adminApi.getUserDetails(axiosInstance, userId);
+      navigate(`/admin/verify-tutor/${userId}`, { state: response });
     } catch (error) {
       console.error('Error verifying tutor:', error);
     }
@@ -85,6 +80,11 @@ const UsersManagement = () => {
       console.error('Error getting language change request:', error);
     }
   };
+
+  const studentColumns = ['No.', 'User Info', 'Language to Learn', 'Balance Credits', 'Status', 'Action'];
+  const tutorColumns = ['No.', 'User Info', 'Language to Teach', 'Balance Credits', 'Status', 'Action'];
+  const pendingColumns = ['No.', 'User Info', 'Language to Teach', 'Required Credits', 'Action'];
+  const languageRequestColumns = ['No.', 'User Info', 'Current Language', 'Requested Language', 'Action'];
 
   return (
     <div className="max-w-7xl mx-auto">

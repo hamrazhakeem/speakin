@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, ChevronRight, KeyRound, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, KeyRound } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
-import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import { commonApi } from '../../../../api/commonApi';
 import PasswordRequirements from '../../common/ui/input/PasswordRequirements';
 import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 import PasswordInput from '../../common/ui/input/PasswordInput';
+import axios from 'axios';
 
 const ForgotPasswordSetNewPasswordForm = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { email, cache_key } = location.state || {};
     const [loading, setLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
     useEffect(() => {
@@ -34,15 +32,12 @@ const ForgotPasswordSetNewPasswordForm = () => {
 
         setLoading(true);
         try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_GATEWAY_URL}set-new-password/`, 
-                { 
-                    email, 
-                    newPassword: data.newPassword, 
-                    cache_key 
-                }
-            );
-            console.log('Password set successfully:', response.data);
+            await commonApi.setNewPassword(axios, {
+                email,
+                newPassword: data.newPassword,
+                cache_key
+            });
+            
             toast.success('Password updated successfully! You can now sign in.');
             navigate('/sign-in');
         } catch (error) {
@@ -53,10 +48,10 @@ const ForgotPasswordSetNewPasswordForm = () => {
         }
     };
     
-  return (
-    <div className="flex-1 bg-gray-50">
-        <main className="flex justify-center items-center p-4">
-        <div className="w-full max-w-md mt-10 mb-10">
+    return (
+        <div className="flex-1 bg-gray-50">
+            <main className="flex justify-center items-center p-4">
+                <div className="w-full max-w-md mt-10 mb-10">
                     {/* Back Link */}
                     <Link 
                         to="/sign-in" 

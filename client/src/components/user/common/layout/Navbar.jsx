@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Bell, User, Menu, X, CreditCard, LogOut, Plus, MessageCircle, Star } from 'lucide-react';
 import { clearTokens, updateCredits } from '../../../../redux/authSlice';
 import useAxios from '../../../../hooks/useAxios';
+import { studentApi } from '../../../../api/studentApi';
 import Avatar from '../../../common/ui/Avatar';
 import GradientButton from '../ui/buttons/GradientButton';
 
@@ -20,11 +21,11 @@ const Navbar = () => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await axiosInstance.get(`users/${userId}/`);
-        if (response.data.balance_credits !== credits) {
-          dispatch(updateCredits(response.data.balance_credits));
+        const response = await studentApi.getUser(axiosInstance, userId);
+        if (response.balance_credits !== credits) {
+          dispatch(updateCredits(response.balance_credits));
         }
-        setProfileImage(response.data.profile_image);
+        setProfileImage(response.profile_image);
       } catch (error) {
         console.error('Error fetching user data:', error);
       }
@@ -198,7 +199,7 @@ const Navbar = () => {
         </div>
       </div>
   
-      {/* Mobile menu with updated styling */}
+      {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100">
           <div className="px-4 py-3 space-y-4">
@@ -216,11 +217,10 @@ const Navbar = () => {
                     <p className="font-medium text-gray-900">{userName}</p>
                     <p className="text-sm text-gray-500">{isTutor ? 'Tutor' : 'Student'}</p>
                   </div>
-                  
                 </div>
 
                 <div className="flex flex-col space-y-2">
-                <button
+                  <button
                     onClick={() => {
                       navigate(getProfilePath());
                       setIsMobileMenuOpen(false);

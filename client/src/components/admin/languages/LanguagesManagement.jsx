@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import useAxios from '../../../hooks/useAxios';
 import LoadingSpinner from '../../common/ui/LoadingSpinner';
 import LanguageSection from './LanguageSection';
+import { adminApi } from '../../../api/adminApi';
 
 const LanguagesManagement = () => {
   const [languages, setLanguages] = useState([]);
@@ -12,10 +13,10 @@ const LanguagesManagement = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get('platform-languages/');
-        if (response.data) {
-          setLanguages(response.data.languages || []);
-          setProficiencies(response.data.proficiencies || []);
+        const response = await adminApi.getPlatformLanguages(axiosInstance);
+        if (response) {
+          setLanguages(response.languages || []);
+          setProficiencies(response.proficiencies || []);
         }
         console.log(response);
       } catch (error) {

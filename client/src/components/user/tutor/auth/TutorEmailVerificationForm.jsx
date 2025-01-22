@@ -2,12 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Shield, Timer } from 'lucide-react';
 import { toast } from 'react-hot-toast';
-import axios from 'axios';
+import { tutorApi } from '../../../../api/tutorApi';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
 import OtpInput from '../../common/ui/input/OtpInput';
 import FormInput from '../../common/ui/input/FormInput';
 import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
-
+import axios from 'axios';
 
 const TutorEmailVerificationForm = () => {
     const [email, setEmail] = useState('');
@@ -43,34 +43,32 @@ const TutorEmailVerificationForm = () => {
     };
   }, []);
   
-  // Update handleResendOtp
-  const handleResendOtp = async () => {
-    setResendLoading(true);
-    try {
-      await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}resend-otp/`, 
-        { email, cache_key: cacheKey }
-       );
-      setTimer(30); // Restart timer
-      setShowTimer(true);
-      setOtp(['', '', '', '', '', '']);
-      toast.success('OTP resent successfully!');
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to resend OTP');
-    } finally {
-      setResendLoading(false);
-    }
-  };
+    const handleResendOtp = async () => {
+      setResendLoading(true);
+      try {
+        await tutorApi.resendOtp(axios, { 
+          email, 
+          cache_key: cacheKey 
+        });
+        setTimer(30);
+        setShowTimer(true);
+        setOtp(['', '', '', '', '', '']);
+        toast.success('OTP resent successfully!');
+      } catch (error) {
+        toast.error(error.response?.data?.error || 'Failed to resend OTP');
+      } finally {
+        setResendLoading(false);
+      }
+    };
   
     const handleSendOtp = async (e) => {
       e.preventDefault();
       setLoading(true);
       try {
-        const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}tutor/verify-email/`, {
-          email
-        });
-        setCacheKey(response.data.cache_key);
+        const response = await tutorApi.sendVerificationOtp(axios, email);
+        setCacheKey(response.cache_key);
         setShowOtpInput(true);
-        setTimer(30); // Start timer
+        setTimer(30);
         setShowTimer(true);
         toast.success('OTP sent successfully!');
       } catch (error) {
@@ -83,7 +81,7 @@ const TutorEmailVerificationForm = () => {
     const handleVerifyOtp = async () => {
       setLoading(true);
       try {
-        await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}tutor/verify-otp/`, {
+        await tutorApi.verifyOtp(axios, {
           email,
           otp: otp.join(''),
           cache_key: cacheKey
@@ -134,83 +132,83 @@ const TutorEmailVerificationForm = () => {
       }
     };
   
-  return (
-    <div className="flex-1 bg-gradient-to-b from-blue-50 to-white">
-      <main className="flex-1 flex justify-center items-center p-4 mb-10">
-      <div className="w-full max-w-md mt-16 mb-10">
-        <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-            <div className="flex justify-center mb-6">
-            <div className="p-3 bg-blue-50 rounded-full">
-                <Shield className="w-8 h-8 text-blue-600" />
-            </div>
-            </div>
+    return (
+      <div className="flex-1 bg-gradient-to-b from-blue-50 to-white">
+        <main className="flex-1 flex justify-center items-center p-4 mb-10">
+          <div className="w-full max-w-md mt-16 mb-10">
+            <div className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+              <div className="flex justify-center mb-6">
+                <div className="p-3 bg-blue-50 rounded-full">
+                  <Shield className="w-8 h-8 text-blue-600" />
+                </div>
+              </div>
 
-            <div className="text-center mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-                {showOtpInput ? 'Verify OTP' : 'Verify Your Email'}
-            </h2>
-            <p className="text-gray-600">
-                {showOtpInput 
-                ? `Enter the 6-digit code sent to ${email}`
-                : 'First, lets verify your email address'}
-            </p>
-            </div>
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+                  {showOtpInput ? 'Verify OTP' : 'Verify Your Email'}
+                </h2>
+                <p className="text-gray-600">
+                  {showOtpInput 
+                    ? `Enter the 6-digit code sent to ${email}`
+                    : 'First, lets verify your email address'}
+                </p>
+              </div>
 
-            {showOtpInput ? (
-            <div className="space-y-6">
-                <OtpInput
+              {showOtpInput ? (
+                <div className="space-y-6">
+                  <OtpInput
                     otp={otp}
                     handleOtpChange={handleOtpChange}
                     handleKeyDown={handleKeyDown}
-                />
-                <PrimaryButton
+                  />
+                  <PrimaryButton
                     onClick={handleVerifyOtp}
                     loading={loading}
                     disabled={loading}
-                >
+                  >
                     Verify OTP
-                </PrimaryButton>
-                <div className="mt-6 text-center">
-                {showTimer ? (
-                    <div className="flex items-center justify-center text-gray-600">
-                    <Timer className="w-4 h-4 mr-2" />
-                    Resend OTP in {timer} seconds
-                    </div>
-                ) : (
-                    <div className="flex justify-center">
-                    <button
-                        onClick={handleResendOtp}
-                        disabled={resendLoading}
-                        className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
-                    >
-                        {resendLoading ? (
-                        <LoadingSpinner size="sm" className="text-blue-600" />
-                        ) : (
-                        'Resend OTP'
-                        )}
-                    </button>
-                    </div>
-                )}
+                  </PrimaryButton>
+                  <div className="mt-6 text-center">
+                    {showTimer ? (
+                      <div className="flex items-center justify-center text-gray-600">
+                        <Timer className="w-4 h-4 mr-2" />
+                        Resend OTP in {timer} seconds
+                      </div>
+                    ) : (
+                      <div className="flex justify-center">
+                        <button
+                          onClick={handleResendOtp}
+                          disabled={resendLoading}
+                          className="text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+                        >
+                          {resendLoading ? (
+                            <LoadingSpinner size="sm" className="text-blue-600" />
+                          ) : (
+                            'Resend OTP'
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-            </div>
-            ) : (
-            <form onSubmit={handleSendOtp} className="space-y-4">
-                <FormInput
+              ) : (
+                <form onSubmit={handleSendOtp} className="space-y-4">
+                  <FormInput
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Enter your email"
                     required
-                />
-                <PrimaryButton
+                  />
+                  <PrimaryButton
                     type="submit"
                     loading={loading}
                     disabled={loading}
-                >
+                  >
                     Send OTP
-                </PrimaryButton>
-            </form>
-            )}
+                  </PrimaryButton>
+                </form>
+              )}
 
             {/* Back to Sign In Link */}
             <div className="mt-6 text-center">

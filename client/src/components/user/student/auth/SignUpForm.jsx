@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import axios from 'axios';
+import useAxios from '../../../../hooks/useAxios';
+import { toast } from 'react-hot-toast';
+import { studentApi } from '../../../../api/studentApi';
+
+// Component imports
 import SignInWithGoogleButton from './SignInWithGoogleButton';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
-import { toast } from 'react-hot-toast';
 import FormInput from '../../common/ui/input/FormInput';
 import PasswordInput from '../../common/ui/input/PasswordInput';
-import UserTypeSelector from '../../common/ui/profile/UserTypeSelector';
+import UserTypeSelector from '../../common/ui/signin/UserTypeSelector';
 import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 import PasswordRequirements from '../../common/ui/input/PasswordRequirements';
 
@@ -16,19 +19,15 @@ const SignUpForm = () => {
   const { register, handleSubmit, formState: { errors }, reset } = useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const axiosInstance = useAxios();
 
   const onSubmit = async (data) => {
     setLoading(true);
     try {                              
-      const response = await axios.post(`${import.meta.env.VITE_API_GATEWAY_URL}sign-up/`, {
-        name: data.name,
-        email: data.email,
-        password: data.password,
-        user_type: 'student'
-      });
+      const response = await studentApi.signUp(axiosInstance, data);
       
       reset();
-      const { cache_key } = response.data;
+      const { cache_key } = response;
       navigate('/sign-up/verify-otp', { 
         state: { 
           email: data.email,
@@ -36,7 +35,7 @@ const SignUpForm = () => {
         } 
       });
     } catch (error) {
-      if (error.response && error.response.data.errors.email[0] === 'user with this email already exists.') {
+      if (error.response?.data?.errors?.email?.[0] === 'user with this email already exists.') {
         toast.error('This email is already registered. Please try signing in instead.');
       } else {
         toast.error('Something went wrong. Please try again.');

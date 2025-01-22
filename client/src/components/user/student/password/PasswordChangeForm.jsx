@@ -3,6 +3,7 @@ import { FaLock } from 'react-icons/fa';
 import { useForm } from "react-hook-form";
 import useAxios from "../../../../hooks/useAxios";
 import { toast } from 'react-hot-toast';
+import { studentApi } from '../../../../api/studentApi';
 import NavigationTabs from '../../common/ui/profile/NavigationTabs';
 import PasswordInput from '../../common/ui/input/PasswordInput';
 import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
@@ -29,14 +30,9 @@ const PasswordChangeForm = () => {
     const onSubmit = async (data) => {
       try {
         setLoading(true);
-        const response = await axiosInstance.post('change-password/', {
-          current_password: data.currentPassword,
-          new_password: data.newPassword
-        });
+        await studentApi.changePassword(axiosInstance, data);
         reset();
-        if (response.status === 200) {
-          toast.success('Password changed successfully');
-        }
+        toast.success('Password changed successfully');
       } catch (error) {
         if (error.response?.status === 400 && error.response.data.current_password) {
           toast.error(error.response.data.current_password[0]);

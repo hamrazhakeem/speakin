@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Languages } from 'lucide-react';
 import useAxios from '../../../hooks/useAxios';
 import LoadingSpinner from '../../common/ui/LoadingSpinner';
+import { adminApi } from '../../../api/adminApi';
 
 const LanguageStatsCard = () => {
   const [languageStats, setLanguageStats] = useState({ teaching: [], learning: [], spoken: [] });
@@ -11,15 +12,16 @@ const LanguageStatsCard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [bookingsRes, availabilitiesRes] = await Promise.all([
-          axiosInstance.get('bookings/'),
-          axiosInstance.get('tutor-availabilities/'),
+        const [bookingsRes, availabilitiesRes, usersRes] = await Promise.all([
+          adminApi.getBookings(axiosInstance),
+          adminApi.getTutorAvailabilities(axiosInstance),
+          adminApi.getUsers(axiosInstance)
         ]);
 
         // Mapping teaching languages
         const teachingLanguages = {};
-        bookingsRes.data.forEach(booking => {
-          const availability = availabilitiesRes.data.find(a => a.id === booking.availability);
+        bookingsRes.forEach(booking => {
+          const availability = availabilitiesRes.find(a => a.id === booking.availability);
           if (availability) {
             const lang = availability.language_to_teach;
             teachingLanguages[lang] = (teachingLanguages[lang] || 0) + 1;
@@ -32,12 +34,10 @@ const LanguageStatsCard = () => {
           .slice(0, 5);
 
         // Fetching users for learning and spoken languages
-        const usersRes = await axiosInstance.get('users/');
-        console.log('userres',usersRes)
         const spokenLanguages = {}; // This will store the count of users for each spoken language
         const learningLanguages = {}; // This stores the count for learning languages
 
-        usersRes.data.forEach(user => {
+        usersRes.forEach(user => {
           // For each user, track the spoken languages
           user.language_spoken?.forEach(langObj => {
             if (spokenLanguages[langObj.language]) {

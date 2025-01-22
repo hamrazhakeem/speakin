@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import useAxios from '../../../hooks/useAxios';
 import { toast } from 'react-hot-toast';
 import { VerificationContent, InfoItem } from './VerificationContent';
+import { adminApi } from '../../../api/adminApi';
 
 const LanguageChangeReview = () => {
   const location = useLocation();
@@ -27,10 +28,10 @@ const LanguageChangeReview = () => {
     loadingSetter(true);
     try {
       if (isApprove) {
-        await axiosInstance.patch(`teaching-language-change-requests/${requestData.id}/`);
+        await adminApi.approveLanguageChange(axiosInstance, requestData.id);
         toast.success('Language Change Request Approved Successfully');
       } else {
-        await axiosInstance.delete(`teaching-language-change-requests/${requestData.id}/`);
+        await adminApi.denyLanguageChange(axiosInstance, requestData.id);
         toast.success('Language Change Request Denied Successfully');
       }
       navigate('/admin/manage-users');

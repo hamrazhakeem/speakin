@@ -14,6 +14,7 @@ import CustomBarTooltip from './CustomBarTooltip';
 import StatCard from './StatCard';
 import AdminTable from '../ui/AdminTable';
 import AdminButton from '../ui/AdminButton';
+import { adminApi } from '../../../api/adminApi';
 
 const FinancialDashboard = () => {
   const axiosInstance = useAxios();
@@ -28,20 +29,25 @@ const FinancialDashboard = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [transactionsRes, bookingsRes, escrowRes, availabilitiesRes] = await Promise.all([
-          axiosInstance.get('transactions/'),
-          axiosInstance.get('bookings/'),
-          axiosInstance.get('escrow/'),
-          axiosInstance.get('tutor-availabilities/')
+        const [
+          transactionsData, 
+          bookingsData, 
+          escrowData, 
+          availabilitiesData
+        ] = await Promise.all([
+          adminApi.getTransactions(axiosInstance),
+          adminApi.getBookings(axiosInstance),
+          adminApi.getEscrowData(axiosInstance),
+          adminApi.getTutorAvailabilities(axiosInstance)
         ]);
         const availabilitiesMap = {};
-        availabilitiesRes.data.forEach(availability => {
+        availabilitiesData.forEach(availability => {
           availabilitiesMap[availability.id] = availability;
         });
   
-        setTransactions(transactionsRes.data);
-        setBookings(bookingsRes.data);
-        setEscrowData(escrowRes.data);
+        setTransactions(transactionsData);
+        setBookings(bookingsData);
+        setEscrowData(escrowData);
         setAvailabilities(availabilitiesMap);
       } catch (error) {
         console.error('Error fetching transactions:', error);
