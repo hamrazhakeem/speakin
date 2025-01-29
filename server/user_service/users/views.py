@@ -492,7 +492,7 @@ def tutor_request(request):
         if is_native:
             govt_id = image_file
             certificate = None
-        else:
+        else: 
             govt_id = None
             certificate = image_file
 
