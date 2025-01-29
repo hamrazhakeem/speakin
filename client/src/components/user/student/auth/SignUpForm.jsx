@@ -79,6 +79,20 @@ const SignUpForm = () => {
                   minLength: {
                     value: 2,
                     message: 'Name must be at least 2 characters'
+                  },
+                  maxLength: {
+                    value: 50,
+                    message: 'Name cannot exceed 50 characters'
+                  },
+                  pattern: {
+                    value: /^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/,
+                    message: 'Name can only contain letters, spaces, and simple punctuation'
+                  },
+                  validate: {
+                    notOnlySpaces: (value) => 
+                      value.trim().length > 0 || 'Name cannot be only spaces',
+                    noConsecutiveSpaces: (value) => 
+                      !/\s\s/.test(value) || 'Name cannot contain consecutive spaces'
                   }
                 })}
                 error={errors.name}
@@ -94,6 +108,22 @@ const SignUpForm = () => {
                   pattern: {
                     value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                     message: 'Invalid email address'
+                  },
+                  maxLength: {
+                    value: 254,
+                    message: 'Email cannot exceed 254 characters'
+                  },
+                  validate: {
+                    notOnlySpaces: (value) => 
+                      value.trim().length > 0 || 'Email cannot be only spaces',
+                    validDomain: (value) => {
+                      const domain = value.split('@')[1];
+                      return (
+                        !domain ||
+                        !/^[.-]|[.-]$/.test(domain) ||
+                        'Email domain cannot start or end with dots or hyphens'
+                      );
+                    }
                   }
                 })}
                 error={errors.email}

@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { ChevronRight } from 'lucide-react';
 import { FaGlobe, FaTrash } from 'react-icons/fa';
 import { toast } from 'react-hot-toast';
 import { useSelector } from 'react-redux';
@@ -133,14 +131,28 @@ const ProfileSettings = () => {
 
     const handleProfileImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-        if (file.size > 5242880) {
-        toast.error('Image size should be less than 5MB');
+    if (!file) return;
+
+    // Check file type
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    const validExtensions = ['jpg', 'jpeg', 'png'];
+    const extension = file.name.split('.').pop().toLowerCase();
+
+    if (!allowedTypes.includes(file.type) || !validExtensions.includes(extension)) {
+        toast.error('Please upload only JPG or PNG images');
+        e.target.value = null;
         return;
-        }
-        setProfileImage(file);
-        setImagePreview(URL.createObjectURL(file));
     }
+
+    // Check file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image size should be less than 5MB');
+        e.target.value = null;
+        return;
+    }
+
+    setProfileImage(file);
+    setImagePreview(URL.createObjectURL(file));
     };
 
     const handleDeleteImage = () => {
@@ -306,6 +318,7 @@ const ProfileSettings = () => {
                     onImageChange={handleProfileImageChange}
                     onImageDelete={handleDeleteImage}
                     imagePreview={imagePreview}
+                    accept=".jpg,.jpeg,.png"
                   />
                 </div>
 
@@ -374,17 +387,28 @@ const ProfileSettings = () => {
                       </div>
 
                       <div>
-                        <FormInput
-                          {...register("country")}
-                          label="Country"
-                          type={editMode ? "select" : "text"}
-                          value={studentData?.country ?? "N/A"}
-                          disabled={!editMode}
-                          options={countries.map(([name, code]) => ({
-                            value: name,
-                            label: name
-                          }))}
-                        />
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                        {editMode ? (
+                          <select
+                            {...register("country", { required: true })}
+                            className={`w-full px-4 py-3 rounded-xl border bg-gray-50 ${
+                              errors.country ? 'border-red-300' : 'border-gray-200'
+                            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                          >
+                            {countries.map(([name, code]) => (
+                              <option key={code} value={name}>
+                                {name}
+                              </option>
+                            ))}
+                          </select>
+                        ) : (
+                          <FormInput
+                            type="text"
+                            value={studentData?.country ?? "N/A"}
+                            readOnly
+                          />
+                        )}
+                        {errors.country && <p className="text-red-500 text-sm mt-1">This field is required</p>}
                       </div>
 
                       {/* Languages Spoken Section */}

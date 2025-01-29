@@ -63,13 +63,25 @@ const TutorLanguageUpdateForm = () => {
         toast.error("Image is required.");
         return;
       }
-    
-      if (!['image/jpeg', 'image/png', 'image/bmp'].includes(file.type)) {
-        toast.error("Invalid file type. Please upload JPG, PNG, or BMP images.");
+
+      // Validate image type and extension
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      const validExtensions = ['jpg', 'jpeg', 'png'];
+      const extension = file.name.split('.').pop().toLowerCase();
+
+      if (!allowedTypes.includes(file.type) || !validExtensions.includes(extension)) {
+        toast.error('Please upload only JPG or PNG images');
         e.target.value = null;
         return;
       }
-  
+
+            // Check file size (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+              toast.error('Image size should be less than 5MB');
+              e.target.value = null;
+              return;
+            }
+
       setImage(file);
     }, []);
     
@@ -78,6 +90,20 @@ const TutorLanguageUpdateForm = () => {
     
       if (!file) {
         toast.error("Video is required.");
+        return;
+      }
+
+      // Check if it's a video file
+      if (!file.type.startsWith('video/')) {
+        toast.error('Please upload a valid video file');
+        e.target.value = null;
+        return;
+      }
+
+      // Check file size (100MB)
+      if (file.size > 100 * 1024 * 1024) {
+        toast.error('Video size should be less than 100MB');
+        e.target.value = null;
         return;
       }
       
@@ -209,14 +235,49 @@ const TutorLanguageUpdateForm = () => {
                 />
 
                 <div className="space-y-6 bg-gray-50 rounded-xl p-6">
-                  <FileUpload
-                    label={isNative === "true" ? 'Upload Your Government ID' : 'Upload Your Teaching Certificate'}
-                    accept="image/*"
-                    onChange={(e) => {
-                      validateImage(e);
-                      register("imageUpload").onChange(e);
+                  <Controller
+                    name="imageUpload"
+                    control={control}
+                    rules={{ 
+                      required: 'Image is required',
+                      validate: {
+                        checkFileType: (value) => {
+                          if (!value) return true;
+
+                          const file = value instanceof File ? value : 
+                                    (value.target && value.target.files ? value.target.files[0] : null);
+
+                          if (!file) return true;
+
+                          const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                          const validExtensions = ['jpg', 'jpeg', 'png'];
+                          const extension = file.name.split('.').pop().toLowerCase();
+                          
+                          if (!allowedTypes.includes(file.type)) {
+                            return 'Please upload only JPG or PNG images';
+                          }
+                          if (!validExtensions.includes(extension)) {
+                            return 'Please upload only JPG or PNG images';
+                          }
+                          if (file.size > 5 * 1024 * 1024) {
+                            return 'Image size should be less than 5MB';
+                          }
+                          return true;
+                        }
+                      }
                     }}
-                    error={errors.imageUpload}
+                    render={({ field: { onChange, value } }) => (
+                      <FileUpload
+                        label={isNative === "true" ? 'Upload Your Government ID' : 'Upload Your Teaching Certificate'}
+                        accept=".jpg,.jpeg,.png"
+                        onChange={(e) => {
+                          validateImage(e);
+                          onChange(e.target.files[0]);
+                        }}
+                        error={errors.imageUpload}
+                        maxSize={5}
+                      />
+                    )}
                   />
 
                   <Controller
@@ -245,14 +306,42 @@ const TutorLanguageUpdateForm = () => {
                     )}
                   />
 
-                  <FileUpload
-                    label="Introduction Video"
-                    accept="video/*"
-                    onChange={(e) => {
-                      validateVideo(e);
-                      register("videoUpload").onChange(e);
+                  <Controller
+                    name="videoUpload"
+                    control={control}
+                    rules={{ 
+                      required: 'Video is required',
+                      validate: {
+                        checkFileType: (value) => {
+                          if (!value) return true;
+
+                          const file = value instanceof File ? value : 
+                                    (value.target && value.target.files ? value.target.files[0] : null);
+
+                          if (!file) return true;
+
+                          if (!file.type.startsWith('video/')) {
+                            return 'Please upload a valid video file';
+                          }
+                          if (file.size > 100 * 1024 * 1024) {
+                            return 'Video size should be less than 100MB';
+                          }
+                          return true;
+                        }
+                      }
                     }}
-                    error={errors.videoUpload}
+                    render={({ field: { onChange, value } }) => (
+                      <FileUpload
+                        label="Introduction Video"
+                        accept="video/*"
+                        onChange={(e) => {
+                          validateVideo(e);
+                          onChange(e.target.files[0]);
+                        }}
+                        error={errors.videoUpload}
+                        maxSize={100}
+                      />
+                    )}
                   />
                 </div>
 

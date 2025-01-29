@@ -116,11 +116,13 @@ const TutorDashboardContent = () => {
           toast.success("Profile updated successfully");
         }
       } catch (error) {
-        const errorMessage = error.response?.data?.error || error.message;
+        const errorMessage = error.response?.data?.error || error.response?.data?.code;
         if (errorMessage.includes("duplicate key value violates unique constraint")) {
           toast.error("The selected SpeakIn name is already taken. Please choose a different one.");
         } else {
-          toast.error("Error updating profile: " + errorMessage);
+          if (!errorMessage.includes("user_inactive")) {
+            toast.error("Error updating profile: " + errorMessage);
+          }
         }
       } finally {
         setSaveLoading(false);

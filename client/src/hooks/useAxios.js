@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { useDispatch } from 'react-redux';
 import { clearTokens } from '../redux/authSlice';
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 const useAxios = () => {
   const { accessToken, refreshToken } = useSelector((state) => state.auth);
@@ -31,12 +31,13 @@ const useAxios = () => {
       return response; // Pass through the successful response
     },
     (error) => {
+      console.log(error)
       if (error.response && error.response.status === 403) {
         dispatch(clearTokens());
       }
       else if (error.response && error.response.data.code === "user_inactive") {
-        dispatch(clearTokens());
         toast.error("Your account has been deactivated. Please contact the support for more info.");
+        dispatch(clearTokens());
       }
       return Promise.reject(error); // Forward the error for further handling
     }

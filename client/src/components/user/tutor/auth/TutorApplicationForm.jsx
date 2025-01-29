@@ -1,10 +1,10 @@
-import React, { forwardRef, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
 import { useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-hot-toast';
-import { Eye, EyeOff, ChevronRight, UserCircle } from 'lucide-react';
+import { ChevronRight, UserCircle } from 'lucide-react';
 import InputField from '../../common/ui/input/InputField';
 import SelectField from './SelectField';
 import RadioButton from '../../common/ui/buttons/RadioButton';
@@ -39,16 +39,15 @@ const TutorApplicationForm = () => {
       const [image, setImage] = useState(null);
       const [errorMessage, setErrorMessage] = useState('');
       const [loading, setLoading] = useState(false);
-      const [showPassword, setShowPassword] = useState(false);
       const navigate = useNavigate();
       const location = useLocation();
       const verifiedEmail = location.state?.verifiedEmail;
     
-      useEffect(() => {
-        if (!verifiedEmail) {
-          navigate('/tutor/verify-email');
-        }
-      }, [verifiedEmail, navigate]);
+      // useEffect(() => {
+      //   if (!verifiedEmail) {
+      //     navigate('/tutor/verify-email');
+      //   }
+      // }, [verifiedEmail, navigate]);
     
       const isNative = watch('isNative');
     
@@ -107,14 +106,34 @@ const TutorApplicationForm = () => {
     
       const handleProfileImage = (e) => {
         const file = e.target.files[0];
-        if (file) {
-          if (file.size > 5242880) { // 5MB
-            toast.error('Image size should be less than 5MB');
-            return;
-          }
-          setProfileImageFile(file);
-          setProfilePreview(URL.createObjectURL(file));
+        if (!file) return;
+    
+        // More strict file type checking
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+          toast.error('Please upload only JPG or PNG images');
+          e.target.value = null;
+          return;
         }
+    
+        // Additional check for file extension
+        const validExtensions = ['jpg', 'jpeg', 'png'];
+        const extension = file.name.split('.').pop().toLowerCase();
+        if (!validExtensions.includes(extension)) {
+          toast.error('Please upload only JPG or PNG images');
+          e.target.value = null;
+          return;
+        }
+    
+        // Check file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          toast.error('Image size should be less than 5MB');
+          e.target.value = null;
+          return;
+        }
+    
+        setProfileImageFile(file);
+        setProfilePreview(URL.createObjectURL(file));
       };
       
       const handleVideoChange = useCallback((e) => {
@@ -373,23 +392,51 @@ const TutorApplicationForm = () => {
               </div>
 
               <Controller
-                  name="image"
-                  control={control}
-                  rules={{ required: 'Image is required' }}
-                  render={({ field }) => (
-                    <FileUpload
-                      {...field}
-                      onChange={(event) => {
-                        // Call your existing handleImageChange logic here
-                        handleImageChange(event);
-                        field.onChange(event); // Ensure react-hook-form state is updated
-                      }}
-                      accept="image/*"
-                      label={`Upload your ${isNative ? 'Government ID' : 'Teaching Certificate'}`}
-                      error={errors.image} // Pass error to display it
-                    />
-                  )}
-                />
+                name="image"
+                control={control}
+                rules={{ 
+                  required: 'Image is required',
+                  validate: {
+                    checkFileType: (value) => {
+                      // If no value, skip validation (required rule will handle this)
+                      if (!value) return true;
+
+                      // Handle both File object and event cases
+                      const file = value instanceof File ? value : 
+                                  (value.target && value.target.files ? value.target.files[0] : null);
+
+                      if (!file) return true;
+
+                      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+                      const validExtensions = ['jpg', 'jpeg', 'png'];
+                      const extension = file.name.split('.').pop().toLowerCase();
+                      
+                      if (!allowedTypes.includes(file.type)) {
+                        return 'Please upload only JPG or PNG images';
+                      }
+                      if (!validExtensions.includes(extension)) {
+                        return 'Please upload only JPG or PNG images';
+                      }
+                      if (file.size > 5 * 1024 * 1024) {
+                        return 'Image size should be less than 5MB';
+                      }
+                      return true;
+                    }
+                  }
+                }}
+                render={({ field: { onChange, value } }) => (
+                  <FileUpload
+                    onChange={(event) => {
+                      handleImageChange(event);
+                      onChange(event.target.files[0]); // Pass the File object directly
+                    }}
+                    accept=".jpg,.jpeg,.png"
+                    maxSize={5}
+                    label={`Upload your ${isNative ? 'Government ID' : 'Teaching Certificate'}`}
+                    error={errors.image}
+                  />
+                )}
+              />
             </div>
 
             <div className="space-y-4">
@@ -444,23 +491,48 @@ const TutorApplicationForm = () => {
             </div>
 
             <Controller
-                name="video"
-                control={control}
-                rules={{ required: 'Video is required' }}
-                render={({ field }) => (
-                  <FileUpload
-                    {...field}
-                    onChange={(event) => {
-                      // Call your existing handleVideoChange logic here
-                      handleVideoChange(event);
-                      field.onChange(event); // Ensure react-hook-form state is updated
-                    }}
-                    accept="video/*"
-                    label="Upload Introduction Video"
-                    error={errors.video} // Pass error to display it
-                  />
-                )}
-              />
+              name="video"
+              control={control}
+              rules={{ 
+                required: 'Video is required',
+                validate: {
+                  checkFileType: (value) => {
+                    // If no value, skip validation (required rule will handle this)
+                    if (!value) return true;
+
+                    // Handle both File object and event cases
+                    const file = value instanceof File ? value : 
+                                (value.target && value.target.files ? value.target.files[0] : null);
+
+                    if (!file) return true;
+
+                    // Check if it's a video file
+                    if (!file.type.startsWith('video/')) {
+                      return 'Please upload a valid video file';
+                    }
+
+                    // Check file size (100MB limit)
+                    if (file.size > 100 * 1024 * 1024) {
+                      return 'Video size should be less than 100MB';
+                    }
+
+                    return true;
+                  }
+                }
+              }}
+              render={({ field: { onChange, value } }) => (
+                <FileUpload
+                  onChange={(event) => {
+                    handleVideoChange(event);
+                    onChange(event.target.files[0]); // Pass the File object directly
+                  }}
+                  accept="video/*"
+                  maxSize={100}
+                  label="Upload Introduction Video"
+                  error={errors.video}
+                />
+              )}
+            />
 
             <div className="space-y-2">
               <label className="font-medium block">Set Hourly Rate:</label>
