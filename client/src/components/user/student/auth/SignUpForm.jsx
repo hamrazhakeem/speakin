@@ -23,7 +23,7 @@ const SignUpForm = () => {
 
   const onSubmit = async (data) => {
     setLoading(true);
-    try {                              
+    try {
       const response = await studentApi.signUp(axiosInstance, data);
       
       reset();

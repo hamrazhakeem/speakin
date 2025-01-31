@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import HomeEmptyState from "./HomeEmptyState";
 import FilterSelect from "./FilterSelect";
 import { studentApi } from "../../../../api/studentApi";
+import { useSelector } from 'react-redux';
 
 const TutorBrowse = () => {
     const axiosInstance = useAxios();
@@ -15,25 +16,32 @@ const TutorBrowse = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedTeachLanguage, setSelectedTeachLanguage] = useState('');
     const [selectedSpokenLanguage, setSelectedSpokenLanguage] = useState('');
+    const [studentLanguages, setStudentLanguages] = useState(null);
+    const userId = useSelector((state) => state.auth.userId);
   
-    async function fetchTutorData() {
+    async function fetchData() {
       try {
         setLoading(true);
-        const response = await studentApi.getUsers(axiosInstance);
-        const tutorUsers = response.filter(
+        const [tutorsResponse, studentResponse] = await Promise.all([
+          studentApi.getUsers(axiosInstance),
+          studentApi.getUser(axiosInstance, userId)
+        ]);
+
+        const tutorUsers = tutorsResponse.filter(
           user => user.user_type === "tutor" && user.is_active
         );
         setTutors(tutorUsers);
+        setStudentLanguages(studentResponse);
       } catch (error) {
-        console.error("Error fetching tutor data:", error);
-        setError("Failed to load tutors. Please try again later.");
+        console.error("Error fetching data:", error);
+        setError("Failed to load data. Please try again later.");
       } finally {
         setLoading(false);
       }
     }
   
     useEffect(() => {
-      fetchTutorData();
+      fetchData();
     }, []);
   
     // Get unique languages for both teaching and spoken languages
@@ -64,7 +72,15 @@ const TutorBrowse = () => {
                                      lang.language.toLowerCase() === selectedSpokenLanguage.toLowerCase()
                                    );
       
-      return matchesSearch && matchesTeachLanguage && matchesSpokenLanguage;
+      // Additional filter to only show tutors that match student's learning preferences
+      const matchesStudentPreferences = 
+        tutor.tutor_language_to_teach?.some(tutorLang =>
+          studentLanguages?.language_to_learn?.some(
+            studentLang => studentLang.language === tutorLang.language
+          )
+        );
+      
+      return matchesSearch && matchesTeachLanguage && matchesSpokenLanguage && matchesStudentPreferences;
     }) || [];
   
     return (
@@ -106,6 +122,14 @@ const TutorBrowse = () => {
                     onChange={(e) => setSelectedTeachLanguage(e.target.value)}
                     options={teachingLanguages}
                     placeholder="All Teaching Languages"
+                    userLanguageMessage="(You want to learn this)"
+                    renderOption={(lang) => ({
+                      value: lang,
+                      label: lang,
+                      isUserLanguage: studentLanguages?.language_to_learn?.some(
+                        userLang => userLang.language === lang
+                      )
+                    })}
                   />
                   
                   <FilterSelect
@@ -114,6 +138,14 @@ const TutorBrowse = () => {
                     onChange={(e) => setSelectedSpokenLanguage(e.target.value)}
                     options={spokenLanguages}
                     placeholder="All Spoken Languages"
+                    userLanguageMessage="(You speak this)"
+                    renderOption={(lang) => ({
+                      value: lang,
+                      label: lang,
+                      isUserLanguage: studentLanguages?.language_spoken?.some(
+                        userLang => userLang.language === lang
+                      )
+                    })}
                   />
                 </div>
               </div>

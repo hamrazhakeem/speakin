@@ -11,7 +11,7 @@ const useAxios = () => {
   const instance = axios.create({
     baseURL: import.meta.env.VITE_API_GATEWAY_URL,
   });
- 
+
   instance.interceptors.request.use(
     (config) => {
       if (accessToken){
@@ -28,7 +28,7 @@ const useAxios = () => {
 
   instance.interceptors.response.use(
     (response) => {
-      return response; // Pass through the successful response
+      return response; 
     },
     (error) => {
       console.log(error)
@@ -39,7 +39,7 @@ const useAxios = () => {
         toast.error("Your account has been deactivated. Please contact the support for more info.");
         dispatch(clearTokens());
       }
-      return Promise.reject(error); // Forward the error for further handling
+      return Promise.reject(error); 
     }
   );
 

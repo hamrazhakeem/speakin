@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import status, generics
+from rest_framework import status, generics, serializers
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .serializers import ChangePasswordSerializer, TeachingLanguageChangeRequestSerializer, UserSerializer, TutorDetailsSerializer
@@ -17,6 +17,9 @@ from rest_framework.permissions import IsAdminUser
 from .permissions import IsAdminOrUserSelf
 from .utils import get_user_or_create, get_id_token
 from .services import EmailService
+from .tasks import process_video_upload
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
 
 # Create your views here.
 
@@ -301,30 +304,25 @@ class UserDetail(generics.RetrieveUpdateDestroyAPIView):
         language_to_learn_data = self.request.data.get('language_to_learn')
         if language_to_learn_data:
             try:
-                language_data = json.loads(language_to_learn_data)  # Expecting a list (e.g., [{"language": "French", "proficiency": "Beginner"}])
+                languages = json.loads(language_to_learn_data)
+                # Delete existing languages first
+                LanguageToLearn.objects.filter(user=user).delete()
                 
-                if not language_data:  # Empty array case: delete existing LanguageToLearn entry
-                    LanguageToLearn.objects.filter(user=user).delete()
-                    print("Existing language to learn deleted successfully.")
-                
-                elif len(language_data) == 1:  # Single entry expected in the list
-                    language_entry = language_data[0]
-                    language_name = language_entry.get('language')
-                    proficiency_level = language_entry.get('proficiency')
-
-                    if language_name and proficiency_level:
-                        language, _ = Language.objects.get_or_create(name=language_name)
-                        proficiency, _ = Proficiency.objects.get_or_create(level=proficiency_level)
-                        
-                        # Delete existing entry and create new one
-                        LanguageToLearn.objects.filter(user=user).delete()
-                        LanguageToLearn.objects.create(user=user, language=language, proficiency=proficiency)
-                        print("Language to learn updated successfully.")
-            
+                # Create new language entries
+                for lang_data in languages:
+                    if lang_data.get('language') and lang_data.get('proficiency'):
+                        language, _ = Language.objects.get_or_create(name=lang_data['language'])
+                        proficiency, _ = Proficiency.objects.get_or_create(level=lang_data['proficiency'])
+                        LanguageToLearn.objects.create(
+                            user=user,
+                            language=language,
+                            proficiency=proficiency
+                        )
+                print("Languages to learn updated successfully")
             except json.JSONDecodeError:
                 print("Invalid JSON format for language_to_learn")
-            except Exception as e: 
-                print(f"Error updating language to learn: {str(e)}")
+            except Exception as e:
+                print(f"Error updating languages to learn: {str(e)}")
         
         else:
             print("Serializer is not valid")
@@ -459,25 +457,25 @@ def tutor_request(request):
         speakin_name = data.get('speakinName')
         email = data.get('email')
         
-        # Check if email exists
+        # Validation checks...
         if User.objects.filter(email=email).exists():
             return Response(
                 {'error': 'This email address is already registered. Please use a different email.'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
             
-        # Check if speakinName exists
         if TutorDetails.objects.filter(speakin_name=speakin_name).exists():
             return Response(
                 {'error': 'This SpeakIn Name is already taken. Please choose a different name.'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+        # Get files
         video_file = request.FILES.get('video')
         image_file = request.FILES.get('image')
         profile_image = request.FILES.get('profile_image')
 
-        # Create the User instance
+        # Create User instance
         user = User.objects.create(
             email=email,
             name=data['fullName'],
@@ -496,30 +494,28 @@ def tutor_request(request):
             govt_id = None
             certificate = image_file
 
-        # Create the TutorDetails instance
-        TutorDetails.objects.create(
+        # Create TutorDetails without video
+        tutor_details = TutorDetails.objects.create(
             user=user,
             speakin_name=speakin_name,
             about=data['about'],
             required_credits=data['hourlyRate'],
-            intro_video=video_file,
             govt_id=govt_id,
             certificate=certificate,
         )
 
+        # Process languages and other data...
         language_instance = Language.objects.get(name=data['teachingLanguage'])
         is_native_value = data['isNative'] == 'true'
 
-        # Handle Languages to Teach
         TutorLanguageToTeach.objects.create(
             user=user,
             is_native=is_native_value,
             language=language_instance
         )
 
-        # Handle Spoken Languages
+        # Process spoken languages...
         spoken_languages_str = data.get('spokenLanguages', '[]')
-
         try:
             spoken_languages = json.loads(spoken_languages_str)
             if not isinstance(spoken_languages, list):
@@ -554,14 +550,26 @@ def tutor_request(request):
         except json.JSONDecodeError:
             raise ValueError('Invalid spokenLanguages format')
 
-        return Response({'message': 'Tutor request submitted successfully!'}, status=status.HTTP_201_CREATED)
+        # Handle video upload asynchronously
+        if video_file:
+            # Save the video file temporarily
+            temp_path = f'media/temp_videos/{user.id}_{video_file.name}'
+            path = default_storage.save(temp_path, ContentFile(video_file.read()))
+            
+            # Queue the video processing task
+            process_video_upload.delay('TutorDetails', tutor_details.id, path)
+
+        return Response({
+            'message': 'Tutor request submitted successfully! Video upload is being processed.',
+            'user_id': user.id
+        }, status=status.HTTP_201_CREATED)
 
     except ValueError as e:
         transaction.set_rollback(True)
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
         transaction.set_rollback(True)
-        print(f"Unexpected error: {str(e)}")  # Log the unexpected error
+        print(f"Unexpected error: {str(e)}")
         return Response({'error': 'An error occurred while processing your request.'}, status=status.HTTP_400_BAD_REQUEST)
 
 class BlockUnblockUser(APIView):
@@ -632,18 +640,30 @@ class TeachingLanguageChangeRequestList(generics.ListCreateAPIView):
     serializer_class = TeachingLanguageChangeRequestSerializer
         
     def perform_create(self, serializer):
-        # Pass the authenticated user to the serializer
-        serializer.save(user=self.request.user)
-
-    def create(self, request, *args, **kwargs):
-        # Check if the user already has a pending language change request
-        existing_request = TeachingLanguageChangeRequest.objects.filter(user=request.user, status='pending').first()
+        existing_request = TeachingLanguageChangeRequest.objects.filter(
+            user=self.request.user, 
+            status='pending'
+        ).first()
         
         if existing_request:
-            return Response({'error': 'You already have a pending request to change your teaching language. Please wait for it to be resolved before submitting a new request.'}, status=status.HTTP_400_BAD_REQUEST)
- 
-        # If no existing request, proceed with the creation
-        return super().create(request, *args, **kwargs)
+            raise serializers.ValidationError({
+                'error': 'You already have a pending request to change your teaching language.'
+            })
+
+        video_file = self.request.FILES.get('intro_video')
+        if video_file:
+            # Save video temporarily
+            temp_path = f'media/temp_videos/language_change_{self.request.user.id}_{video_file.name}'
+            path = default_storage.save(temp_path, ContentFile(video_file.read()))
+            
+            # Create request without video first
+            instance = serializer.save(user=self.request.user)
+            
+            # Queue video processing task
+            process_video_upload.delay('TeachingLanguageChangeRequest', instance.id, path)
+        else:
+            instance = serializer.save(user=self.request.user)
+        return instance
 
 class TeachingLanguageChangeRequestDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = TeachingLanguageChangeRequest.objects.all()

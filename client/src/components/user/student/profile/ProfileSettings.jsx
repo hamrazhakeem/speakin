@@ -25,7 +25,7 @@ const ProfileSettings = () => {
     const [spokenProficiencyLevels, setSpokenProficiencyLevels] = useState([]);
     const [learningProficiencyLevels, setLearningProficiencyLevels] = useState([]);
     const [spokenLanguages, setSpokenLanguages] = useState([]);
-    const [languageToLearn, setLanguageToLearn] = useState(null);
+    const [languagesToLearn, setLanguagesToLearn] = useState([]);
     const [languageErrors, setLanguageErrors] = useState([]);
     const [formErrors, setFormErrors] = useState({});
     const userId = useSelector((state) => state.auth.userId);
@@ -33,40 +33,39 @@ const ProfileSettings = () => {
     const [pageLoading, setPageLoading] = useState(true);
 
     const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors }
+      register,
+      handleSubmit,
+      setValue,
+      formState: { errors }
     } = useForm();
 
     const validateLanguages = () => {
-    let isValid = true;
-    const newErrors = [];
-    const newFormErrors = {};
+      let isValid = true;
+      const newErrors = [];
+      const newFormErrors = {};
 
-    // Remove spoken languages validation
-    spokenLanguages.forEach((lang, index) => {
-        const errors = {};
-        if (lang.language && !lang.proficiency) {
-        errors.proficiency = 'Please select a proficiency level';
-        isValid = false;
-        }
-        if (!lang.language && lang.proficiency) {
-        errors.language = 'Please select a language';
-        isValid = false;
-        }
-        newErrors[index] = errors;
+      spokenLanguages.forEach((lang, index) => {
+          const errors = {};
+          if (lang.language && !lang.proficiency) {
+            errors.proficiency = 'Please select a proficiency level';
+            isValid = false;
+          }
+          if (!lang.language && lang.proficiency) {
+            errors.language = 'Please select a language';
+            isValid = false;
+          }
+          newErrors[index] = errors;
     });
 
-    // Remove required validation for language to learn
-    if (languageToLearn?.language && !languageToLearn?.proficiency) {
-        newFormErrors.languageToLearn = 'Please select a proficiency level';
-        isValid = false;
-    }
-    if (!languageToLearn?.language && languageToLearn?.proficiency) {
-        newFormErrors.languageToLearn = 'Please select a language';
-        isValid = false;
-    }
+    languagesToLearn.forEach((lang, index) => {
+        if (!lang.language || !lang.proficiency) {
+            newFormErrors.languagesToLearn = {
+                index,
+                message: !lang.language ? 'Please select a language' : 'Please select a proficiency level'
+            };
+            isValid = false;
+        }
+    });
 
     setLanguageErrors(newErrors);
     setFormErrors(newFormErrors);
@@ -74,197 +73,216 @@ const ProfileSettings = () => {
     };
 
     async function fetchUserData() {
-    try {
-        const [
-            userResponse,
-            countriesResponse,
-            spokenLanguagesResponse,
-            platformLanguagesResponse
-        ] = await Promise.all([
-            studentApi.getUser(axiosInstance, userId),
-            studentApi.getCountries(axiosInstance),
-            studentApi.getSpokenLanguages(axiosInstance),
-            studentApi.getPlatformLanguages(axiosInstance)
-        ]);
+      try {
+          const [
+              userResponse,
+              countriesResponse,
+              spokenLanguagesResponse,
+              platformLanguagesResponse
+          ] = await Promise.all([
+              studentApi.getUser(axiosInstance, userId),
+              studentApi.getCountries(axiosInstance),
+              studentApi.getSpokenLanguages(axiosInstance),
+              studentApi.getPlatformLanguages(axiosInstance)
+          ]);
 
-        setStudentData(userResponse);
-        
-        if (userResponse.language_spoken?.length > 0) {
-        setSpokenLanguages(userResponse.language_spoken);
-        }
-        
-        if (userResponse.language_to_learn?.length > 0) {
-        setLanguageToLearn(userResponse.language_to_learn[0]);
-        }
-        
-        setValue("name", userResponse.name || "");
-        setValue("balance_credits", userResponse.balance_credits || "");
-        setValue("email", userResponse.email || "");
-        setValue("country", userResponse.country || "");
+          setStudentData(userResponse);
+          
+          if (userResponse.language_spoken?.length > 0) {
+            setSpokenLanguages(userResponse.language_spoken);
+          }
+          
+          if (userResponse.language_to_learn?.length > 0) {
+            setLanguagesToLearn(userResponse.language_to_learn);
+          }
+          
+          setValue("name", userResponse.name || "");
+          setValue("balance_credits", userResponse.balance_credits || "");
+          setValue("email", userResponse.email || "");
+          setValue("country", userResponse.country || "");
 
-        setCountries(countriesResponse);
-        setAvailableLanguages(spokenLanguagesResponse.languages);
-        setSpokenProficiencyLevels(spokenLanguagesResponse.proficiencies);
-        setPlatformLanguages(platformLanguagesResponse.languages);
-        setLearningProficiencyLevels(platformLanguagesResponse.proficiencies);
-        
-        console.log('Spoken Languages:', spokenLanguagesResponse.data, 'Platform:', platformLanguagesResponse.data);
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Failed to load profile data');
-    } finally {
-        setPageLoading(false);
-    }
+          setCountries(countriesResponse);
+          setAvailableLanguages(spokenLanguagesResponse.languages);
+          setSpokenProficiencyLevels(spokenLanguagesResponse.proficiencies);
+          setPlatformLanguages(platformLanguagesResponse.languages);
+          setLearningProficiencyLevels(platformLanguagesResponse.proficiencies);
+          
+          console.log('Spoken Languages:', spokenLanguagesResponse.data, 'Platform:', platformLanguagesResponse.data);
+      } catch (error) {
+          console.error('Error fetching data:', error);
+          toast.error('Failed to load profile data');
+      } finally {
+          setPageLoading(false);
+      }
     }
 
     useEffect(() => {
-    fetchUserData();
+      fetchUserData();
     }, []);
 
     const handleEditToggle = () => {
-    setEditMode(!editMode);
-    setDeleteImage(false);
-    setLanguageErrors([]);
-    setFormErrors({});
-    console.log('Toggle edit mode', editMode);
+      setEditMode(!editMode);
+      setDeleteImage(false);
+      setLanguageErrors([]);
+      setFormErrors({});
+      console.log('Toggle edit mode', editMode);
     };
 
     const handleProfileImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+      const file = e.target.files[0];
+      if (!file) return;
 
-    // Check file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
-    const validExtensions = ['jpg', 'jpeg', 'png'];
-    const extension = file.name.split('.').pop().toLowerCase();
+      // Check file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+      const validExtensions = ['jpg', 'jpeg', 'png'];
+      const extension = file.name.split('.').pop().toLowerCase();
 
-    if (!allowedTypes.includes(file.type) || !validExtensions.includes(extension)) {
-        toast.error('Please upload only JPG or PNG images');
-        e.target.value = null;
-        return;
-    }
+      if (!allowedTypes.includes(file.type) || !validExtensions.includes(extension)) {
+          toast.error('Please upload only JPG or PNG images');
+          e.target.value = null;
+          return;
+      }
 
-    // Check file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image size should be less than 5MB');
-        e.target.value = null;
-        return;
-    }
+      // Check file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+          toast.error('Image size should be less than 5MB');
+          e.target.value = null;
+          return;
+      }
 
-    setProfileImage(file);
-    setImagePreview(URL.createObjectURL(file));
+      setProfileImage(file);
+      setImagePreview(URL.createObjectURL(file));
     };
 
     const handleDeleteImage = () => {
-    setProfileImage(null)
-    setImagePreview(null)
-    setDeleteImage(true)
+      setProfileImage(null)
+      setImagePreview(null)
+      setDeleteImage(true)
     };
 
     const handleAddSpokenLanguage = () => {
-    const hasEmptyFields = spokenLanguages.some((lang, index) => {
-        const errors = {};
-        if (!lang.language) errors.language = 'Please select a language';
-        if (!lang.proficiency) errors.proficiency = 'Please select a proficiency level';
-        
-        if (Object.keys(errors).length > 0) {
-        const newErrors = [...languageErrors];
-        newErrors[index] = errors;
-        setLanguageErrors(newErrors);
-        return true;
-        }
-        return false;
-    });
+      const hasEmptyFields = spokenLanguages.some((lang, index) => {
+          const errors = {};
+          if (!lang.language) errors.language = 'Please select a language';
+          if (!lang.proficiency) errors.proficiency = 'Please select a proficiency level';
+          
+          if (Object.keys(errors).length > 0) {
+          const newErrors = [...languageErrors];
+          newErrors[index] = errors;
+          setLanguageErrors(newErrors);
+          return true;
+          }
+          return false;
+      });
 
-    if (hasEmptyFields) {
-        return;
-    }
+      if (hasEmptyFields) {
+          return;
+      }
 
-    const defaultProficiency = spokenLanguages.length === 0 ? 'Native' : 
-        (spokenProficiencyLevels.find(level => level.level !== 'Native')?.level || '');
-    
-    setSpokenLanguages([
-        ...spokenLanguages, 
-        { language: '', proficiency: defaultProficiency }
-    ]);
-    
-    setLanguageErrors([...languageErrors, {}]);
+      const defaultProficiency = spokenLanguages.length === 0 ? 'Native' : 
+          (spokenProficiencyLevels.find(level => level.level !== 'Native')?.level || '');
+      
+      setSpokenLanguages([
+          ...spokenLanguages, 
+          { language: '', proficiency: defaultProficiency }
+      ]);
+      
+      setLanguageErrors([...languageErrors, {}]);
     };
 
     const handleRemoveSpokenLanguage = (index) => {
-    const newLanguages = spokenLanguages.filter((_, i) => i !== index);
-    setSpokenLanguages(newLanguages);
-    
-    const newErrors = languageErrors.filter((_, i) => i !== index);
-    setLanguageErrors(newErrors);
+      const newLanguages = spokenLanguages.filter((_, i) => i !== index);
+      setSpokenLanguages(newLanguages);
+      
+      const newErrors = languageErrors.filter((_, i) => i !== index);
+      setLanguageErrors(newErrors);
     };
 
     const handleSpokenLanguageChange = (index, field, value) => {
-    const newLanguages = [...spokenLanguages];
-    
-    if (field === 'language') {
-        const isLanguageSelected = spokenLanguages.some(
-        (lang, i) => i !== index && lang.language === value
-        );
-        if (isLanguageSelected) return;
+      const newLanguages = [...spokenLanguages];
+      
+      if (field === 'language') {
+          const isLanguageSelected = spokenLanguages.some(
+          (lang, i) => i !== index && lang.language === value
+          );
+          if (isLanguageSelected) return;
+          
+          if (index === 0) {
+          newLanguages[index] = { language: value, proficiency: 'Native' };
+          } else {
+          newLanguages[index] = { ...newLanguages[index], language: value };
+          }
+      } else {
+          newLanguages[index] = { ...newLanguages[index], [field]: value };
+      }
+      
+      const newErrors = [...languageErrors];
+      newErrors[index] = {};
+      setLanguageErrors(newErrors);
+      
+      setSpokenLanguages(newLanguages);
+    };
+
+    const handleAddLanguageToLearn = () => {
+        const hasEmptyFields = languagesToLearn.some(lang => !lang.language || !lang.proficiency);
+        if (hasEmptyFields) return;
         
-        if (index === 0) {
-        newLanguages[index] = { language: value, proficiency: 'Native' };
-        } else {
-        newLanguages[index] = { ...newLanguages[index], language: value };
-        }
-    } else {
-        newLanguages[index] = { ...newLanguages[index], [field]: value };
-    }
-    
-    const newErrors = [...languageErrors];
-    newErrors[index] = {};
-    setLanguageErrors(newErrors);
-    
-    setSpokenLanguages(newLanguages);
+        setLanguagesToLearn([
+            ...languagesToLearn,
+            { language: '', proficiency: '' }
+        ]);
     };
 
-    const handleLanguageToLearnChange = (language, proficiency) => {
-    if (!language && !proficiency) {
-        setLanguageToLearn(null);
-    } else {
-        setLanguageToLearn({ language, proficiency });
-    }
+    const handleRemoveLanguageToLearn = (index) => {
+        const newLanguages = languagesToLearn.filter((_, i) => i !== index);
+        setLanguagesToLearn(newLanguages);
     };
 
-    const handleRemoveLanguageToLearn = () => {
-    setLanguageToLearn(null);
+    const handleLanguageToLearnChange = (index, field, value) => {
+        const newLanguages = [...languagesToLearn];
+        const isLanguageSelected = languagesToLearn.some(
+            (lang, i) => i !== index && lang.language === value
+        );
+        
+        if (field === 'language' && isLanguageSelected) return;
+        
+        newLanguages[index] = { 
+            ...newLanguages[index], 
+            [field]: value 
+        };
+        
+        setLanguagesToLearn(newLanguages);
     };
 
     const onSubmit = async (data) => {
-    if (!validateLanguages()) {
-        return;
-    }
+      if (!validateLanguages()) {
+          return;
+      }
 
-    setSaveLoading(true);
-    const formData = new FormData();
-    if (profileImage) {
-        formData.append("profile_image", profileImage);
-    } else if (deleteImage) {
-        formData.append("profile_image", "");
-    }
-    
-    formData.append("name", data.name);
-    formData.append("country", data.country);
-    formData.append("language_spoken", JSON.stringify(spokenLanguages));
-    formData.append("language_to_learn", JSON.stringify(languageToLearn ? [languageToLearn] : []));
+      setSaveLoading(true);
+      const formData = new FormData();
+      if (profileImage) {
+          formData.append("profile_image", profileImage);
+      } else if (deleteImage) {
+          formData.append("profile_image", "");
+      }
+      
+      formData.append("name", data.name);
+      formData.append("country", data.country);
+      formData.append("language_spoken", JSON.stringify(spokenLanguages));
+      formData.append("language_to_learn", JSON.stringify(languagesToLearn));
 
-    try {
-        await studentApi.updateProfile(axiosInstance, userId, formData);
-        setEditMode(false);
-        fetchUserData();
-        toast.success('Profile updated successfully');
-    } catch (error) {
-        console.error("Error updating profile:", error);
-        toast.error('Failed to update profile');
-    } finally {
-        setSaveLoading(false);
-    }
+      try {
+          await studentApi.updateProfile(axiosInstance, userId, formData);
+          setEditMode(false);
+          fetchUserData();
+          toast.success('Profile updated successfully');
+      } catch (error) {
+          console.error("Error updating profile:", error);
+          toast.error('Failed to update profile');
+      } finally {
+          setSaveLoading(false);
+      }
     };
 
     const { email, profile_image, name } = studentData || {};
@@ -523,70 +541,100 @@ const ProfileSettings = () => {
                       </div>
 
                       {/* Language to Learn Section */}
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Language to Learn</label>
+                      <div className="space-y-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Languages to Learn</label>
                         {editMode ? (
-                          <>
-                            {formErrors.languageToLearn && (
-                              <p className="text-red-500 text-sm mb-2">{formErrors.languageToLearn}</p>
-                            )}
-                            <div className="flex flex-col sm:flex-row gap-4">
-                              <select
-                                value={languageToLearn?.language || ''}
-                                onChange={(e) => handleLanguageToLearnChange(e.target.value, languageToLearn?.proficiency || learningProficiencyLevels[0]?.level)}
-                                className="flex-1 w-full px-4 py-2 rounded-lg border bg-white"
-                              >
-                                <option value="">Select Language</option>
-                                {platformLanguages.map((lang) => (
-                                  <option key={lang.id || lang} value={lang.name || lang}>{lang.name || lang}</option>
-                                ))}
-                              </select>
-                              <select
-                                value={languageToLearn?.proficiency || ''}
-                                onChange={(e) => handleLanguageToLearnChange(languageToLearn?.language || '', e.target.value)}
-                                className="flex-1 w-full px-4 py-2 rounded-lg border bg-white"
-                              >
-                                {learningProficiencyLevels.map((level) => (
-                                  <option key={level.level} value={level.level}>
-                                    {level.description}
-                                  </option>
-                                ))}
-                              </select>
-                              {languageToLearn && (
-                                <button
-                                  type="button"
-                                  onClick={handleRemoveLanguageToLearn}
-                                  className="bg-red-100 text-red-600 p-2 rounded-lg hover:bg-red-200 transition-colors mt-2 sm:mt-0"
-                                  aria-label="Remove language to learn"
-                                >
-                                  <FaTrash />
-                                </button>
-                              )}
-                            </div>
-                          </>
+                            <>
+                                <div className="max-h-[200px] overflow-y-auto bg-white border border-gray-100 rounded-lg p-4 scrollbar-thin">
+                                    <div className="space-y-4">
+                                        {languagesToLearn.length === 0 ? (
+                                            <div className="bg-gray-50 p-6 rounded-lg text-center">
+                                                <p className="text-gray-500">No languages selected</p>
+                                            </div>
+                                        ) : (
+                                            languagesToLearn.map((lang, index) => (
+                                                <div key={index} className="space-y-2">
+                                                    <div className="flex flex-col sm:flex-row gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
+                                                        <div className="flex-1 w-full">
+                                                            <select
+                                                                value={lang.language || ''}
+                                                                onChange={(e) => handleLanguageToLearnChange(index, 'language', e.target.value)}
+                                                                className={`w-full px-4 py-2 rounded-lg border bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors ${
+                                                                    formErrors.languagesToLearn?.index === index && !lang.language 
+                                                                    ? 'border-red-500' 
+                                                                    : ''
+                                                                }`}
+                                                            >
+                                                                <option value="">Select Language</option>
+                                                                {platformLanguages.map((lang) => (
+                                                                    <option 
+                                                                        key={lang.id || lang} 
+                                                                        value={lang.name || lang}
+                                                                        disabled={languagesToLearn.some((existing, i) => 
+                                                                            i !== index && existing.language === (lang.name || lang)
+                                                                        )}
+                                                                    >
+                                                                        {lang.name || lang}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                            {formErrors.languagesToLearn?.index === index && !lang.language && (
+                                                                <p className="text-red-500 text-sm mt-1">Please select a language</p>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <div className="flex-1 w-full">
+                                                            <select
+                                                                value={lang.proficiency || ''}
+                                                                onChange={(e) => handleLanguageToLearnChange(index, 'proficiency', e.target.value)}
+                                                                className={`w-full px-4 py-2 rounded-lg border bg-white hover:border-blue-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-colors ${
+                                                                    formErrors.languagesToLearn?.index === index && !lang.proficiency 
+                                                                    ? 'border-red-500' 
+                                                                    : ''
+                                                                }`}
+                                                            >
+                                                                <option value="">Select Level</option>
+                                                                {learningProficiencyLevels.map((level) => (
+                                                                    <option key={level.level} value={level.level}>
+                                                                        {level.description}
+                                                                    </option>
+                                                                ))}
+                                                            </select>
+                                                            {formErrors.languagesToLearn?.index === index && !lang.proficiency && (
+                                                                <p className="text-red-500 text-sm mt-1">Please select a proficiency level</p>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveLanguageToLearn(index)}
+                                                            className="bg-red-100 text-red-600 p-2 rounded-lg hover:bg-red-200 transition-colors mt-2 sm:mt-0"
+                                                            aria-label="Remove language"
+                                                        >
+                                                            <FaTrash />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                    
+                                    {languagesToLearn.length < 6 && (
+                                        <button
+                                            type="button"
+                                            onClick={handleAddLanguageToLearn}
+                                            className="mt-4 bg-blue-50 text-blue-600 py-2 px-4 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-2 font-medium"
+                                        >
+                                            + Add Language
+                                        </button>
+                                    )}
+                                </div>
+                            </>
                         ) : (
-                          <div className="w-full">
-                            {languageToLearn ? (
-                              <div className="flex flex-col sm:flex-row gap-4">
-                                <input
-                                  type="text"
-                                  value={languageToLearn.language}
-                                  className="flex-1 w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed"
-                                  readOnly
-                                />
-                                <input
-                                  type="text"
-                                  value={languageToLearn.proficiency}
-                                  className="flex-1 w-full px-4 py-2 rounded-lg border border-gray-300 bg-gray-50 cursor-not-allowed"
-                                  readOnly
-                                />
-                              </div>
-                            ) : (
-                              <div className="bg-gray-50 p-6 rounded-lg text-center">
-                                <p className="text-gray-500">No languages selected</p>
-                              </div>
-                            )}
-                          </div>
+                            <LanguageList 
+                                languages={languagesToLearn} 
+                                getProficiencyColor={getProficiencyColor} 
+                            />
                         )}
                       </div>
                     </div>

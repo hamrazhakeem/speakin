@@ -9,7 +9,7 @@ const Layout = ({ children, showFooter = true }) => {
       <main className="flex-grow pt-16">
         {children}
       </main>
-      {showFooter && <Footer />}  {/* Conditionally render Footer */}
+      {showFooter && <Footer />} 
     </div>
   );
 };

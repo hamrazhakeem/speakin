@@ -56,7 +56,6 @@ const Navbar = () => {
         <CreditCard className="h-4 w-4 text-blue-600" />
         <span>{credits} Credits</span>
       </div>
-      {/* Only show Buy Credits button for students */}
       {!isTutor && (
         <GradientButton
           onClick={() => navigate('/buy-credits')}
@@ -108,7 +107,6 @@ const Navbar = () => {
     <nav className="fixed w-full z-50 top-0 border-b border-gray-100 bg-white/80 backdrop-blur-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
-          {/* Logo Section */}
           <div className="flex-shrink-0 flex items-center">
             <img
               onClick={() => navigate(getHomePath())}
@@ -118,7 +116,6 @@ const Navbar = () => {
             />
           </div>
   
-          {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-6">
             {!isAuthenticated && (
               <div className="flex space-x-8">
@@ -139,7 +136,6 @@ const Navbar = () => {
               <div className="flex items-center space-x-6">
                 {renderCreditsSection()}
   
-                {/* Action Buttons */}
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => navigate('/messages')}
@@ -148,7 +144,6 @@ const Navbar = () => {
                     <MessageCircle className="h-5 w-5" />
                   </button>
   
-                  {/* User Menu */}
                   <div className="relative">
                     <button
                       onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -176,7 +171,6 @@ const Navbar = () => {
             )}
           </div>
   
-          {/* Mobile menu button */}
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -199,13 +193,11 @@ const Navbar = () => {
         </div>
       </div>
   
-      {/* Mobile menu */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-100">
           <div className="px-4 py-3 space-y-4">
             {isAuthenticated ? (
               <>
-                {/* User Info */}
                 <div className="flex items-center space-x-3 px-4 py-3 bg-gray-50 rounded-xl">
                   <Avatar
                     src={profileImage}
@@ -265,7 +257,6 @@ const Navbar = () => {
                   )}
                 </div>
 
-                {/* Logout Button */}
                 <button
                   onClick={() => {
                     handleLogout();
@@ -279,7 +270,6 @@ const Navbar = () => {
               </>
             ) : (
               <>
-                {/* Non-authenticated Menu */}
                 <div className="space-y-2">
                   {navigationLinks.map((link) => (
                     <Link

@@ -39,7 +39,6 @@ const Footer = () => {
     <footer className="bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {/* Logo and Copyright */}
           <div className="col-span-2 md:col-span-1">
             <h3 
               onClick={() => navigate('/')} 
@@ -52,7 +51,6 @@ const Footer = () => {
             </p>
           </div>
 
-          {/* Footer Links */}
           {footerLinks.map((group, idx) => (
             <div key={idx}>
               <h4 className="font-semibold text-gray-900 mb-4">{group.title}</h4>
@@ -82,7 +80,6 @@ const Footer = () => {
           ))}
         </div>
 
-        {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-gray-100">
           <p className="text-sm text-gray-500 text-center">
             © {new Date().getFullYear()} SpeakIn. All rights reserved.
