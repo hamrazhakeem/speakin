@@ -100,6 +100,7 @@ class EmailService:
         """Handle resending forgot password OTP"""
         otp = generate_otp()
         cache_otp_data(cache_key, otp)
+        print(otp)
 
         context = format_email_context({'otp': otp})
         template = get_email_template_path('resend_otp_email')

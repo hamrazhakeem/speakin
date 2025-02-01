@@ -16,10 +16,11 @@ import PrimaryButton from '../../common/ui/buttons/PrimaryButton';
 import PasswordRequirements from '../../common/ui/input/PasswordRequirements';
 
 const SignUpForm = () => {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const axiosInstance = useAxios();
+  const password = watch('password', '');
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -147,7 +148,7 @@ const SignUpForm = () => {
               />
             </div>
 
-            <PasswordRequirements />
+            <PasswordRequirements password={password} />
 
             <PrimaryButton
               type="submit"

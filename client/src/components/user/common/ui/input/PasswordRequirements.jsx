@@ -1,13 +1,28 @@
 import React from 'react';
-import { ShieldCheck } from 'lucide-react';
+import { ShieldCheck, Check } from 'lucide-react';
 
-const PasswordRequirements = () => {
+const PasswordRequirements = ({ password = '' }) => {
   const requirements = [
-    'At least 8 characters',
-    'One uppercase letter',
-    'One lowercase letter',
-    'One number',
-    'One special character'
+    {
+      text: 'At least 8 characters',
+      met: password.length >= 8
+    },
+    {
+      text: 'One uppercase letter',
+      met: /[A-Z]/.test(password)
+    },
+    {
+      text: 'One lowercase letter',
+      met: /[a-z]/.test(password)
+    },
+    {
+      text: 'One number',
+      met: /\d/.test(password)
+    },
+    {
+      text: 'One special character',
+      met: /[@$!%*?&]/.test(password)
+    }
   ];
 
   return (
@@ -19,8 +34,14 @@ const PasswordRequirements = () => {
       <ul className="text-sm text-gray-600 space-y-2">
         {requirements.map((req, index) => (
           <li key={index} className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
-            {req}
+            {req.met ? (
+              <Check className="w-4 h-4 text-green-500" />
+            ) : (
+              <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+            )}
+            <span className={req.met ? 'text-green-700' : ''}>
+              {req.text}
+            </span>
           </li>
         ))}
       </ul>

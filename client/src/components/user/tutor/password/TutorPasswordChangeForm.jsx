@@ -18,8 +18,11 @@ const TutorPasswordChangeForm = () => {
     handleSubmit,
     formState: { errors },
     getValues,
-    reset
+    reset,
+    watch
   } = useForm();
+
+  const newPassword = watch('newPassword', '');
 
   const tabs = [
     { label: 'Profile', path: '/tutor/dashboard' },
@@ -93,8 +96,8 @@ const TutorPasswordChangeForm = () => {
                       noSpaces: value =>
                         value.trim() === value || 'Password must not start or end with spaces',
                       complexity: value =>
-                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).*$/.test(value) ||
-                        'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character'
+                        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(value) ||
+                        'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character'
                     }
                   })}
                   error={errors.newPassword}
@@ -113,7 +116,7 @@ const TutorPasswordChangeForm = () => {
                 />
               </div>
 
-              <PasswordRequirements />
+              <PasswordRequirements password={newPassword} />
 
               <button
                 type="submit"

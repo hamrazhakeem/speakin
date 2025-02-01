@@ -16,6 +16,8 @@ const ForgotPasswordSetNewPasswordForm = () => {
     const [loading, setLoading] = useState(false);
     const { register, handleSubmit, watch, formState: { errors } } = useForm();
 
+    const newPassword = watch('newPassword', '');
+
     useEffect(() => {
         if (!cache_key || !email) {
             navigate('/sign-in');
@@ -91,8 +93,8 @@ const ForgotPasswordSetNewPasswordForm = () => {
                                             message: 'Password must be at least 8 characters long',
                                         },
                                         pattern: {
-                                            value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).*$/,
-                                            message: 'Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character',
+                                            value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                                            message: 'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character',
                                         },
                                     })}
                                     error={errors.newPassword}
@@ -110,6 +112,8 @@ const ForgotPasswordSetNewPasswordForm = () => {
                                 />
                             </div>
 
+                            <PasswordRequirements password={newPassword} />
+
                             <PrimaryButton
                                 type="submit"
                                 loading={loading}
@@ -118,10 +122,6 @@ const ForgotPasswordSetNewPasswordForm = () => {
                                 Set New Password
                             </PrimaryButton>
                         </form>
-
-                        <div className="mt-6">
-                            <PasswordRequirements />
-                        </div>
                     </div>
                 </div>
             </main>

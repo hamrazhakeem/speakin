@@ -641,7 +641,7 @@ class TeachingLanguageChangeRequestList(generics.ListCreateAPIView):
         
     def perform_create(self, serializer):
         existing_request = TeachingLanguageChangeRequest.objects.filter(
-            user=self.request.user, 
+            user=self.request.user,
             status='pending'
         ).first()
         
