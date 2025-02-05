@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: speakin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:    
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      containers:
+      - name: payment-service
+        image: payment-service:latest
+        ports:
+        - containerPort: 8001
+          name: http  
+        - containerPort: 50052
+          name: grpc
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: payment-service-code
+          mountPath: /app
+      volumes:
+      - name: payment-service-code
+        hostPath:
+          path: "/run/desktop/mnt/host/d/hamraz hakeem/desktop/speakin/server/payment_service"
+          type: Directory
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+  namespace: speakin
+spec:
+  selector:
+    app: payment-service
+  ports:
+    - port: 8001
+      targetPort: 8001
+      name: http
+    - port: 50052
+      targetPort: 50052
+      name: grpc
+  type: ClusterIP

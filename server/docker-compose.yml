@@ -190,8 +190,8 @@ services:
       api_gateway:
         condition: service_started
     restart: on-failure:5 
-    volumes:
-      - ./payment_service:/app
+    # volumes:
+    #   - ./payment_service:/app
     env_file:
       - .env 
 

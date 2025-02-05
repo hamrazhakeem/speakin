@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: speakin
+data:
+  USER_SERVICE_URL: "http://user-service:8000/"
+  PAYMENT_SERVICE_URL: "http://payment-service:8001/"
+  SESSION_SERVICE_URL: "http://session-service:8002/"
+  MESSAGE_SERVICE_URL: "http://message-service:8003/"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  RABBITMQ_HOST: "rabbitmq"
+  RABBITMQ_PORT: "5672"

@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stripe-cli
+  namespace: speakin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stripe-cli
+  template:
+    metadata:
+      labels:
+        app: stripe-cli
+    spec:
+      containers:
+      - name: stripe-cli
+        image: stripe/stripe-cli:latest
+        command: ["stripe", "listen", "--forward-to", "http://api-gateway:8080/api/webhook/"]
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets

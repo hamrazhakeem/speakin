@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: session-service-worker
+  namespace: speakin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: session-service-worker
+  template:
+    metadata:
+      labels:
+        app: session-service-worker
+    spec:
+      containers:
+      - name: session-service-worker
+        image: session-service:latest
+        command: ["celery", "-A", "session_service", "worker", "--loglevel=info"]
+        envFrom:
+        - configMapRef:
+            name: app-config
+        - secretRef:
+            name: app-secrets
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "200m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: session-service-code
+          mountPath: /app
+      volumes:
+      - name: session-service-code
+        hostPath:
+          path: "/run/desktop/mnt/host/d/hamraz hakeem/desktop/speakin/server/session_service"
+          type: Directory
