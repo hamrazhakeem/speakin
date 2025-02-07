@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-config
+  namespace: speakin
+data:
+  # General settings
+  DEBUG: "True"
+  ALLOWED_HOSTS: "host.docker.internal,127.0.0.1"
+
+  # Database settings
+  DB_HOST: "payment_service_db"
+  DB_PORT: "5432"
+
+  # Frontend URL
+  FRONTEND_DOMAIN: "http://localhost:5173"

@@ -20,10 +20,8 @@ spec:
         ports:
         - containerPort: 5432
         envFrom:
-        - configMapRef:
-            name: app-config
         - secretRef:
-            name: app-secrets
+            name: message-db-secrets
         volumeMounts:
         - name: message-db-data
           mountPath: /var/lib/postgresql/data

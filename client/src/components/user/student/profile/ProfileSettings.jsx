@@ -408,7 +408,7 @@ const ProfileSettings = () => {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Country</label>
                         {editMode ? (
                           <select
-                            {...register("country", { required: true })}
+                            {...register("country")}
                             className={`w-full px-4 py-3 rounded-xl border bg-gray-50 ${
                               errors.country ? 'border-red-300' : 'border-gray-200'
                             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
@@ -422,7 +422,7 @@ const ProfileSettings = () => {
                         ) : (
                           <FormInput
                             type="text"
-                            value={studentData?.country ?? "N/A"}
+                            value={studentData?.country || "Not Specified"}
                             readOnly
                           />
                         )}

@@ -43,8 +43,8 @@ const SessionCard = ({ session, type, users }) => {
           <div className="w-12 h-12 rounded-full bg-zinc-800 overflow-hidden">
             {user?.profile_image ? (
               <img 
-                src={user.profile_image} 
-                alt={user?.name} 
+                src={user.profile_image}
+                alt={user?.name}
                 className="w-full h-full object-cover"
               />
             ) : (

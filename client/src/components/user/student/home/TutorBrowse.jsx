@@ -72,15 +72,7 @@ const TutorBrowse = () => {
                                      lang.language.toLowerCase() === selectedSpokenLanguage.toLowerCase()
                                    );
       
-      // Additional filter to only show tutors that match student's learning preferences
-      const matchesStudentPreferences = 
-        tutor.tutor_language_to_teach?.some(tutorLang =>
-          studentLanguages?.language_to_learn?.some(
-            studentLang => studentLang.language === tutorLang.language
-          )
-        );
-      
-      return matchesSearch && matchesTeachLanguage && matchesSpokenLanguage && matchesStudentPreferences;
+      return matchesSearch && matchesTeachLanguage && matchesSpokenLanguage;
     }) || [];
   
     return (

@@ -23,10 +23,8 @@ spec:
         - containerPort: 15672
           name: management
         envFrom:
-        - configMapRef:
-            name: app-config
         - secretRef:
-            name: app-secrets
+            name: rabbitmq-secrets
         volumeMounts:
         - name: rabbitmq-data
           mountPath: /var/lib/rabbitmq

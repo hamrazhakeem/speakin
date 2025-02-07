@@ -27,7 +27,6 @@ const BookingsManage = () => {
           (booking) => booking.student_id === userId
         );
   
-        // For each booking, fetch corresponding availability and tutor details
         const sessionsWithDetails = await Promise.all(
           studentBookings.map(async (session) => {
             try {

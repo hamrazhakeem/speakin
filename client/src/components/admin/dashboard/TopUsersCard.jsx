@@ -12,6 +12,16 @@ const TopUsersCard = ({ bookings, availabilities, type = 'student' }) => {
   useEffect(() => {
     const fetchAndProcessUsers = async () => {
       try {
+        if (!bookings || bookings.length === 0) {
+          setLoading(false);
+          return;
+        }
+
+        if (type === 'tutor' && (!availabilities || Object.keys(availabilities).length === 0)) {
+          setLoading(false);
+          return;
+        }
+
         if (type === 'student') {
           const studentCounts = bookings.reduce((acc, booking) => {
             if (booking.booking_status === 'completed') {
@@ -73,23 +83,37 @@ const TopUsersCard = ({ bookings, availabilities, type = 'student' }) => {
               .slice(0, 5)
           );
         }
-        setLoading(false);
       } catch (error) {
         console.error('Error processing user data:', error);
+      } finally {
         setLoading(false);
       }
     };
 
-    if (bookings.length > 0 && (!availabilities || Object.keys(availabilities).length > 0)) {
-      fetchAndProcessUsers();
-    }
-  }, [bookings, availabilities, type]);
+    fetchAndProcessUsers();
+  }, [bookings, availabilities, type, axiosInstance]);
 
   if (loading) {
     return (
       <div className="w-full bg-zinc-800 rounded-lg">
         <div className="flex justify-center items-center h-48">
           <LoadingSpinner size="lg" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!topUsers.length) {
+    return (
+      <div className="w-full bg-zinc-800 rounded-lg border border-zinc-700">
+        <div className="flex flex-row items-center justify-between p-4">
+          <h3 className="text-lg font-semibold text-white">
+            Top Performing {type === 'student' ? 'Students' : 'Tutors'}
+          </h3>
+          <Award className="w-5 h-5 text-yellow-500" />
+        </div>
+        <div className="flex justify-center items-center h-48 text-zinc-400">
+          No {type === 'student' ? 'students' : 'tutors'} data available yet
         </div>
       </div>
     );

@@ -18,7 +18,5 @@ spec:
         image: stripe/stripe-cli:latest
         command: ["stripe", "listen", "--forward-to", "http://api-gateway:8080/api/webhook/"]
         envFrom:
-        - configMapRef:
-            name: app-config
         - secretRef:
-            name: app-secrets
+            name: stripe-cli-secrets

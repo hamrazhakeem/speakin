@@ -20,9 +20,9 @@ spec:
         - containerPort: 8002
         envFrom:  
         - configMapRef:
-            name: app-config
+            name: session-service-config
         - secretRef:
-            name: app-secrets
+            name: session-service-secrets
         resources:
           requests:
             memory: "256Mi"

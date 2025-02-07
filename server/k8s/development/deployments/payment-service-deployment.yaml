@@ -23,9 +23,9 @@ spec:
           name: grpc
         envFrom:
         - configMapRef:
-            name: app-config
+            name: payment-service-config
         - secretRef:
-            name: app-secrets
+            name: payment-service-secrets
         resources:
           requests:
             memory: "256Mi"

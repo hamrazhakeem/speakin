@@ -19,11 +19,6 @@ spec:
         image: redis:alpine
         ports:
         - containerPort: 6379
-        envFrom:
-        - configMapRef:
-            name: app-config
-        - secretRef:
-            name: app-secrets
         volumeMounts:
         - name: redis-data
           mountPath: /data

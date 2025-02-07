@@ -43,11 +43,11 @@ const TutorApplicationForm = () => {
       const location = useLocation();
       const verifiedEmail = location.state?.verifiedEmail;
     
-      // useEffect(() => {
-      //   if (!verifiedEmail) {
-      //     navigate('/tutor/verify-email');
-      //   }
-      // }, [verifiedEmail, navigate]);
+      useEffect(() => {
+        if (!verifiedEmail) {
+          navigate('/tutor/verify-email');
+        }
+      }, [verifiedEmail, navigate]);
     
       const isNative = watch('isNative');
     

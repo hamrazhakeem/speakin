@@ -17,11 +17,11 @@ spec:
       - name: session-service-worker
         image: session-service:latest
         command: ["celery", "-A", "session_service", "worker", "--loglevel=info"]
-        envFrom:
-        - configMapRef:
-            name: app-config
-        - secretRef:
-            name: app-secrets
+        # envFrom:
+        # - configMapRef:
+        #     name: session-service-config
+        # - secretRef:
+        #     name: session-service-secrets
         resources:
           requests:
             memory: "256Mi"
@@ -29,11 +29,11 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
-        volumeMounts:
-        - name: session-service-code
-          mountPath: /app
-      volumes:
-      - name: session-service-code
-        hostPath:
-          path: "/run/desktop/mnt/host/d/hamraz hakeem/desktop/speakin/server/session_service"
-          type: Directory
+        # volumeMounts:
+        # - name: session-service-code
+        #   mountPath: /app
+      # volumes:
+      # - name: session-service-code
+      #   hostPath:
+      #     path: "/run/desktop/mnt/host/d/hamraz hakeem/desktop/speakin/server/session_service"
+      #     type: Directory

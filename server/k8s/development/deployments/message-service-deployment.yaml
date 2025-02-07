@@ -20,9 +20,9 @@ spec:
         - containerPort: 8003
         envFrom:  
         - configMapRef:
-            name: app-config
+            name: message-service-config
         - secretRef:
-            name: app-secrets
+            name: message-service-secrets
         resources:
           requests:
             memory: "256Mi"

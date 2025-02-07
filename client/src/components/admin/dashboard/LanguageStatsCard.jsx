@@ -18,6 +18,12 @@ const LanguageStatsCard = () => {
           adminApi.getUsers(axiosInstance)
         ]);
 
+        // Early return if no data
+        if (!bookingsRes?.length && !usersRes?.length) {
+          setLoading(false);
+          return;
+        }
+
         // Mapping teaching languages
         const teachingLanguages = {};
         bookingsRes.forEach(booking => {
@@ -94,36 +100,52 @@ const LanguageStatsCard = () => {
     );
   }
 
-  const renderLanguageList = (languages, title, iconColor) => (
-    <div className="w-full bg-zinc-800 rounded-lg border border-zinc-700">
-      <div className="flex flex-row items-center justify-between p-4">
-        <h3 className="text-lg font-semibold text-white">{title}</h3>
-        <Languages className={`w-5 h-5 ${iconColor}`} />
-      </div>
-      <div className="p-4 space-y-4">
-        {languages.map((lang, index) => (
-          <div
-            key={lang.name}
-            className="flex items-center justify-between p-4 bg-zinc-900 rounded-lg border border-zinc-800"
-          >
-            <div className="flex items-center space-x-4">
-              <div className="flex-shrink-0 w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center">
-                <span className="text-sm font-medium text-white">#{index + 1}</span>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-white">{lang.name}</h4>
-                <p className="text-xs text-zinc-400">Language</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-sm font-medium text-white">{lang.value}</p>
-              <p className="text-xs text-zinc-400">Users</p>
-            </div>
+  const renderLanguageList = (languages, title, iconColor) => {
+    if (!languages || languages.length === 0) {
+      return (
+        <div className="w-full bg-zinc-800 rounded-lg border border-zinc-700">
+          <div className="flex flex-row items-center justify-between p-4">
+            <h3 className="text-lg font-semibold text-white">{title}</h3>
+            <Languages className={`w-5 h-5 ${iconColor}`} />
           </div>
-        ))}
+          <div className="flex justify-center items-center h-48 text-zinc-400">
+            No data available yet
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-full bg-zinc-800 rounded-lg border border-zinc-700">
+        <div className="flex flex-row items-center justify-between p-4">
+          <h3 className="text-lg font-semibold text-white">{title}</h3>
+          <Languages className={`w-5 h-5 ${iconColor}`} />
+        </div>
+        <div className="p-4 space-y-4">
+          {languages.map((lang, index) => (
+            <div
+              key={lang.name}
+              className="flex items-center justify-between p-4 bg-zinc-900 rounded-lg border border-zinc-800"
+            >
+              <div className="flex items-center space-x-4">
+                <div className="flex-shrink-0 w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium text-white">#{index + 1}</span>
+                </div>
+                <div>
+                  <h4 className="text-sm font-medium text-white">{lang.name}</h4>
+                  <p className="text-xs text-zinc-400">Language</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-white">{lang.value}</p>
+                <p className="text-xs text-zinc-400">Users</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

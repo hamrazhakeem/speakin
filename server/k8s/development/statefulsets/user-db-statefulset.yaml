@@ -20,10 +20,8 @@ spec:
         ports:
         - containerPort: 5432
         envFrom:
-        - configMapRef:
-            name: app-config
         - secretRef:
-            name: app-secrets
+            name: user-db-secrets
         volumeMounts:
         - name: user-db-data
           mountPath: /var/lib/postgresql/data

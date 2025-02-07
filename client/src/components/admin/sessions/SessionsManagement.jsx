@@ -56,6 +56,19 @@ const SessionsManagement = () => {
     </AdminButton>
   );
 
+  const renderEmptyState = () => (
+    <div className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col items-center justify-center min-h-[400px]">
+      <p className="text-lg text-zinc-400 mb-2">
+        No {activeTab === 'availabilities' ? 'availabilities' : 'bookings'} found
+      </p>
+      <p className="text-sm text-zinc-500">
+        {activeTab === 'availabilities' 
+          ? 'No tutors have created any availabilities yet'
+          : 'No sessions have been booked yet'}
+      </p>
+    </div>
+  );
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
@@ -79,28 +92,33 @@ const SessionsManagement = () => {
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center h-64">
+        <div className="flex justify-center items-center min-h-[400px]">
           <LoadingSpinner size="lg" className="text-white" />
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {activeTab === 'availabilities'
-            ? data.availabilities.map((availability) => (
-                <SessionCard
-                  key={availability.id}
-                  session={availability}
-                  type="availability"
-                  users={users}
-                />
-              ))
-            : data.bookings.map((booking) => (
-                <SessionCard
-                  key={booking.id}
-                  session={booking}
-                  type="booking"
-                  users={users}
-                />
-              ))}
+          {activeTab === 'availabilities' 
+            ? (data.availabilities.length === 0 
+                ? renderEmptyState()
+                : data.availabilities.map((availability) => (
+                    <SessionCard
+                      key={availability.id}
+                      session={availability}
+                      type="availability"
+                      users={users}
+                    />
+                  )))
+            : (data.bookings.length === 0
+                ? renderEmptyState()
+                : data.bookings.map((booking) => (
+                    <SessionCard
+                      key={booking.id}
+                      session={booking}
+                      type="booking"
+                      users={users}
+                    />
+                  )))
+          }
         </div>
       )}
     </div>

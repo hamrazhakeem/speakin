@@ -20,9 +20,9 @@ spec:
         - containerPort: 8080
         envFrom:
         - configMapRef:
-            name: app-config
+            name: api-gateway-config
         - secretRef:
-            name: app-secrets
+            name: api-gateway-secrets
         resources:
           requests:
             memory: "128Mi"

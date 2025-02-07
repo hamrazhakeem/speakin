@@ -24,10 +24,10 @@ class CreateCheckoutSession(APIView):
     def post(self, request): 
         serializer = TransactionsSerializer(data=request.data)
         if serializer.is_valid(): 
-            credits = serializer.validated_data['purchased_credits']  # Assuming 'purchased_credits' is in request data
+            credits = serializer.validated_data['purchased_credits']  
             price_per_credit = serializer.validated_data['price_per_credit']
             currency = serializer.validated_data['currency']
-            user_id = serializer.validated_data['user_id']  # Get user_id from the request data
+            user_id = serializer.validated_data['user_id']
             transaction_type = serializer.validated_data['transaction_type']
  
             try:
