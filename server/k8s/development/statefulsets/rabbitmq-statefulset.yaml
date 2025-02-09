@@ -28,13 +28,6 @@ spec:
         volumeMounts:
         - name: rabbitmq-data
           mountPath: /var/lib/rabbitmq
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
         livenessProbe:
           exec:
             command: ["rabbitmq-diagnostics", "ping"] 

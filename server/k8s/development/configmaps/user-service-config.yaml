@@ -6,11 +6,11 @@ metadata:
 data:
   # General settings
   DEBUG: "True"
-  ALLOWED_HOSTS: "host.docker.internal,127.0.0.1,localhost"
+  ALLOWED_HOSTS: "user-service,localhost"
   CORS_ALLOWED_ORIGINS: "http://localhost:5173,http://127.0.0.1:5173"
   
   # Database settings
-  DB_HOST: "user_service_db"
+  DB_HOST: "user-db"
   DB_PORT: "5432"
   
   # JWT settings

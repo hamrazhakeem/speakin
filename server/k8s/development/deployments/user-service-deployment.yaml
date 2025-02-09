@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: user-service
-        image: user-service:latest
+        image: server-user_service:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8000
           name: http
@@ -26,13 +27,6 @@ spec:
             name: user-service-config
         - secretRef:
             name: user-service-secrets
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
         volumeMounts:
         - name: user-service-code
           mountPath: /app
@@ -51,10 +45,10 @@ spec:
   selector:
     app: user-service
   ports:
-    - port: 8000
+    - name: http
+      port: 8000
       targetPort: 8000
-      name: http
-    - port: 50051
+    - name: grpc
+      port: 50051
       targetPort: 50051
-      name: grpc
   type: ClusterIP

@@ -147,7 +147,7 @@ const MessagesInterface = () => {
     useEffect(() => {
       if (selectedUser) {
         const setupChatConnection = () => {
-          const wsUrl = `ws://127.0.0.1:8003/ws/chat/${selectedUser.id}/?token=${accessToken}`;
+          const wsUrl = `ws://localhost/ws/chat/${selectedUser.id}/?token=${accessToken}`;
           const newSocket = new WebSocket(wsUrl);
     
           newSocket.onopen = () => {

@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: session-service
-        image: session-service:latest
+        image: server-session_service:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8002
         envFrom:  
@@ -23,13 +24,6 @@ spec:
             name: session-service-config
         - secretRef:
             name: session-service-secrets
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
         volumeMounts:
         - name: session-service-code
           mountPath: /app
@@ -37,7 +31,7 @@ spec:
       - name: session-service-code
         hostPath:
           path: "/run/desktop/mnt/host/d/hamraz hakeem/desktop/speakin/server/session_service"
-          type: Directory
+          type: Directory 
 
 ---
 apiVersion: v1

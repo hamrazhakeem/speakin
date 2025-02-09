@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: api-gateway
-        image: api-gateway:latest
+        image: server-api_gateway:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8080
         envFrom:
@@ -23,13 +24,6 @@ spec:
             name: api-gateway-config
         - secretRef:
             name: api-gateway-secrets
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "100m"
-          limits:
-            memory: "256Mi"
-            cpu: "200m"
         volumeMounts:
         - name: api-gateway-code
           mountPath: /app

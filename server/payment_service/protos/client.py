@@ -1,12 +1,13 @@
 import grpc
 from .generated.user_service_pb2 import UpdateUserCreditsRequest
 from .generated.user_service_pb2_grpc import UserServiceStub
-
+import os
 def update_user_credits(user_id, credits , is_deduction=False, refund_from_escrow=False):
     try:
-        with grpc.insecure_channel('user_service:50051') as channel:
+        with grpc.insecure_channel(os.getenv('USER_SERVICE_GRPC_HOST') + ':50051') as channel:
             print('notifying service in payment service client')
             stub = UserServiceStub(channel)
+
             request = UpdateUserCreditsRequest(
                 user_id=user_id, 
                 credits=credits,

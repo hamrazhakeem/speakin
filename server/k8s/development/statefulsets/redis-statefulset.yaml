@@ -22,13 +22,6 @@ spec:
         volumeMounts:
         - name: redis-data
           mountPath: /data
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
   volumeClaimTemplates:
   - metadata:
       name: redis-data

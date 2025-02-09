@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: payment-service
-        image: payment-service:latest
+        image: server-payment_service:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8001
           name: http  
@@ -26,13 +27,6 @@ spec:
             name: payment-service-config
         - secretRef:
             name: payment-service-secrets
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
         volumeMounts:
         - name: payment-service-code
           mountPath: /app

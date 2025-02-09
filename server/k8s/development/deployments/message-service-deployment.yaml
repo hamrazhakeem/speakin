@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: message-service
-        image: message-service:latest
+        image: server-message_service:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 8003
         envFrom:  
@@ -23,13 +24,6 @@ spec:
             name: message-service-config
         - secretRef:
             name: message-service-secrets
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
         volumeMounts:
         - name: message-service-code
           mountPath: /app

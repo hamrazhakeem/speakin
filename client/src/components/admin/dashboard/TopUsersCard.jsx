@@ -91,7 +91,7 @@ const TopUsersCard = ({ bookings, availabilities, type = 'student' }) => {
     };
 
     fetchAndProcessUsers();
-  }, [bookings, availabilities, type, axiosInstance]);
+  }, [bookings, availabilities, type]);
 
   if (loading) {
     return (
