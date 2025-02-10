@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: session-service
+  namespace: speakin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:    
+      app: session-service
+  template:
+    metadata:
+      labels:
+        app: session-service
+    spec:
+      containers:
+      - name: session-service
+        image: hamrazhakeem/speakin-session-service:latest
+        ports:
+        - containerPort: 8002
+        envFrom:  
+        - configMapRef:
+            name: session-service-config
+        - secretRef:
+            name: session-service-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: session-service
+  namespace: speakin
+spec:
+  selector:
+    app: session-service
+  ports:
+    - port: 8002
+      targetPort: 8002
+  type: ClusterIP

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-gateway-config
+  namespace: speakin
+data:
+  # General settings
+  DEBUG: "False"
+  ALLOWED_HOSTS: "api-gateway,backend.speakin.hamrazhakeem.site" 
+  CORS_ALLOWED_ORIGINS: "https://speakin.hamrazhakeem.site"
+  
+  # Service URLs (keeping internal k8s DNS names)
+  USER_SERVICE_URL: "http://user-service:8000/"
+  PAYMENT_SERVICE_URL: "http://payment-service:8001/"
+  SESSION_SERVICE_URL: "http://session-service:8002/"
+  MESSAGE_SERVICE_URL: "http://message-service:8003/"

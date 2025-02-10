@@ -5,15 +5,15 @@ metadata:
   namespace: speakin
 data:
   # General settings
-  DEBUG: "True"
-  ALLOWED_HOSTS: "payment-service,localhost,api-gateway"
+  DEBUG: "False"
+  ALLOWED_HOSTS: "payment-service,backend.speakin.hamrazhakeem.site,api-gateway"
 
   # Database settings
-  DB_HOST: "payment-db"
-  DB_PORT: "5433"
+  DB_HOST: "${RDS_PAYMENT_DB_HOST}"  # From RDS endpoint
+  DB_PORT: "5432"
 
   # Frontend URL
-  FRONTEND_DOMAIN: "http://localhost:5173"
+  FRONTEND_DOMAIN: "https://speakin.hamrazhakeem.site"
 
   # User service grpc host
   USER_SERVICE_GRPC_HOST: "user-service"

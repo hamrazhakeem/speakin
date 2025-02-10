@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service-worker
+  namespace: speakin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service-worker
+  template:
+    metadata:
+      labels:
+        app: user-service-worker
+    spec:
+      containers:
+      - name: user-service-worker
+        image: hamrazhakeem/speakin-user-service:latest
+        command: ["celery", "-A", "user-service", "worker", "--loglevel=info"]
+        envFrom:
+        - configMapRef:
+            name: user-service-config
+        - secretRef:
+            name: user-service-secrets

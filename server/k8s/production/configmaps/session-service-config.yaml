@@ -5,12 +5,12 @@ metadata:
   namespace: speakin
 data:
   # General settings
-  DEBUG: "True"
-  ALLOWED_HOSTS: "session-service,localhost"
+  DEBUG: "False"
+  ALLOWED_HOSTS: "session-service,backend.speakin.hamrazhakeem.site"
 
   # Database settings
-  DB_HOST: "session-db"
-  DB_PORT: "5434"
+  DB_HOST: "${RDS_SESSION_DB_HOST}"  # From RDS endpoint
+  DB_PORT: "5432"
 
   # Daily.co settings
   DAILY_API_ROOM_URL: "https://api.daily.co/v1/rooms"

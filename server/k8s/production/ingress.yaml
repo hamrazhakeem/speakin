@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: speakin-ingress
+  namespace: speakin
+  annotations:
+    # AWS ALB Annotations
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account:certificate/certificate-id
+    alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
+    
+    # WebSocket Support
+    alb.ingress.kubernetes.io/backend-protocol: HTTP
+    alb.ingress.kubernetes.io/conditions.ws: '[{"field":"http-header","httpHeaderConfig":{"httpHeaderName": "Upgrade","values":["websocket"]}}]'
+    
+    # Timeouts
+    alb.ingress.kubernetes.io/idle-timeout: "3600"
+    alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=3600
+    
+    # Security
+    alb.ingress.kubernetes.io/waf-acl-id: your-waf-acl-id  # If using WAF
+    alb.ingress.kubernetes.io/security-groups: sg-xxxxxxxx
+    
+    # CORS
+    # alb.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS, DELETE, PATCH
+    # alb.ingress.kubernetes.io/cors-allow-headers: DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
+    # alb.ingress.kubernetes.io/cors-allow-origin: https://speakin.com
+    # alb.ingress.kubernetes.io/cors-allow-credentials: "true"
+spec:
+  ingressClassName: alb
+  rules:
+  - host: backend.speakin.hamrazhakeem.site
+    http:
+      paths:
+      - pathType: Prefix
+        path: /api
+        backend:
+          service:
+            name: api-gateway
+            port:
+              number: 8080
+      - pathType: Prefix
+        path: /ws
+        backend:
+          service:
+            name: message-service
+            port:
+              number: 8003

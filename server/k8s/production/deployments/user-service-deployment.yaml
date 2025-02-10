@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: speakin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+      - name: user-service
+        image: hamrazhakeem/speakin-user-service:latest
+        ports:
+        - containerPort: 8000
+          name: http
+        - containerPort: 50051
+          name: grpc
+        envFrom:
+        - configMapRef:
+            name: user-service-config
+        - secretRef:
+            name: user-service-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: speakin
+spec:
+  selector:
+    app: user-service
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000
+    - name: grpc
+      port: 50051
+      targetPort: 50051
+  type: ClusterIP

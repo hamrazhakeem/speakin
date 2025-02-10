@@ -1,0 +1,11 @@
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ebs-sc
+provisioner: ebs.csi.aws.com
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  type: gp3                # SSD type
+  encrypted: "true"       # Enable encryption
+reclaimPolicy: Retain     # Important for StatefulSets!
+allowVolumeExpansion: true  # Allow volume resizing
