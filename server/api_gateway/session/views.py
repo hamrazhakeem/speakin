@@ -138,6 +138,7 @@ class ReportView(APIView):
             if pk:
                 session_service_url = os.getenv('SESSION_SERVICE_URL') + f'reports/{pk}/'
             else:
+                print('getReports')
                 session_service_url = os.getenv('SESSION_SERVICE_URL') + 'reports/'
             response = requests.get(session_service_url, json=request.data)
             return Response(response.json(), status=response.status_code)

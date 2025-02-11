@@ -327,10 +327,12 @@ class ReportList(generics.ListCreateAPIView):
     serializer_class = ReportSerializer
 
     def get_serializer_context(self):
+        print('get_serializer_context')
         context = super().get_serializer_context()
         return context
 
     def get_queryset(self):
+        print('get_queryset')
         booking_id = self.kwargs.get('pk')
         if booking_id:
             return Report.objects.filter(booking_id=booking_id)
