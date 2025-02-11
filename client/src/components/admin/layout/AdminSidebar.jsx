@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, Languages, Users, Video } from 'lucide-react';
+import { Home, Languages, Users, Video, Flag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AdminButton from '../ui/AdminButton';
 
@@ -12,6 +12,7 @@ const AdminSidebar = ({ items, isOpen, onClose }) => {
     'Users': <Users className="h-5 w-5" />,
     Sessions: <Video className="h-5 w-5" />,
     Languages: <Languages className="h-5 w-5" />,
+    Reports: <Flag className="h-5 w-5" />,
   };
 
   const paths = {
@@ -19,6 +20,7 @@ const AdminSidebar = ({ items, isOpen, onClose }) => {
     'Users': '/admin/manage-users',
     Sessions: '/admin/manage-sessions',
     Languages: '/admin/manage-languages',
+    Reports: '/admin/manage-reports',
   };
 
   return (

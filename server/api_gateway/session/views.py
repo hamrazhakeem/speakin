@@ -108,13 +108,54 @@ class DailyRoomCreateView(APIView):
 
     def post(self, request):
         try:
-            user_service_url = os.getenv('SESSION_SERVICE_URL') + 'create-daily-room/'
+            session_service_url = os.getenv('SESSION_SERVICE_URL') + 'create-daily-room/'
             raw_body = request.body
             headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
-            response = requests.post(user_service_url, data=raw_body, headers={**headers, "Content-Type": "application/json"})
+            response = requests.post(session_service_url, data=raw_body, headers={**headers, "Content-Type": "application/json"})
             return Response(response.json(), status=response.status_code)
         except requests.exceptions.RequestException as e:
             return Response( 
                 {"error": "Failed to connect to session service.", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        
+class ReportView(APIView):
+    authentication_classes = [JWTAuthentication]
+    def post(self, request):
+        try:
+            session_service_url = os.getenv('SESSION_SERVICE_URL') + 'reports/'
+            headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
+            response = requests.post(session_service_url, json=request.data, headers=headers)
+            return Response(response.json(), status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "Failed to connect to session service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+    def get(self, request, pk=None):
+        try:
+            if pk:
+                session_service_url = os.getenv('SESSION_SERVICE_URL') + f'reports/{pk}/'
+            else:
+                session_service_url = os.getenv('SESSION_SERVICE_URL') + 'reports/'
+            response = requests.get(session_service_url, json=request.data)
+            return Response(response.json(), status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "Failed to connect to session service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        
+    def patch(self, request, pk):
+        try:
+            session_service_url = os.getenv('SESSION_SERVICE_URL') + f'reports/respond/{pk}/'
+            headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
+            response = requests.patch(session_service_url, json=request.data, headers=headers)
+            return Response(response.json(), status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "Failed to connect to session service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+

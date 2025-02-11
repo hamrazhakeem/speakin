@@ -1,19 +1,29 @@
-import React, { useState } from 'react';
-import { Clock, CreditCard, RotateCw, VideoIcon, Filter, ChevronDown, ChevronUp, AlertCircle, Calendar } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Clock, CreditCard, RotateCw, VideoIcon, Filter, ChevronDown, ChevronUp, AlertCircle, Calendar, X, CheckCircle, XCircle } from 'lucide-react';
 import EmptyState from '../../common/ui/bookings/EmptyState';
 import useAxios from '../../../../hooks/useAxios';
 import { toast } from 'react-hot-toast';
 import Avatar from '../../../common/ui/Avatar';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
+import { studentApi } from '../../../../api/studentApi';
+import ResponseModal from './ResponseModal';
 
-const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
+const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }) => {
   const axiosInstance = useAxios();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [showRules, setShowRules] = useState(false);
   const [cancellingSessionIds, setCancellingSessionIds] = useState(new Set());
+  const [reports, setReports] = useState({});
+  const [isResponseModalOpen, setIsResponseModalOpen] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
+
+  const handleViewResponse = (report) => {
+    setSelectedReport(report);
+    setIsResponseModalOpen(true);
+  };
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -267,6 +277,30 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
     }
     return roomLink;
   };
+
+  useEffect(() => {
+    const fetchReports = async () => {
+      const completedSessions = sessions.filter(s => s.booking_status === 'completed');
+      
+      for (const session of completedSessions) {
+        try {
+          const sessionReports = await studentApi.getBookingReports(axiosInstance, session.id);
+          if (sessionReports.length > 0) {
+            setReports(prev => ({
+              ...prev,
+              [session.id]: sessionReports[0]  // Store the entire report object
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching reports:', error);
+        }
+      }
+    };
+
+    if (sessions?.length) {
+      fetchReports();
+    }
+  }, [sessions]);
 
   // Show loading state when sessions is null (initial load)
   if (sessions === null) {
@@ -543,6 +577,50 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions }) => {
                           );
                         })()
                       }
+                      {session.booking_status === 'completed' && !reports[session.id] && (
+                        <button
+                          onClick={() => onReportSession(session.id)}
+                          className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-4 
+                            rounded-xl font-medium transition-colors duration-200 touch-manipulation
+                            flex items-center justify-center gap-2"
+                        >
+                          <AlertCircle className="w-4 h-4" />
+                          Report Issue
+                        </button>
+                      )}
+      {session.booking_status === 'completed' && reports[session.id] && (
+        <div className="space-y-2">
+          <div className={`w-full px-4 py-4 rounded-xl font-medium flex items-center justify-center gap-2
+            ${reports[session.id].status === 'pending' ? 'bg-yellow-50 text-yellow-600' : 
+              reports[session.id].status === 'responded' ? 'bg-green-50 text-green-600' : 
+              'bg-red-50 text-red-600'}`}
+          >
+            {reports[session.id].status === 'pending' && <Clock className="w-4 h-4" />}
+            {reports[session.id].status === 'responded' && <CheckCircle className="w-4 h-4" />}
+            Report {reports[session.id].status === 'pending' ? 'Pending' : 'Reviewed — '}
+            {reports[session.id].status === 'responded' && (
+              <button 
+                onClick={() => handleViewResponse(reports[session.id])}
+                className="underline text-blue-600 hover:text-blue-700"
+              >
+                View Response
+              </button>
+            )}
+          </div>
+          {reports[session.id].status === 'pending' && (
+            <p className="text-sm text-gray-600 text-center px-4">
+              Our team is currently reviewing your report. You will be notified once a response is available.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Response Modal */}
+      <ResponseModal
+        isOpen={isResponseModalOpen}
+        onClose={() => setIsResponseModalOpen(false)}
+        report={selectedReport}
+      />
                       {session.booking_status === 'confirmed' && (() => {
                         const currentTime = new Date();
                         const sessionStartTime = new Date(session.availabilityDetails.start_time);

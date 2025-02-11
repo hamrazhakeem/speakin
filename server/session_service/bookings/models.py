@@ -43,3 +43,23 @@ class Bookings(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+class Report(models.Model):
+    REPORT_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('responded', 'Responded'),
+    )
+
+    booking = models.ForeignKey(Bookings, on_delete=models.CASCADE, related_name='reports')
+    reporter_id = models.IntegerField()
+    description = models.TextField()
+    status = models.CharField(
+        max_length=15,
+        choices=REPORT_STATUS_CHOICES,
+        default='pending'
+    )
+    admin_response = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']

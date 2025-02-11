@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics
-from .models import TutorAvailability, Bookings
-from .serializers import TutorAvailabilitySerializer, BookingsSerializer
+from .models import TutorAvailability, Bookings, Report
+from .serializers import TutorAvailabilitySerializer, BookingsSerializer, ReportSerializer, ReportUpdateSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
@@ -322,3 +322,20 @@ class DailyRoomCreateView(APIView):
             }, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+class ReportList(generics.ListCreateAPIView):
+    serializer_class = ReportSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        return context
+
+    def get_queryset(self):
+        booking_id = self.kwargs.get('pk')
+        if booking_id:
+            return Report.objects.filter(booking_id=booking_id)
+        return Report.objects.all().select_related('booking', 'booking__availability')
+    
+class ReportDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Report.objects.all()
+    serializer_class = ReportUpdateSerializer

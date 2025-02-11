@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import useAxios from '../../../../hooks/useAxios';
 import { useSelector } from 'react-redux';
+import { toast } from 'react-hot-toast';
 import StudentBookingsList from './StudentBookingsList';
 import LoadingSpinner from '../../../common/ui/LoadingSpinner';
 import NavigationTabs from '../../common/ui/profile/NavigationTabs';
+import ReportModal from './ReportModal';
+import { studentApi } from '../../../../api/studentApi';
 
 const BookingsManage = () => {
-    const navigate = useNavigate();
     const axiosInstance = useAxios();
     const { userId } = useSelector((state) => state.auth);
     const [sessions, setSessions] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+    const [selectedSessionId, setSelectedSessionId] = useState(null);
+    const [reportText, setReportText] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
   
     const tabs = [
       { label: 'Profile', path: '/profile' },
@@ -59,6 +64,41 @@ const BookingsManage = () => {
       fetchStudentSessions();
     }, [userId]);
 
+    const handleReportSubmit = async (e) => {
+      e.preventDefault();
+      setIsSubmitting(true);
+      
+      try {
+        await studentApi.submitReport(axiosInstance, {
+          bookingId: selectedSessionId,
+          reporterId: userId,
+          description: reportText
+        });
+        
+        toast.success('Report submitted successfully');
+        setIsReportModalOpen(false);
+        setReportText('');
+        setSelectedSessionId(null);
+        fetchStudentSessions();
+      } catch (error) {
+        const errorMessage = error.response?.data?.detail || error.response?.data?.message || error.response?.data?.non_field_errors || 'Failed to submit report';
+        toast.error(errorMessage);
+      } finally {
+        setIsSubmitting(false);
+      }
+    };
+
+    const handleOpenReportModal = (sessionId) => {
+      setSelectedSessionId(sessionId);
+      setIsReportModalOpen(true);
+    };
+
+    const handleCloseReportModal = () => {
+      setIsReportModalOpen(false);
+      setReportText('');
+      setSelectedSessionId(null);
+    };
+
     return (
         <div className="flex-1 bg-gradient-to-b from-blue-50 to-white">
           <main className="container mx-auto px-4 py-8">
@@ -83,11 +123,21 @@ const BookingsManage = () => {
                 ) : (
                   <StudentBookingsList 
                     sessions={sessions} 
-                    fetchStudentSessions={fetchStudentSessions} 
+                    fetchStudentSessions={fetchStudentSessions}
+                    onReportSession={handleOpenReportModal}
                   />
                 )}
               </div>
             </div>
+
+            <ReportModal 
+              isOpen={isReportModalOpen}
+              onClose={handleCloseReportModal}
+              onSubmit={handleReportSubmit}
+              reportText={reportText}
+              setReportText={setReportText}
+              isSubmitting={isSubmitting}
+            />
           </main>
         </div>
       );

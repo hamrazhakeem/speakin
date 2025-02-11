@@ -73,5 +73,13 @@ export const adminApi = {
 
     signIn: (axiosInstance, credentials) => 
         axiosInstance.post('admin/sign-in/', credentials)
-            .then(response => response.data)
+            .then(response => response.data),
+
+    getReports: (axiosInstance) => {
+      return axiosInstance.get('reports/');
+    },
+
+    updateReportStatus: (axiosInstance, reportId, data) => {
+      return axiosInstance.patch(`reports/respond/${reportId}/`, data);
+    },
   };

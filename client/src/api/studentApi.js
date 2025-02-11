@@ -88,5 +88,25 @@ export const studentApi = {
 
     updateProfile: (axiosInstance, userId, formData) => 
         axiosInstance.patch(`users/${userId}/`, formData)
-            .then(response => response.data)
+            .then(response => response.data),
+
+    getBookingReports: (axiosInstance, bookingId) => 
+        axiosInstance.get(`reports/${bookingId}`)
+            .then(response => response.data),
+
+    submitReport: (axiosInstance, data) => 
+        axiosInstance.post('reports/', {
+            booking: data.bookingId,
+            reporter_id: data.reporterId,
+            description: data.description
+        })
+            .then(response => response.data),
+    
+    getReports: (axiosInstance) => 
+        axiosInstance.get('reports/')
+            .then(response => response.data),
+    
+    getReport: (axiosInstance, reportId) => 
+        axiosInstance.get(`reports/${reportId}/`)
+            .then(response => response.data),
 };

@@ -15,6 +15,7 @@ import AdminManageSessions from '../../pages/admin/AdminManageSessions';
 import AdminManageLanguages from '../../pages/admin/AdminManageLanguages';
 import AdminVerifyTutor from '../../pages/admin/AdminVerifyTutor';
 import AdminVerifyLanguage from '../../pages/admin/AdminVerifyLanguage';
+import AdminManageReports from '../../pages/admin/AdminManageReports';
 
 // Student Pages
 import Home from '../../pages/user/student/Home';
@@ -75,6 +76,7 @@ const AppRoutes = () => {
                 <Route path='/admin/manage-languages' element={<AdminManageLanguages />} />
                 <Route path='/admin/verify-tutor/:userId' element={<AdminVerifyTutor />} />
                 <Route path='/admin/verify-language/:requestId' element={<AdminVerifyLanguage />} />
+                <Route path='/admin/manage-reports' element={<AdminManageReports />} />
             </Route>
 
             {/* Student Protected Routes */}

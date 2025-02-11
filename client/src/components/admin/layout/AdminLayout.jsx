@@ -15,6 +15,7 @@ const AdminLayout = ({ children, showSidebar = true }) => {
     { label: 'Users', active: location.pathname === '/admin/manage-users' },
     { label: 'Sessions', active: location.pathname === '/admin/manage-sessions' },
     { label: 'Languages', active: location.pathname === '/admin/manage-languages' },
+    { label: 'Reports', active: location.pathname === '/admin/manage-reports' },
   ];
 
   return (

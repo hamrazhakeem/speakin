@@ -1,6 +1,8 @@
 from rest_framework import serializers
-from .models import TutorAvailability, Bookings
+from .models import TutorAvailability, Bookings, Report
 from django.utils import timezone
+import requests
+from django.conf import settings
 
 class BookingsSerializer(serializers.ModelSerializer):
     class Meta:
@@ -91,3 +93,85 @@ class TutorAvailabilitySerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("This time slot overlaps with an existing available slot.")
 
         return data
+
+class ReportSerializer(serializers.ModelSerializer):
+    reporter_details = serializers.SerializerMethodField()
+    tutor_details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Report
+        fields = [
+            'id',
+            'booking',
+            'reporter_id',
+            'description',
+            'status',
+            'admin_response',
+            'created_at',
+            'reporter_details',
+            'tutor_details'
+        ]
+        read_only_fields = ['status', 'admin_response']
+
+    def get_reporter_details(self, obj):
+        try:
+            response = requests.get(
+                f"{settings.USER_SERVICE_URL}/users/{obj.reporter_id}/",
+                headers=self.context['request'].headers
+            )
+            if response.status_code == 200:
+                return response.json()
+            return None
+        except Exception as e:
+            print(f"Error fetching reporter details: {e}")
+            return None
+
+    def get_tutor_details(self, obj):
+        try:
+            tutor_id = obj.booking.availability.tutor_id
+            response = requests.get(
+                f"{settings.USER_SERVICE_URL}/users/{tutor_id}/",
+                headers=self.context['request'].headers
+            )
+            if response.status_code == 200:
+                return response.json()
+            return None
+        except Exception as e:
+            print(f"Error fetching tutor details: {e}")
+            return None
+
+    def validate(self, data):
+        # Ensure the reporter can only report their own booking
+        booking = data['booking']
+        reporter_id = data['reporter_id']
+        print(data)
+
+        if booking.student_id != reporter_id:
+            raise serializers.ValidationError("You can only report your own bookings.")
+
+        # Ensure the booking is completed
+        if booking.booking_status != 'completed':
+            raise serializers.ValidationError("You can only report completed sessions.")
+
+        # Check if a report already exists for this booking
+        existing_report = Report.objects.filter(
+            booking=booking,
+            reporter_id=reporter_id
+        ).exists()
+
+        if existing_report:
+            raise serializers.ValidationError("You have already submitted a report for this session.")
+
+        return data
+    
+class ReportUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['status', 'admin_response']
+
+    def update(self, instance, validated_data):
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
