@@ -20,6 +20,7 @@ const ReportsManagement = () => {
       setLoading(true);
       const response = await adminApi.getReports(axiosInstance);
       setReports(response.data);
+      console.log(response);
     } catch (error) {
       console.error('Error fetching reports:', error);
     } finally {

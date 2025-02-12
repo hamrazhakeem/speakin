@@ -76,6 +76,7 @@ export const adminApi = {
             .then(response => response.data),
 
     getReports: (axiosInstance) => {
+      console.log('getReports');
       return axiosInstance.get('reports/');
     },
 
