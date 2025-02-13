@@ -16,9 +16,16 @@ spec:
       containers:
       - name: session-service-worker
         image: hamrazhakeem/speakin-session-service:latest
-        command: ["celery", "-A", "session-service", "worker", "--loglevel=info"]
+        command: ["celery", "-A", "session_service", "worker", "--loglevel=info"]
         envFrom:
         - configMapRef:
             name: session-service-config
         - secretRef:
             name: session-service-secrets
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"

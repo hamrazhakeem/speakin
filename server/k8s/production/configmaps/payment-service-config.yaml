@@ -9,7 +9,7 @@ data:
   ALLOWED_HOSTS: "payment-service,backend.speakin.hamrazhakeem.site,api-gateway"
 
   # Database settings
-  DB_HOST: "${RDS_PAYMENT_DB_HOST}"  # From RDS endpoint
+  DB_HOST: "speakin-db.czq066m88qo6.eu-north-1.rds.amazonaws.com"  # From RDS endpoint
   DB_PORT: "5432"
 
   # Frontend URL

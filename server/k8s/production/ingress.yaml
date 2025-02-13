@@ -8,7 +8,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:region:account:certificate/certificate-id
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-north-1:980921730669:certificate/6126efbf-df2f-4948-a8e5-1d8a505b355a
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
     
     # WebSocket Support
@@ -20,8 +20,7 @@ metadata:
     alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=3600
     
     # Security
-    alb.ingress.kubernetes.io/waf-acl-id: your-waf-acl-id  # If using WAF
-    alb.ingress.kubernetes.io/security-groups: sg-xxxxxxxx
+    alb.ingress.kubernetes.io/security-groups: sg-0e4e9ead42ca5bf49
     
     # CORS
     # alb.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS, DELETE, PATCH
