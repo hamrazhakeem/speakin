@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import AdminNavbar from './AdminNavbar';
 import AdminSidebar from './AdminSidebar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
-import logoWhite from '@/assets/logo-white.webp';
+import logoWhite from '../../../assets/logo-white.webp';
 
 const AdminLayout = ({ children, showSidebar = true }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);

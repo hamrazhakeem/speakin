@@ -8,7 +8,7 @@ import useAxios from '../../../../hooks/useAxios';
 import { studentApi } from '../../../../api/studentApi';
 import Avatar from '../../../common/ui/Avatar';
 import GradientButton from '../ui/buttons/GradientButton';
-import logo from '@/assets/logo.webp';
+import logo from '../../../../assets/logo.webp';
 
 const Navbar = () => {
   const navigate = useNavigate();

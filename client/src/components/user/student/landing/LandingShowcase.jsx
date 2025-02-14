@@ -5,7 +5,7 @@ import TrustBadge from '../../common/ui/landing/TrustBadge'
 import LandingButton from '../../common/ui/buttons/LandingButton'
 import BenefitCard from '../../common/ui/landing/BenefitCard'
 import LanguageCard from './LanguageCard'
-import stripePartner from '@/assets/powered-by-stripe.webp'
+import stripePartner from '../../../../assets/powered-by-stripe.webp'
 
 const LandingContent = () => {
   const navigate = useNavigate();
