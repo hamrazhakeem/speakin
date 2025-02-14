@@ -8,7 +8,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-north-1:980921730669:certificate/6126efbf-df2f-4948-a8e5-1d8a505b355a
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-north-1:980921730669:certificate/cb249995-e41b-4252-9a96-39894b49a059
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
     
     # WebSocket Support
@@ -21,12 +21,6 @@ metadata:
     
     # Security
     alb.ingress.kubernetes.io/security-groups: sg-0e4e9ead42ca5bf49
-    
-    # CORS
-    # alb.ingress.kubernetes.io/cors-allow-methods: PUT, GET, POST, OPTIONS, DELETE, PATCH
-    # alb.ingress.kubernetes.io/cors-allow-headers: DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization
-    # alb.ingress.kubernetes.io/cors-allow-origin: https://speakin.com
-    # alb.ingress.kubernetes.io/cors-allow-credentials: "true"
 spec:
   ingressClassName: alb
   rules:
