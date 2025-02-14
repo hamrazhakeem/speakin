@@ -10,7 +10,6 @@ data:
   CORS_ALLOWED_ORIGINS: "https://speakin.hamrazhakeem.site"
   
   # Database settings
-  DB_HOST: "speakin-db.czq066m88qo6.eu-north-1.rds.amazonaws.com"  # From RDS endpoint
   DB_PORT: "5432"
   
   # JWT settings
