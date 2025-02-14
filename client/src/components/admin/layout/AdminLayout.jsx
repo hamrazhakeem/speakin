@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import AdminNavbar from './AdminNavbar';
 import AdminSidebar from './AdminSidebar';
 import { Bars3Icon } from '@heroicons/react/24/outline';
+import logoWhite from '@/assets/logo-white.webp';
 
 const AdminLayout = ({ children, showSidebar = true }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -32,7 +33,7 @@ const AdminLayout = ({ children, showSidebar = true }) => {
           )}
           <img
             onClick={() => navigate('/admin/dashboard')}
-            src="/src/assets/logo-white.webp"
+            src={logoWhite}
             className="h-8 w-auto cursor-pointer"
             alt="SpeakIn Logo"
           />

@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { Bell, User, Menu, X, CreditCard, LogOut, Plus, MessageCircle, Star } from 'lucide-react';
+import { User, Menu, X, CreditCard, LogOut, Plus, MessageCircle } from 'lucide-react';
 import { clearTokens, updateCredits } from '../../../../redux/authSlice';
 import useAxios from '../../../../hooks/useAxios';
 import { studentApi } from '../../../../api/studentApi';
 import Avatar from '../../../common/ui/Avatar';
 import GradientButton from '../ui/buttons/GradientButton';
+import logo from '@/assets/logo.webp';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -110,7 +111,7 @@ const Navbar = () => {
           <div className="flex-shrink-0 flex items-center">
             <img
               onClick={() => navigate(getHomePath())}
-              src="/src/assets/logo.webp"
+              src={logo}
               className="h-8 w-auto cursor-pointer"
               alt="SpeakIn Logo"
             />

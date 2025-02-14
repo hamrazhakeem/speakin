@@ -5,6 +5,7 @@ import TrustBadge from '../../common/ui/landing/TrustBadge'
 import LandingButton from '../../common/ui/buttons/LandingButton'
 import BenefitCard from '../../common/ui/landing/BenefitCard'
 import LanguageCard from './LanguageCard'
+import stripePartner from '@/assets/powered-by-stripe.webp'
 
 const LandingContent = () => {
   const navigate = useNavigate();
@@ -224,7 +225,11 @@ const LandingContent = () => {
             </div>
             {/* Stripe Partnership Banner */}
             <div className="flex justify-center items-center gap-4 mt-12">
-              <img src='/src/assets/powered-by-stripe.webp' alt="Stripe" className="h-8" />
+              <img 
+                src={stripePartner} 
+                alt="Powered by Stripe" 
+                className="h-8" 
+              />
             </div>
           </div>
         </div>
