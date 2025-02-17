@@ -160,3 +160,15 @@ class ReportView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
 
+class TutorCreditsHistoryView(APIView):
+    authentication_classes = [JWTAuthentication]
+    def get(self, request, tutor_id):
+        try:
+            session_service_url = os.getenv('SESSION_SERVICE_URL') + f'bookings/tutor-credits-history/{tutor_id}/'
+            response = requests.get(session_service_url, json=request.data)
+            return Response(response.json(), status=response.status_code)
+        except requests.exceptions.RequestException as e:
+            return Response(
+                {"error": "Failed to connect to session service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

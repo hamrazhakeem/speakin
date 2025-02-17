@@ -84,6 +84,8 @@ def sign_in(request):
     if user is not None and not user.user_type == 'tutor':
         if user.with_google:
             return Response({'detail': 'You have created account with google, Click sign in with google'}, status=status.HTTP_401_UNAUTHORIZED)
+        if not user.is_active:
+            return Response({'detail': 'Your account has been blocked. Please contact support.'}, status=status.HTTP_403_FORBIDDEN)
         refresh = RefreshToken.for_user(user)
         access_token = refresh.access_token
         access_token['is_admin'] = user.is_staff
@@ -204,6 +206,18 @@ class LoginWithGoogle(APIView):
             email = id_token['email']
             name = id_token['name']
      
+            # First check if user exists and is blocked
+            try:
+                existing_user = User.objects.get(email=email)
+                if not existing_user.is_active:
+                    return Response(
+                        {"detail": "Your account has been blocked. Please contact support."}, 
+                        status=status.HTTP_403_FORBIDDEN
+                    )
+            except User.DoesNotExist:
+                pass
+
+            # If user is not blocked or doesn't exist, proceed with get_user_or_create
             user = get_user_or_create(email, name)
             
             refresh = RefreshToken.for_user(user)
@@ -212,7 +226,7 @@ class LoginWithGoogle(APIView):
             return Response({
                 'access': str(access_token),
                 'refresh': str(refresh),
-                'role':"user", 
+                'role': "user", 
                 'name': user.name,
                 'id': user.id,
                 'credits': user.balance_credits
@@ -574,18 +588,32 @@ def tutor_request(request):
 
 class BlockUnblockUser(APIView):
     permission_classes = [IsAdminUser]
+
     def patch(self, request, id):
-        try: 
+        try:
             user = User.objects.get(id=id)
-            user.is_active = not user.is_active
-            user.save() 
-            if user.is_active:
-                return Response({'message': 'User unblocked successfully!'}, status=status.HTTP_200_OK)
-            return Response({'message': 'User blocked successfully!'}, status=status.HTTP_200_OK)
+            is_active = request.data.get('is_active', False)
+            
+            # Only send email if status is actually changing
+            if user.is_active != is_active:
+                user.is_active = is_active
+                user.save()
+                
+                if is_active:
+                    EmailService.send_account_reactivation_email(user)
+                    message = 'User unblocked successfully!'
+                else:
+                    EmailService.send_account_suspension_email(user)
+                    message = 'User blocked successfully!'
+                
+                return Response({'message': message}, status=status.HTTP_200_OK)
+            
+            return Response({'message': 'No change in user status'}, status=status.HTTP_200_OK)
+            
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST) 
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def tutor_sign_in(request):

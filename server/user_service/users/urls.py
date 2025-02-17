@@ -33,4 +33,6 @@ urlpatterns = [
     
     path('teaching-language-change-requests/', TeachingLanguageChangeRequestList.as_view()),
     path('teaching-language-change-requests/<int:pk>/', TeachingLanguageChangeRequestDetail.as_view()),
+
+    path('users/<int:id>/block-unblock/', BlockUnblockUser.as_view()),
 ] 

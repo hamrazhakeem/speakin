@@ -274,3 +274,33 @@ class EmailService:
                 get_email_template_path('student_cancellation_notification'),
                 context
             )
+
+    @staticmethod
+    def send_account_suspension_email(user):
+        """Send account suspension notification email"""
+        context = format_email_context({
+            'user_name': user.name
+        })
+        template = get_email_template_path('account_suspension_email')
+
+        send_email_task.delay(
+            'Important: Your SpeakIn Account Has Been Suspended',
+            user.email,
+            template,
+            context
+        )
+
+    @staticmethod
+    def send_account_reactivation_email(user):
+        """Send account reactivation notification email"""
+        context = format_email_context({
+            'user_name': user.name
+        })
+        template = get_email_template_path('account_reactivation_email')
+
+        send_email_task.delay(
+            'Good News: Your SpeakIn Account Has Been Reactivated',
+            user.email,
+            template,
+            context
+        )

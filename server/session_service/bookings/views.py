@@ -341,3 +341,31 @@ class ReportList(generics.ListCreateAPIView):
 class ReportDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Report.objects.all()
     serializer_class = ReportUpdateSerializer
+
+class TutorCreditsHistoryView(generics.ListAPIView):
+    serializer_class = BookingsSerializer
+
+    def get_queryset(self):
+        tutor_id = self.kwargs.get('tutor_id')
+        return Bookings.objects.filter(
+            availability__tutor_id=tutor_id,
+            booking_status='completed'
+        ).select_related('availability')
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        credits_history = []
+
+        for booking in queryset:
+            credits_required = booking.availability.credits_required
+            # Trial sessions get 25%, standard sessions get 80% of required credits
+            earned_credits = (credits_required * 25) // 100 if booking.availability.session_type == 'trial' else (credits_required * 80) // 100
+
+            credits_history.append({
+                'id': booking.id,
+                'session_type': booking.availability.session_type,
+                'credits_earned': earned_credits,
+                'created_at': booking.created_at,
+            })
+
+        return Response(credits_history)

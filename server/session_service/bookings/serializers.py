@@ -97,6 +97,8 @@ class TutorAvailabilitySerializer(serializers.ModelSerializer):
 class ReportSerializer(serializers.ModelSerializer):
     reporter_details = serializers.SerializerMethodField()
     tutor_details = serializers.SerializerMethodField()
+    tutor_report_stats = serializers.SerializerMethodField()
+    tutor_report_history = serializers.SerializerMethodField()
 
     class Meta:
         model = Report
@@ -109,7 +111,9 @@ class ReportSerializer(serializers.ModelSerializer):
             'admin_response',
             'created_at',
             'reporter_details',
-            'tutor_details'
+            'tutor_details',
+            'tutor_report_stats',
+            'tutor_report_history'
         ]
         read_only_fields = ['status', 'admin_response']
 
@@ -139,6 +143,19 @@ class ReportSerializer(serializers.ModelSerializer):
         except Exception as e:
             print(f"Error fetching tutor details: {e}")
             return None
+
+    def get_tutor_report_stats(self, obj):
+        tutor_id = obj.booking.availability.tutor_id
+        return Report.get_tutor_report_stats(tutor_id)
+
+    def get_tutor_report_history(self, obj):
+        tutor_id = obj.booking.availability.tutor_id
+        # Get only reports created before the current report
+        history = Report.objects.filter(
+            booking__availability__tutor_id=tutor_id,
+            created_at__lt=obj.created_at  # Only get reports created before this one
+        ).order_by('-created_at')
+        return ReportHistorySerializer(history, many=True).data
 
     def validate(self, data):
         # Ensure the reporter can only report their own booking
@@ -174,4 +191,9 @@ class ReportUpdateSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
+
+class ReportHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Report
+        fields = ['id', 'description', 'status', 'created_at', 'admin_response']
 

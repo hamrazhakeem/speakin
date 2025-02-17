@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background: linear-gradient(to right, #2563eb, #4f46e5);
+            color: white;
+            padding: 24px;
+            text-align: center;
+            border-radius: 16px 16px 0 0;
+        }
+        .content {
+            padding: 32px;
+            background-color: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0;
+        }
+        .highlight-container {
+            background-color: #fee2e2;
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .status-badge {
+            background-color: #dc2626;
+            color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .warning-box {
+            background-color: #fff7ed;
+            border-left: 4px solid #ea580c;
+            padding: 16px;
+            margin: 24px 0;
+            border-radius: 4px;
+        }
+        .support-link {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .support-link:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">SpeakIn</h1>
+        </div>
+        <div class="content">
+            <div class="highlight-container">
+                <div class="status-badge">Account Suspended</div>
+                <h2 style="margin: 16px 0; color: #dc2626;">Account Access Restricted</h2>
+                <p style="margin: 0; color: #991b1b;">Your account has been temporarily suspended</p>
+            </div>
+
+            <p>Dear {{user_name}},</p>
+            
+            <p>We are writing to inform you that your SpeakIn account has been temporarily suspended due to a violation of our community guidelines and terms of service.</p>
+
+            <div class="warning-box">
+                <p style="margin-top: 0;"><strong>What this means:</strong></p>
+                <ul style="margin-bottom: 0;">
+                    <li>You cannot access your account or use SpeakIn services</li>
+                    <li>Any scheduled sessions have been cancelled</li>
+                    <li>Your profile is temporarily hidden from the platform</li>
+                </ul>
+            </div>
+
+            <p>If you believe this suspension was made in error or would like to appeal this decision, please contact our support team immediately. Our team will review your case and provide further assistance.</p>
+
+            <p style="margin-top: 32px;">Contact our support team:</p>
+            <a href="mailto:support@speakin.com" class="support-link">support@speakin.com</a>
+            
+            <p style="margin-top: 32px;">Best regards,<br>The SpeakIn Team</p>
+
+            <div class="footer">
+                <p>© 2025 SpeakIn. All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Count
 
 # Create your models here.
 
@@ -63,3 +64,19 @@ class Report(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+    @classmethod
+    def get_tutor_report_stats(cls, tutor_id):
+        return cls.objects.filter(
+            booking__availability__tutor_id=tutor_id
+        ).aggregate(
+            total_reports=Count('id'),
+            pending_reports=Count('id', filter=models.Q(status='pending')),
+            responded_reports=Count('id', filter=models.Q(status='responded'))
+        )
+
+    @classmethod
+    def get_tutor_report_history(cls, tutor_id):
+        return cls.objects.filter(
+            booking__availability__tutor_id=tutor_id
+        ).order_by('-created_at')

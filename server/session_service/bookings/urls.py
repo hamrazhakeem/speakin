@@ -10,4 +10,5 @@ urlpatterns = [
     path('reports/', ReportList.as_view()),
     path('reports/<int:pk>/', ReportList.as_view()),
     path('reports/respond/<int:pk>/', ReportDetail.as_view()),
+    path('bookings/tutor-credits-history/<int:tutor_id>/', TutorCreditsHistoryView.as_view()),
 ]

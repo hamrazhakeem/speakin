@@ -27,4 +27,5 @@ urlpatterns = [
     path('platform-languages/', PlatformLanguageView.as_view()),
     path('spoken-languages/', SpokenLanguageView.as_view()),
     path('countries/', CountryView.as_view()),
+    path('users/<int:id>/block-unblock/', BlockUnblockUser.as_view()),
 ]
