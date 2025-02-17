@@ -75,6 +75,11 @@ const ReportsManagement = () => {
           <div>
             <h1 className="text-xl lg:text-2xl font-bold text-white flex items-center gap-2">
               Reports Management
+              {reports.length > 0 && (
+                <span className="text-sm font-normal bg-red-500 text-white px-2 py-0.5 rounded-full">
+                  {reports.filter(r => r.status === 'pending').length} pending
+                </span>
+              )}
             </h1>
             <p className="text-sm text-zinc-400">
               Review and manage user complaints about sessions and tutors
@@ -93,7 +98,15 @@ const ReportsManagement = () => {
 
       <div className="bg-black border border-zinc-800 rounded-lg">
         <ReportsTable
-          reports={filteredReports}
+          reports={filteredReports.map(report => ({
+            ...report,
+            tutorStats: {
+              totalReports: report.tutor_report_stats.total_reports,
+              pendingReports: report.tutor_report_stats.pending_reports,
+              respondedReports: report.tutor_report_stats.responded_reports
+            },
+            reportHistory: report.tutor_report_history
+          }))}
           activeTab={activeTab}
           onResolve={handleResolve}
         />

@@ -11,6 +11,9 @@ const ReportsTable = ({ reports, activeTab, onResolve }) => {
   const [dialogType, setDialogType] = useState(null); // 'description', 'response', or 'resolve'
   const [adminResponse, setAdminResponse] = useState('');
   const [loading, setLoading] = useState(false); // Add loading state
+  const [expandedReport, setExpandedReport] = useState(null);
+  const [resolvingReport, setResolvingReport] = useState(null);
+  const [response, setResponse] = useState('');
 
   if (reports.length === 0) {
     return (
@@ -34,25 +37,16 @@ const ReportsTable = ({ reports, activeTab, onResolve }) => {
     setIsDialogOpen(true);
   };
 
-  const handleResolveClick = (report) => {
-    setSelectedReport(report);
-    setDialogType('resolve');
-    setAdminResponse('');
-    setIsDialogOpen(true);
+  const handleResolveClick = (reportId) => {
+    setResolvingReport(reportId);
+    setResponse('');
   };
 
-  const handleSubmitResponse = () => {
-    if (adminResponse.trim()) {
-      setLoading(true);
-      onResolve(
-        selectedReport.id, 
-        adminResponse.trim(),
-        selectedReport.booking,
-        selectedReport.reporter_id,
-      );
-      setLoading(false);
-      setIsDialogOpen(false);
-      setAdminResponse('');
+  const handleSubmitResponse = (reportId, bookingId, reporterId) => {
+    if (response.trim()) {
+      onResolve(reportId, response, bookingId, reporterId);
+      setResolvingReport(null);
+      setResponse('');
     }
   };
 
@@ -75,7 +69,7 @@ const ReportsTable = ({ reports, activeTab, onResolve }) => {
             <AdminButton
               variant="secondary"
               size="sm"
-              onClick={handleSubmitResponse}
+              onClick={() => handleSubmitResponse(selectedReport.id, selectedReport.booking.id, selectedReport.reporter_id)}
               disabled={loading || !adminResponse.trim()}
             >
               {loading ? (
@@ -94,110 +88,202 @@ const ReportsTable = ({ reports, activeTab, onResolve }) => {
 
   return (
     <>
-      <div className="relative">
-        <div className="overflow-x-auto">
-          <div className="inline-block min-w-full align-middle">
-            <table className="min-w-full divide-y divide-zinc-800">
-              <thead>
-                <tr className="border-b border-zinc-800 bg-zinc-900">
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400 w-[250px]">Reporter</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400 w-[250px]">Reported User</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400 w-[120px]">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400 w-[160px]">Description</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400 w-[160px]">Response</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-zinc-400 w-[160px]">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-800">
-                {reports.map((report) => (
-                  <tr key={report.id} className="hover:bg-zinc-900/50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <Avatar
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="text-left text-sm text-zinc-400">
+              <th className="p-4">Reporter</th>
+              <th className="p-4">Tutor</th>
+              <th className="p-4">Description</th>
+              <th className="p-4">Status</th>
+              <th className="p-4">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {reports.map((report) => (
+              <React.Fragment key={report.id}>
+                <tr className="border-t border-zinc-800">
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                    <Avatar
                           src={report.reporter_details?.profile_image}
                           name={report.reporter_details?.name}
                           size={40}
                         />
-                        <div>
-                          <div className="text-sm font-medium text-white">
-                            {report.reporter_details?.name}
-                          </div>
-                          <div className="text-sm text-zinc-400">
-                            {report.reporter_details?.email}
-                          </div>
+                      <div>
+                        <div className="font-medium text-white">
+                          {report.reporter_details?.name || 'Unknown'}
                         </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center gap-3">
-                        <Avatar
-                          src={report.tutor_details?.profile_image}
-                          name={report.tutor_details?.name}
-                          size={40}
-                        />
-                        <div>
-                          <div className="text-sm font-medium text-white">
-                            {report.tutor_details?.name}
-                          </div>
-                          <div className="text-sm text-zinc-400">
-                            {report.tutor_details?.email}
-                          </div>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        src={report.tutor_details?.profile_image}
+                        name={report.tutor_details?.name}
+                        size={40}
+                      />
+                      <div>
+                        <div className="font-medium text-white">
+                          {report.tutor_details?.tutor_details?.speakin_name || 'Unknown'}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium
-                        ${report.status === 'pending' ? 'bg-yellow-500/10 text-yellow-500' :
-                          'bg-green-500/10 text-green-500'}`}>
-                        {report.status === 'pending' ? <Clock className="w-3 h-3" /> : <CheckCircle className="w-3 h-3" />}
-                        {report.status.charAt(0).toUpperCase() + report.status.slice(1)}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <AdminButton
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleViewDetails(report, 'description')}
-                      >
-                        View
-                      </AdminButton>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <AdminButton
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleViewDetails(report, 'response')}
-                      >
-                        View
-                      </AdminButton>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {report.status === 'pending' && (
-                        <AdminButton
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleResolveClick(report)}
+                        <div className="mt-2 flex gap-3 text-sm">
+                          <span className="text-zinc-400">
+                            Total: <span className="text-white">{report.tutorStats.totalReports}</span>
+                          </span>
+                          <span className="text-zinc-400">
+                            Pending: <span className="text-yellow-500">{report.tutorStats.pendingReports}</span>
+                          </span>
+                          <span className="text-zinc-400">
+                            Resolved: <span className="text-green-500">{report.tutorStats.respondedReports}</span>
+                          </span>
+                        </div>
+                        <button 
+                          onClick={() => setExpandedReport(expandedReport === report.id ? null : report.id)}
+                          className="mt-2 text-sm text-blue-500 hover:text-blue-400"
                         >
-                          Resolve
-                        </AdminButton>
-                      )}
+                          {expandedReport === report.id ? 'Hide History' : 'View History'}
+                        </button>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    <button 
+                      onClick={() => setSelectedReport(report)}
+                      className="text-sm text-blue-500 hover:text-blue-400 mt-1"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                  <td className="p-4">
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                      report.status === 'pending' 
+                        ? 'bg-yellow-500/10 text-yellow-500' 
+                        : 'bg-green-500/10 text-green-500'
+                    }`}>
+                      {report.status}
+                    </span>
+                  </td>
+                  <td className="p-4">
+                    {report.status === 'pending' && (
+                      <>
+                        {resolvingReport === report.id ? (
+                          <div className="space-y-2">
+                            <textarea
+                              value={response}
+                              onChange={(e) => setResponse(e.target.value)}
+                              placeholder="Enter your response..."
+                              className="w-full px-3 py-2 text-sm bg-zinc-900 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-blue-500"
+                              rows="3"
+                            />
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleSubmitResponse(report.id, report.booking.id, report.reporter_id)}
+                                className="px-3 py-1 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+                              >
+                                Submit
+                              </button>
+                              <button
+                                onClick={() => setResolvingReport(null)}
+                                className="px-3 py-1 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => handleResolveClick(report.id)}
+                            className="text-sm text-blue-500 hover:text-blue-400"
+                          >
+                            Resolve
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </td>
+                </tr>
+                {expandedReport === report.id && (
+                  <tr className="border-t border-zinc-800 bg-zinc-900/50">
+                    <td colSpan="5" className="p-4">
+                      <div className="space-y-3">
+                        <h4 className="text-sm font-medium text-white">Previous Reports</h4>
+                        {report.reportHistory && report.reportHistory.length > 0 ? (
+                          report.reportHistory.map((history) => (
+                            <div key={history.id} className="p-3 bg-zinc-900 rounded-lg">
+                              <p className="text-white text-sm">{history.description}</p>
+                              {history.admin_response && (
+                                <p className="mt-2 text-sm text-zinc-400">
+                                  <span className="font-medium text-zinc-300">Admin Response:</span> {history.admin_response}
+                                </p>
+                              )}
+                              <div className="mt-2 flex justify-between items-center">
+                                <span className="text-xs text-zinc-500">
+                                  {new Date(history.created_at).toLocaleDateString()}
+                                </span>
+                                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                  history.status === 'pending' 
+                                    ? 'bg-yellow-500/10 text-yellow-500' 
+                                    : 'bg-green-500/10 text-green-500'
+                                }`}>
+                                  {history.status}
+                                </span>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-sm text-zinc-400 py-2 px-3 bg-zinc-900 rounded-lg">
+                            No previous reports found for this tutor before this report.
+                          </div>
+                        )}
+                      </div>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                )}
+              </React.Fragment>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      <Dialog
-        open={isDialogOpen}
-        onClose={() => setIsDialogOpen(false)}
-        title={dialogType === 'description' ? 'Report Description' : 
-              dialogType === 'response' ? 'Admin Response' : 
-              'Resolve Report'}
+      <Dialog 
+        open={!!selectedReport} 
+        onClose={() => setSelectedReport(null)}
+        title="Report Details"
       >
-        {selectedReport && renderDialogContent()}
+        <div className="space-y-4">
+          <div>
+            <h4 className="text-sm font-medium text-zinc-400 mb-2">Description</h4>
+            <p className="text-white">{selectedReport?.description}</p>
+          </div>
+
+          <div>
+            <h4 className="text-sm font-medium text-zinc-400 mb-2">Admin Response</h4>
+            {selectedReport?.admin_response ? (
+              <p className="text-white">{selectedReport.admin_response}</p>
+            ) : (
+              <p className="text-zinc-500 italic">No admin response yet</p>
+            )}
+          </div>
+
+          <div className="pt-2 border-t border-zinc-800">
+            <div className="flex justify-between text-sm text-zinc-400">
+              <span>Status: 
+                <span className={`ml-2 inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                  selectedReport?.status === 'pending' 
+                    ? 'bg-yellow-500/10 text-yellow-500' 
+                    : 'bg-green-500/10 text-green-500'
+                }`}>
+                  {selectedReport?.status}
+                </span>
+              </span>
+              <span>
+                {new Date(selectedReport?.created_at).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+        </div>
       </Dialog>
     </>
   );

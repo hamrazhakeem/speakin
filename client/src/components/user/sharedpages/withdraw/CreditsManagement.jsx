@@ -122,6 +122,40 @@ const Card = ({ children, className = '' }) => (
     );
     };
 
+const CreditsHistoryItem = ({ credit }) => {
+  return (
+    <div className="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
+      <div className="flex items-center gap-4">
+        <Plus className="w-6 h-6 text-green-500" />
+        <div>
+          <p className="font-medium text-gray-900">
+            Credits Earned ({credit.session_type})
+          </p>
+          <div className="flex flex-col sm:flex-row sm:gap-2">
+            <p className="text-sm text-gray-500">
+              {new Date(credit.created_at).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })}
+            </p>
+          </div>
+        </div>
+      </div>
+      <div className="flex items-center gap-4">
+        <div className="text-right">
+          <p className="font-medium text-green-500">
+            +{credit.credits_earned} credits
+          </p>
+          <p className="text-xs text-gray-500">
+            ≈ ₹{(credit.credits_earned * 150).toLocaleString()}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CreditsManagement = () => {
     const [credits, setCredits] = useState(0);
     const [inputValue, setInputValue] = useState('');
@@ -132,6 +166,8 @@ const CreditsManagement = () => {
     const [transactions, setTransactions] = useState([]);
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
     const [isPageLoading, setIsPageLoading] = useState(true);
+    const [creditsHistory, setCreditsHistory] = useState([]);
+    const [isLoadingCreditsHistory, setIsLoadingCreditsHistory] = useState(false);
     const { userId, isTutor } = useSelector(state => state.auth);
     const axiosInstance = useAxios();
     const dispatch = useDispatch();
@@ -139,7 +175,11 @@ const CreditsManagement = () => {
 
     useEffect(() => {
         const initializePage = async () => {
-        await Promise.all([checkStripeAccount(), fetchTransactions()]);
+        await Promise.all([
+            checkStripeAccount(), 
+            fetchTransactions(),
+            isTutor && fetchCreditsHistory()
+        ]);
         setIsPageLoading(false);
         };
         initializePage();
@@ -168,6 +208,19 @@ const CreditsManagement = () => {
         toast.error('Failed to load transaction history');
         } finally {
         setIsLoadingTransactions(false);
+        }
+    };
+
+    const fetchCreditsHistory = async () => {
+        try {
+        setIsLoadingCreditsHistory(true);
+        const response = await axiosInstance.get(`bookings/tutor-credits-history/${userId}/`);
+        setCreditsHistory(Array.isArray(response.data) ? response.data : []);
+        } catch (error) {
+        console.error('Error fetching credits history:', error);
+        toast.error('Failed to load credits history');
+        } finally {
+        setIsLoadingCreditsHistory(false);
         }
     };
 
@@ -346,6 +399,44 @@ const CreditsManagement = () => {
                   ) : (
                     <div className="text-center py-8">
                       <p className="text-gray-500">No transactions yet.</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {isTutor && (
+            <div className="lg:col-span-2 lg:col-start-2">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Credits History</CardTitle>
+                    <button 
+                      onClick={fetchCreditsHistory}
+                      className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-2"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingCreditsHistory ? (
+                    <div className="flex justify-center py-8">
+                      <LoadingSpinner size="md" className="text-blue-600" />
+                    </div>
+                  ) : creditsHistory.length > 0 ? (
+                    <div className="divide-y divide-gray-100 max-h-[500px] overflow-y-auto scrollbar-thin rounded-lg">
+                      {creditsHistory.map((credit) => (
+                        <CreditsHistoryItem 
+                          key={credit.id} 
+                          credit={credit}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No credits history yet.</p>
                     </div>
                   )}
                 </CardContent>

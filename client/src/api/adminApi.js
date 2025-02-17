@@ -47,10 +47,9 @@ export const adminApi = {
             .then(response => response.data),
     
     updateUserStatus: (axiosInstance, userId, isActive) => 
-    axiosInstance.patch(`users/${userId}/`, {
-        user_id: userId,
-        is_active: isActive,
-    })
+        axiosInstance.patch(`users/${userId}/block-unblock/`, {
+            is_active: isActive
+        })
         .then(response => response.data),
 
     approveTutor: (axiosInstance, tutorId) => 
