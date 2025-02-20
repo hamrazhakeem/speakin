@@ -17,12 +17,20 @@ const SignInWithGoogleButton = () => {
 
   const handleSuccess = async (codeResponse) => {
     try {
+      console.log('Google OAuth response:', codeResponse);
       const { access, refresh, name, id, credits } = await studentApi.signInWithGoogle(axios, codeResponse.code);
-      // const { access, refresh, name, id, credits } = response.data;
+      console.log('Sign in successful:', { name, id, credits });
+      
       dispatch(setTokens({ accessToken: access, refreshToken: refresh, userName: name, userId: id, isAdmin: false, isStudent: true, credits: credits }));
       toast.success(`Welcome, ${name}!`);
       navigate('/home');
     } catch (error) {
+      console.log(error)
+        console.error('Google sign in error:', {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
+        });
         const message = error.response?.data?.detail || 'Login failed. Please try again.';
         toast.error(message);
     }

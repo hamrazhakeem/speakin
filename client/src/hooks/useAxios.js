@@ -22,6 +22,7 @@ const useAxios = () => {
       return config;
     },
     (error) => {
+      console.log(error)
       return Promise.reject(error);
     }
   );
@@ -31,11 +32,21 @@ const useAxios = () => {
       return response; 
     },
     (error) => {
-      console.log(error)
+      console.error('API Error:', {
+        url: error.config?.url,
+        method: error.config?.method,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message
+      });
+
       if (error.response && error.response.status === 403) {
+        console.warn('Authentication failed: Token expired or invalid');
         dispatch(clearTokens());
       }
       else if (error.response && error.response.data.code === "user_inactive") {
+        console.error('User account deactivated:', error.response.data);
         toast.error("Your account has been deactivated. Please contact the support for more info.");
         dispatch(clearTokens());
       }
