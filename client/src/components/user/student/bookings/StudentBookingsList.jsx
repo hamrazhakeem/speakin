@@ -281,29 +281,18 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }
   useEffect(() => {
     const fetchReports = async () => {
       const completedSessions = sessions.filter(s => s.booking_status === 'completed');
-      console.log('Completed sessions:', completedSessions);
-      
-      // Initialize reports for all completed sessions as null
-      const initialReports = {};
-      completedSessions.forEach(session => {
-        initialReports[session.id] = null;
-      });
-      setReports(initialReports);
       
       for (const session of completedSessions) {
         try {
-          console.log('Fetching reports for session:', session.id);
           const sessionReports = await studentApi.getBookingReports(axiosInstance, session.id);
-          console.log(`Reports for session ${session.id}:`, sessionReports);
-          
-          if (sessionReports && sessionReports.length > 0) {
+          if (sessionReports.length > 0) {
             setReports(prev => ({
               ...prev,
-              [session.id]: sessionReports[0]
+              [session.id]: sessionReports[0]  // Store the entire report object
             }));
           }
         } catch (error) {
-          console.error(`Error fetching reports for session ${session.id}:`, error);
+          console.error('Error fetching reports:', error);
         }
       }
     };
@@ -588,23 +577,17 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }
                           );
                         })()
                       }
-                      {session.booking_status === 'completed' && (
-                        <div>
-                          {console.log('Session:', session.id, 'Reports:', reports[session.id])}
-                          {(!reports[session.id] || reports[session.id] === null) && (
-                            <button
-                              onClick={() => onReportSession(session.id)}
-                              className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-4 
-                                rounded-xl font-medium transition-colors duration-200 touch-manipulation
-                                flex items-center justify-center gap-2"
-                            >
-                              <AlertCircle className="w-4 h-4" />
-                              Report Issue
-                            </button>
-                          )}
-                        </div>
+                      {session.booking_status === 'completed' && !reports[session.id] && (
+                        <button
+                          onClick={() => onReportSession(session.id)}
+                          className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-4 
+                            rounded-xl font-medium transition-colors duration-200 touch-manipulation
+                            flex items-center justify-center gap-2"
+                        >
+                          <AlertCircle className="w-4 h-4" />
+                          Report Issue
+                        </button>
                       )}
-
       {session.booking_status === 'completed' && reports[session.id] && (
         <div className="space-y-2">
           <div className={`w-full px-4 py-4 rounded-xl font-medium flex items-center justify-center gap-2
