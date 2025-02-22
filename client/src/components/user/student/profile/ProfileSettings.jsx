@@ -432,7 +432,6 @@ const ProfileSettings = () => {
                       {/* Languages Spoken Section */}
                       <div className="space-y-4">
                         <div className="flex items-center gap-2 mb-4">
-                          <FaGlobe className="text-blue-600 text-xl" />
                           <h3 className="text-lg font-semibold text-gray-800">Languages Spoken</h3>
                         </div>
 

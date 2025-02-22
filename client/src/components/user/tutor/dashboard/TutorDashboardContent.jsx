@@ -339,6 +339,9 @@ const TutorDashboardContent = () => {
                       <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                           <div className="space-y-6">
+                            <div className="flex items-center gap-2 mb-4">
+                              <h3 className="text-lg font-semibold text-gray-800">Languages Spoken</h3>
+                            </div>
                             {editMode ? (
                               <div className="space-y-4 max-h-[200px] overflow-y-auto scrollbar-thin pr-2">
                                 {selectedLanguages.map((lang, index) => (
