@@ -311,7 +311,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }
     if (sessions?.length) {
       fetchReports();
     }
-  }, [sessions, axiosInstance]);
+  }, [sessions]);
 
   // Show loading state when sessions is null (initial load)
   if (sessions === null) {
