@@ -281,25 +281,29 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }
   useEffect(() => {
     const fetchReports = async () => {
       const completedSessions = sessions.filter(s => s.booking_status === 'completed');
+      console.log('Completed sessions:', completedSessions);
+      
+      // Initialize reports for all completed sessions as null
+      const initialReports = {};
+      completedSessions.forEach(session => {
+        initialReports[session.id] = null;
+      });
+      setReports(initialReports);
       
       for (const session of completedSessions) {
         try {
+          console.log('Fetching reports for session:', session.id);
           const sessionReports = await studentApi.getBookingReports(axiosInstance, session.id);
-          console.log(`Reports for session ${session.id}:`, sessionReports); // Debug log
+          console.log(`Reports for session ${session.id}:`, sessionReports);
           
-          // Update reports state even if the array is empty
-          setReports(prev => ({
-            ...prev,
-            [session.id]: sessionReports.length > 0 ? sessionReports[0] : null
-          }));
-          
+          if (sessionReports && sessionReports.length > 0) {
+            setReports(prev => ({
+              ...prev,
+              [session.id]: sessionReports[0]
+            }));
+          }
         } catch (error) {
           console.error(`Error fetching reports for session ${session.id}:`, error);
-          // Set null for failed requests
-          setReports(prev => ({
-            ...prev,
-            [session.id]: null
-          }));
         }
       }
     };
@@ -307,7 +311,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }
     if (sessions?.length) {
       fetchReports();
     }
-  }, [sessions]);
+  }, [sessions, axiosInstance]);
 
   // Show loading state when sessions is null (initial load)
   if (sessions === null) {
@@ -586,8 +590,8 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }
                       }
                       {session.booking_status === 'completed' && (
                         <div>
-                          {console.log('Session:', session.id, 'Reports:', reports[session.id])} {/* Debug log */}
-                          {reports[session.id] === null && (
+                          {console.log('Session:', session.id, 'Reports:', reports[session.id])}
+                          {(!reports[session.id] || reports[session.id] === null) && (
                             <button
                               onClick={() => onReportSession(session.id)}
                               className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-4 
