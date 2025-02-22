@@ -218,7 +218,6 @@ const CreditsManagement = () => {
         setCreditsHistory(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
         console.error('Error fetching credits history:', error);
-        toast.error('Failed to load credits history');
         } finally {
         setIsLoadingCreditsHistory(false);
         }

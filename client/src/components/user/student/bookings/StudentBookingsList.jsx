@@ -577,7 +577,7 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }
                           );
                         })()
                       }
-                      {session.booking_status === 'completed' && !reports[session.id] && (
+                      {session.booking_status === 'completed' && reports[session.id] === null && (
                         <button
                           onClick={() => onReportSession(session.id)}
                           className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-4 
