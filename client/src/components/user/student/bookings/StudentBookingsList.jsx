@@ -285,14 +285,21 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }
       for (const session of completedSessions) {
         try {
           const sessionReports = await studentApi.getBookingReports(axiosInstance, session.id);
-          if (sessionReports.length > 0) {
-            setReports(prev => ({
-              ...prev,
-              [session.id]: sessionReports[0]  // Store the entire report object
-            }));
-          }
+          console.log(`Reports for session ${session.id}:`, sessionReports); // Debug log
+          
+          // Update reports state even if the array is empty
+          setReports(prev => ({
+            ...prev,
+            [session.id]: sessionReports.length > 0 ? sessionReports[0] : null
+          }));
+          
         } catch (error) {
-          console.error('Error fetching reports:', error);
+          console.error(`Error fetching reports for session ${session.id}:`, error);
+          // Set null for failed requests
+          setReports(prev => ({
+            ...prev,
+            [session.id]: null
+          }));
         }
       }
     };
@@ -577,17 +584,23 @@ const StudentBookingsList = ({ sessions, fetchStudentSessions, onReportSession }
                           );
                         })()
                       }
-                      {session.booking_status === 'completed' && reports[session.id] === null && (
-                        <button
-                          onClick={() => onReportSession(session.id)}
-                          className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-4 
-                            rounded-xl font-medium transition-colors duration-200 touch-manipulation
-                            flex items-center justify-center gap-2"
-                        >
-                          <AlertCircle className="w-4 h-4" />
-                          Report Issue
-                        </button>
+                      {session.booking_status === 'completed' && (
+                        <div>
+                          {console.log('Session:', session.id, 'Reports:', reports[session.id])} {/* Debug log */}
+                          {reports[session.id] === null && (
+                            <button
+                              onClick={() => onReportSession(session.id)}
+                              className="w-full bg-red-50 text-red-600 hover:bg-red-100 px-4 py-4 
+                                rounded-xl font-medium transition-colors duration-200 touch-manipulation
+                                flex items-center justify-center gap-2"
+                            >
+                              <AlertCircle className="w-4 h-4" />
+                              Report Issue
+                            </button>
+                          )}
+                        </div>
                       )}
+
       {session.booking_status === 'completed' && reports[session.id] && (
         <div className="space-y-2">
           <div className={`w-full px-4 py-4 rounded-xl font-medium flex items-center justify-center gap-2

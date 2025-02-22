@@ -91,8 +91,15 @@ export const studentApi = {
             .then(response => response.data),
 
     getBookingReports: (axiosInstance, bookingId) => 
-        axiosInstance.get(`reports/${bookingId}`)
-            .then(response => response.data),
+        axiosInstance.get(`reports/${bookingId}/`)
+            .then(response => {
+                console.log('API Response:', response.data);
+                return response.data;
+            })
+            .catch(error => {
+                console.error('API Error:', error);
+                throw error;
+            }),
 
     submitReport: (axiosInstance, data) => 
         axiosInstance.post('reports/', {
