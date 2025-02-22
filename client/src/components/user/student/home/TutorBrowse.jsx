@@ -28,8 +28,17 @@ const TutorBrowse = () => {
         ]);
 
         const tutorUsers = tutorsResponse.filter(
-          user => user.user_type === "tutor" && user.is_active
+          user => user.user_type === "tutor" && 
+                 user.is_active && 
+                 user.tutor_details?.status === 'approved'
         );
+        
+        console.log('Filtered tutors:', {
+          total: tutorsResponse.length,
+          approved: tutorUsers.length,
+          filtered: tutorUsers
+        });
+
         setTutors(tutorUsers);
         setStudentLanguages(studentResponse);
       } catch (error) {
@@ -59,6 +68,10 @@ const TutorBrowse = () => {
   
     // Filter tutors based on search term and selected languages
     const filteredTutors = tutors?.filter(tutor => {
+      if (!tutor.tutor_details || tutor.tutor_details.status !== 'approved') {
+        return false;
+      }
+
       const matchesSearch = tutor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            tutor.country?.toLowerCase().includes(searchTerm.toLowerCase());
       
