@@ -52,9 +52,9 @@ jobs:
     - name: Deploy to EKS
       run: |
         kubectl rollout restart deployment -n speakin
+        kubectl rollout status deployment -n speakin
 
     - name: Verify deployment
       run: |
-        kubectl rollout status deployment -n speakin
         kubectl get pods -n speakin
         kubectl get services -n speakin
