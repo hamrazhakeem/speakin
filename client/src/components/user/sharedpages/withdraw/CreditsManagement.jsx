@@ -215,6 +215,7 @@ const CreditsManagement = () => {
         try {
         setIsLoadingCreditsHistory(true);
         const response = await axiosInstance.get(`bookings/tutor-credits-history/${userId}/`);
+        console.log(response)
         setCreditsHistory(Array.isArray(response.data) ? response.data : []);
         } catch (error) {
         console.error('Error fetching credits history:', error);
