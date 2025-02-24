@@ -13,9 +13,7 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    # Add a simple comment to trigger the workflow
-    # Deployment attempt with new AWS credentials
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -44,14 +42,13 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ secrets.AWS_REGION }}
 
-    - name: Update kubeconfig
-      run: |
-        aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }} --region ${{ secrets.AWS_REGION }}
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v4
+      with:
+        version: 'v1.28.0'
 
-    - name: Verify kubectl configuration
-      run: |
-        kubectl config view
-        kubectl config current-context
+    - name: Update kubeconfig
+      run: aws eks update-kubeconfig --name ${{ secrets.EKS_CLUSTER_NAME }}
 
     - name: Deploy to EKS
       run: |
@@ -60,7 +57,5 @@ jobs:
 
     - name: Verify deployment
       run: |
-        kubectl get pods -n speakin
-        kubectl get services -n speakin
         kubectl get pods -n speakin
         kubectl get services -n speakin
