@@ -484,7 +484,7 @@ def tutor_request(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Get files
+        # Get files from request
         video_file = request.FILES.get('video')
         image_file = request.FILES.get('image')
         profile_image = request.FILES.get('profile_image')
@@ -564,14 +564,25 @@ def tutor_request(request):
         except json.JSONDecodeError:
             raise ValueError('Invalid spokenLanguages format')
 
-        # Handle video upload asynchronously
+        # Handle video upload
         if video_file:
-            # Save the video file temporarily
-            temp_path = f'media/temp_videos/{user.id}_{video_file.name}'
-            path = default_storage.save(temp_path, ContentFile(video_file.read()))
+            # Read the file content
+            video_content = video_file.read()
             
-            # Queue the video processing task
-            process_video_upload.delay('TutorDetails', tutor_details.id, path)
+            # Create a new ContentFile with the video content
+            video_file_content = ContentFile(video_content)
+            video_file_content.name = video_file.name
+            
+            # Pass the serializable content to the task
+            process_video_upload.delay(
+                'TutorDetails',
+                tutor_details.id,
+                {
+                    'content': video_content,
+                    'name': video_file.name,
+                    'content_type': video_file.content_type
+                }
+            )
 
         return Response({
             'message': 'Tutor request submitted successfully! Video upload is being processed.',
@@ -680,15 +691,22 @@ class TeachingLanguageChangeRequestList(generics.ListCreateAPIView):
 
         video_file = self.request.FILES.get('intro_video')
         if video_file:
-            # Save video temporarily
-            temp_path = f'media/temp_videos/language_change_{self.request.user.id}_{video_file.name}'
-            path = default_storage.save(temp_path, ContentFile(video_file.read()))
+            # Read the file content
+            video_content = video_file.read()
             
             # Create request without video first
             instance = serializer.save(user=self.request.user)
             
-            # Queue video processing task
-            process_video_upload.delay('TeachingLanguageChangeRequest', instance.id, path)
+            # Pass the serializable content to the task
+            process_video_upload.delay(
+                'TeachingLanguageChangeRequest',
+                instance.id,
+                {
+                    'content': video_content,
+                    'name': video_file.name,
+                    'content_type': video_file.content_type
+                }
+            )
         else:
             instance = serializer.save(user=self.request.user)
         return instance

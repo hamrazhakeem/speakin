@@ -31,6 +31,7 @@ def lock_credits_in_escrow(student_id, tutor_id, booking_id, credits_required):
                 credits_locked=credits_required,
                 status='locked'
             ))
+            print('creditsssssss looocked')
             return response.success
     except grpc.RpcError as e:
         print(f"Failed to lock credits in escrow: {e.details()} (Code: {e.code()})")
@@ -56,6 +57,7 @@ def release_credits_from_escrow(session_type, booking_id):
                 session_type=session_type,
                 booking_id=booking_id,
             ))
+            print('releasign from escrowwwww')
             return response.success
     except grpc.RpcError as e:
         print(f"Failed to refund credits from escrow: {e.details()} (Code: {e.code()})")

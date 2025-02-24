@@ -7,6 +7,10 @@ from django.core.files import File
 import json
 import os
 from django.apps import apps
+from django.core.files.base import ContentFile
+import boto3
+from botocore.exceptions import ClientError
+from io import BytesIO
 
 @shared_task(
     bind=True,
@@ -35,35 +39,40 @@ def send_email_task(self, subject, recipient, template_name, context):
     retry_kwargs={'max_retries': 3},
     retry_backoff=True
 )
-def process_video_upload(self, model_name, instance_id, video_path):
+def process_video_upload(self, model_name, instance_id, file_data):
     """
-    Generic task to process video uploads
+    Process video upload directly to S3
     Args:
         model_name: Name of the model ('TutorDetails' or 'TeachingLanguageChangeRequest')
         instance_id: ID of the instance
-        video_path: Path to the temporarily stored video file
+        file_data: Dictionary containing file information
     """
     try:
+        # Validate model_name
+        if model_name not in ['TutorDetails', 'TeachingLanguageChangeRequest']:
+            raise ValueError(f"Invalid model name: {model_name}")
+
         # Get the appropriate model class
-        model_class = apps.get_model('users', model_name)
-        instance = model_class.objects.get(id=instance_id)
+        if model_name == 'TutorDetails':
+            instance = TutorDetails.objects.get(id=instance_id)
+        else:
+            instance = TeachingLanguageChangeRequest.objects.get(id=instance_id)
         
-        # Open and save the video file
-        with open(video_path, 'rb') as video_file:
-            file_name = video_path.split('/')[-1]
-            instance.intro_video.save(
-                file_name,
-                File(video_file),
-                save=True
-            )
+        # Create a ContentFile from the file data
+        file_content = ContentFile(
+            file_data['content'],
+            name=file_data['name']
+        )
         
-        # Clean up temporary file
-        if os.path.exists(video_path):
-            os.remove(video_path)
-            
+        # Save directly to S3 via Django's storage backend
+        file_name = f"tutor_intro_videos/{instance_id}_{file_data['name']}"
+        instance.intro_video.save(
+            file_name,
+            file_content,
+            save=True
+        )
+        
         return True
     except Exception as exc:
         print(f"Error in video upload task: {str(exc)}")
-        if os.path.exists(video_path):
-            os.remove(video_path)
         self.retry(exc=exc)

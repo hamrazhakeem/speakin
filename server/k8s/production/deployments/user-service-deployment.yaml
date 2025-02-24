@@ -16,6 +16,7 @@ spec:
       containers:
       - name: user-service
         image: hamrazhakeem/speakin-user-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
           name: http

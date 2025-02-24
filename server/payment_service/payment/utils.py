@@ -59,19 +59,37 @@ def refund_transaction(transaction, payment_intent):
     except Exception as e:
         print(f"Refund failed: {str(e)}")
 
-def handle_account_verification(account):
+def handle_account_verification(account, event_type):
     try:
-        stripe_account = StripeAccount.objects.get(stripe_account_id=account.id)
-        print('account', account)
-        # Check if the account is fully verified
-        is_verified = (
-            account.charges_enabled and 
-            account.payouts_enabled and 
-            account.details_submitted
-        )
-        
-        stripe_account.is_verified = is_verified
-        stripe_account.save()
+        if event_type == 'file.created':
+            # Retrieve the account details using the file object
+            account_details = stripe.Account.list(
+                limit=1,
+                created={'gte': account.get('created', 0) - 60}  # Look for accounts created in the last minute
+            )
+            print('account_details', account_details)
+            if account_details and account_details.data:
+                account_id = account_details.data[0].id
+                print('Found account:', account_id)
+                
+                stripe_account = StripeAccount.objects.get(stripe_account_id=account_id)
+                stripe_account.is_verified = True
+                stripe_account.save()
+                print(f'Account {account_id} marked as verified')
+            else:
+                print('No matching account found')
+                
+        elif event_type == 'account.updated':
+            stripe_account = StripeAccount.objects.get(stripe_account_id=account.id)
+            is_verified = (
+                account.charges_enabled and 
+                account.payouts_enabled and 
+                account.details_submitted
+            )
+            stripe_account.is_verified = is_verified
+            stripe_account.save()
         
     except StripeAccount.DoesNotExist:
-        print(f"No matching Stripe account found for {account.id}")
+        print(f"No matching Stripe account found")
+    except Exception as e:
+        print(f"Error in handle_account_verification: {str(e)}")

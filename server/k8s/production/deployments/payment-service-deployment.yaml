@@ -16,6 +16,7 @@ spec:
       containers:
       - name: payment-service
         image: hamrazhakeem/speakin-payment-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8001
           name: http  

@@ -85,10 +85,19 @@ class StripeWebhook(APIView):
         if event_type == 'checkout.session.completed':
             session = event['data']['object']
             handle_checkout_completed(session)
-        # elif event_type == 'financial_connections.account.created':
-        elif event.type == 'account.updated':
+        elif event_type == 'file.created':
+            # Pass the event data properly
+            print('Received file.created event:', event)
+            handle_account_verification({
+                'data': {
+                    'object': event.data.object
+                },
+                'created': event.created,
+                'type': event.type
+            }, event_type)
+        elif event_type == 'account.updated':
             account = event.data.object
-            handle_account_verification(account)
+            handle_account_verification(account, event_type)
 
         return JsonResponse({'status': 'success'}, status=status.HTTP_200_OK)
 

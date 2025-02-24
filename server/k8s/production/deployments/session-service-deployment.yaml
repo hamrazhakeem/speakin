@@ -16,6 +16,7 @@ spec:
       containers:
       - name: session-service
         image: hamrazhakeem/speakin-session-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8002
         envFrom:  

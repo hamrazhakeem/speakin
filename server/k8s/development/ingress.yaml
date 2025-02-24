@@ -8,11 +8,6 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"    # 1 hour
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"    # 1 hour
     nginx.ingress.kubernetes.io/proxy-body-size: "50m"        # Increase max body size to 50MB
-    # nginx.ingress.kubernetes.io/enable-cors: "true"
-    # nginx.ingress.kubernetes.io/cors-allow-origin: "http://localhost:5173"
-    # nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, OPTIONS, DELETE, PATCH"
-    # nginx.ingress.kubernetes.io/cors-allow-headers: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization"
-    # nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
 spec:
   ingressClassName: nginx
   rules:

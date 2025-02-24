@@ -83,14 +83,12 @@ def generate_otp():
 
 def get_signin_url():
     """Get the frontend signin URL."""
-    frontend_origin = next((origin for origin in settings.CORS_ALLOWED_ORIGINS 
-                          if origin.startswith('http://localhost') or 
-                          origin.startswith('http://127.0.0.1')), None)
+    frontend_origin = settings.CORS_ALLOWED_ORIGINS
     
     if not frontend_origin:
         raise ValueError("No local frontend origin found in CORS_ALLOWED_ORIGINS")
     
-    return f"{frontend_origin}/tutor-sign-in/"
+    return f"{frontend_origin}/tutor/sign-in/"
 
 def get_user_or_create(email, name):
     """Get existing user or create new one."""

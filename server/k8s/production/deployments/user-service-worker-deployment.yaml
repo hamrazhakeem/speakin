@@ -16,6 +16,7 @@ spec:
       containers:
       - name: user-service-worker
         image: hamrazhakeem/speakin-user-service:latest
+        imagePullPolicy: Always
         command: ["celery", "-A", "user_service", "worker", "--loglevel=info"]
         envFrom:
         - configMapRef:

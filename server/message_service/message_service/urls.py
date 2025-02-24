@@ -16,8 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-
+from django.http import HttpResponse
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('message.urls'))
+    path('', include('message.urls')),
+    path('api/health/', lambda request: HttpResponse(status=200)),
 ]

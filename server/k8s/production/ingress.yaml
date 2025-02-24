@@ -7,13 +7,14 @@ metadata:
     # AWS ALB Annotations
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
-    alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-north-1:980921730669:certificate/cb249995-e41b-4252-9a96-39894b49a059
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
     
     # WebSocket Support
     alb.ingress.kubernetes.io/backend-protocol: HTTP
-    alb.ingress.kubernetes.io/conditions.ws: '[{"field":"http-header","httpHeaderConfig":{"httpHeaderName": "Upgrade","values":["websocket"]}}]'
+    # alb.ingress.kubernetes.io/backend-protocol.message-service: HTTP
+    # alb.ingress.kubernetes.io/conditions.message-service: '[{"field":"http-header","httpHeaderConfig":{"httpHeaderName": "Upgrade","values":["websocket"]}}]'
     
     # Timeouts
     alb.ingress.kubernetes.io/idle-timeout: "3600"
@@ -21,6 +22,14 @@ metadata:
     
     # Security
     alb.ingress.kubernetes.io/security-groups: sg-0e4e9ead42ca5bf49
+
+    # Health Check Annotations for API Gateway
+    alb.ingress.kubernetes.io/healthcheck-path: /api/health/
+    alb.ingress.kubernetes.io/healthcheck-protocol: HTTP
+    alb.ingress.kubernetes.io/success-codes: '200'
+    alb.ingress.kubernetes.io/healthcheck-timeout-seconds: '5'
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: '30'
+
 spec:
   ingressClassName: alb
   rules:

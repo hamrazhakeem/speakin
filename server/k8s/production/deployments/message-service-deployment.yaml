@@ -16,6 +16,7 @@ spec:
       containers:
       - name: message-service
         image: hamrazhakeem/speakin-message-service:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8003
         envFrom:  

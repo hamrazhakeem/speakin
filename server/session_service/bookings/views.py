@@ -135,12 +135,14 @@ class BookingsList(generics.ListCreateAPIView):
         if not update_user_credits(student_id, student_data['balance_credits'] - credits_required):
             raise ValidationError("Failed to update user balance")
 
+        print('credits getting loockd')
         if not lock_credits_in_escrow( 
                 student_id=student_id,
                 tutor_id=tutor_availability.tutor_id,
                 booking_id=booking_id,
                 credits_required=credits_required):
             update_user_credits(student_id, student_data['balance_credits'])
+            print('user credits updateed')
             raise ValidationError("Failed to lock credits in escrow")
          
         # Generate a unique and secure room name
@@ -176,12 +178,12 @@ class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
         if 'student_joined_at' in request.data:
             if valid_time_window_start <= current_time <= valid_time_window_end:
                 request.data['student_joined_within_5_min'] = True
-
+                print('this became true')
         # Check if the current time is within the valid window for the tutor
         if 'tutor_joined_at' in request.data:
             if valid_time_window_start <= current_time <= valid_time_window_end:
                 request.data['tutor_joined_within_5_min'] = True
-
+                print('this became true')
         response = super().update(request, *args, **kwargs)
         booking.refresh_from_db()  # Reload the booking object to ensure it's up to date
 
@@ -192,6 +194,7 @@ class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
                 
                 if release_credits_from_escrow(session_type, booking_id=booking.id):
                         booking.booking_status = 'completed'
+                        print('session completed going to release credits')
                 else: 
                     return Response({"error": "Failed to refund credits from escrow"},
                                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -200,6 +203,7 @@ class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
 
                 if release_credits_from_escrow(session_type, booking_id=booking.id):
                         booking.booking_status = 'no_show_by_student'
+                        print('no showwwwww')
                 else: 
                     return Response({"error": "Failed to refund credits from escrow"},
                                     status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -215,6 +219,7 @@ class BookingsDetail(generics.RetrieveUpdateDestroyAPIView):
                         ): 
                         booking.booking_status = 'no_show_by_tutor'
                         booking.refund_status = True
+                        print('no showwww tutor')
                     else:
                         return Response({"error": "Failed to deduct balance credits"},
                                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -356,15 +361,14 @@ class TutorCreditsHistoryView(generics.ListAPIView):
         queryset = self.get_queryset()
         credits_history = []
 
+
         for booking in queryset:
             credits_required = booking.availability.credits_required
-            # Trial sessions get 25%, standard sessions get 80% of required credits
-            earned_credits = (credits_required * 25) // 100 if booking.availability.session_type == 'trial' else (credits_required * 80) // 100
-
+            credits_earned = (credits_required * 80) // 100 if booking.availability.session_type == 'standard' else credits_required
             credits_history.append({
-                'id': booking.id,
-                'session_type': booking.availability.session_type,
-                'credits_earned': earned_credits,
+                'id': booking.id, 
+                'session_type': booking.availability.session_type, 
+                'credits_earned': credits_earned,
                 'created_at': booking.created_at,
             })
 
