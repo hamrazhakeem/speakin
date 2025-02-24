@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - '.github/workflows/ci-cd.yml'
       - 'server/**'
       - '!server/k8s/**'
       - '!server/docker-compose.yml'
