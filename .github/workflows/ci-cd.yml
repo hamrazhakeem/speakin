@@ -13,7 +13,9 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-
+    # Add a simple comment to trigger the workflow
+    # Deployment attempt with new AWS credentials
+    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -58,5 +60,7 @@ jobs:
 
     - name: Verify deployment
       run: |
+        kubectl get pods -n speakin
+        kubectl get services -n speakin
         kubectl get pods -n speakin
         kubectl get services -n speakin
