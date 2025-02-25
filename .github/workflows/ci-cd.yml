@@ -10,7 +10,23 @@ on:
       - '!server/docker-compose.yml'
 
 jobs:
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Important for SonarCloud to get all history
+        
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Auto-provided by GitHub
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      # No args needed here as they're defined in sonar-project.properties
+
   build-and-deploy:
+    needs: code-quality
     runs-on: ubuntu-latest
 
     steps:

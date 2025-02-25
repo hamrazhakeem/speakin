@@ -370,3 +370,5 @@ class BlockUnblockUser(APIView):
                 {"error": "Failed to connect to user service.", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        
+        
