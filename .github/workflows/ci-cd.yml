@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'server/**'
+      - '!server/prometheus/prometheus.yml'
       - '!server/k8s/**'
       - '!server/docker-compose.yml'
 
@@ -16,14 +17,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        fetch-depth: 0  # Important for SonarQube to get all history
+        fetch-depth: 0  
         
     - name: SonarQube Scan
       uses: SonarSource/sonarqube-scan-action@v4
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      # No args needed here as they're defined in sonar-project.properties
 
   build-and-deploy:
     needs: code-quality
@@ -68,9 +68,9 @@ jobs:
     - name: Deploy to EKS
       run: |
         kubectl rollout restart deployment -n speakin
-        kubectl rollout status deployment -n speakin
 
     - name: Verify deployment
       run: |
+        kubectl rollout status deployment -n speakin
         kubectl get pods -n speakin
         kubectl get services -n speakin
