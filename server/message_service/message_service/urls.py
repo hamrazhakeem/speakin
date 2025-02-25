@@ -17,7 +17,18 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
+
+try:
+    from prometheus_client import generate_latest
+    
+    def prometheus_metrics(request):
+        return HttpResponse(generate_latest(), content_type="text/plain")
+except ImportError:
+    def prometheus_metrics(request):
+        return HttpResponse("Prometheus client not installed", content_type="text/plain")
+
 urlpatterns = [
+    path('direct-metrics/', prometheus_metrics),  # Direct metrics endpoint
     path('admin/', admin.site.urls),
     path('', include('message.urls')),
     path('api/health/', lambda request: HttpResponse(status=200)),
