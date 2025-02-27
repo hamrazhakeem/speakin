@@ -18,20 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.http import HttpResponse
-
-# Import the metrics view directly
-try:
-    from prometheus_client import generate_latest
-    
-    def prometheus_metrics(request):
-        return HttpResponse(generate_latest(), content_type="text/plain")
-except ImportError:
-    def prometheus_metrics(request):
-        return HttpResponse("Prometheus client not installed", content_type="text/plain")
 
 urlpatterns = [
-    path('direct-metrics/', prometheus_metrics),  # Direct metrics endpoint
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
