@@ -12,11 +12,13 @@ from dotenv import load_dotenv
 from django.conf import settings
 from rest_framework import generics
 from .utils import handle_account_verification, handle_checkout_completed
+import logging
+
+# Get logger for the payment app
+logger = logging.getLogger('payment')
 
 load_dotenv()
  
-# Create your views here. 
-  
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class CreateCheckoutSession(APIView): 
@@ -31,6 +33,7 @@ class CreateCheckoutSession(APIView):
             transaction_type = serializer.validated_data['transaction_type']
  
             try:
+                logger.info(f"Creating checkout session for user {user_id}: {credits} credits")
                 # Create Stripe checkout session 
                 unit_amount = int(price_per_credit * 100) 
                 session = stripe.checkout.Session.create( 
@@ -42,7 +45,7 @@ class CreateCheckoutSession(APIView):
                                 'name': 'Credits',
                                 'description': f'{credits} credits',
                             }, 
-                            'unit_amount': unit_amount,  # Amount in paise
+                            'unit_amount': unit_amount,
                         },
                         'quantity': credits,
                     }],
@@ -51,43 +54,47 @@ class CreateCheckoutSession(APIView):
                     cancel_url=f"{os.getenv('FRONTEND_DOMAIN')}/payment/cancel",
                     metadata={
                         'credits': credits,
-                        'user_id': user_id,  # Pass user_id in metadata
+                        'user_id': user_id,
                         'transaction_type': transaction_type, 
                     }
                 )
-
+                logger.info(f"Checkout session created successfully: {session.id}")
                 return Response({
                     'session_id': session.id,
                     'amount': unit_amount,
                     'quantity': credits}, status=status.HTTP_200_OK)
             except Exception as e:
+                logger.error(f"Error creating checkout session: {str(e)}")
                 return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        logger.warning(f"Invalid serializer data: {serializer.errors}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class StripeWebhook(APIView):
     def post(self, request):
         try:
+            logger.info("Processing Stripe webhook event")
             payload = request.body 
             sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
             event = stripe.Webhook.construct_event(
                 payload, sig_header, os.getenv('STRIPE_WEBHOOK_SECRET'), tolerance=360000000000000000000000000000
             ) 
+            logger.info(f"Webhook event type: {event['type']}")
 
         except Exception as e:
-            print('errrrrrrroddd', str(e))
+            logger.error(f"Webhook error: {str(e)}")
             return JsonResponse({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except stripe.error.SignatureVerificationError as e:
+            logger.error("Invalid webhook signature")
             return JsonResponse({'error': 'Invalid signature'}, status=status.HTTP_400_BAD_REQUEST)
 
         event_type = event['type']
 
-        # Handle other events (checkout session completed)
         if event_type == 'checkout.session.completed':
+            logger.info("Processing checkout.session.completed event")
             session = event['data']['object']
             handle_checkout_completed(session)
         elif event_type == 'file.created':
-            # Pass the event data properly
-            print('Received file.created event:', event)
+            logger.info("Processing file.created event")
             handle_account_verification({
                 'data': {
                     'object': event.data.object
@@ -96,6 +103,7 @@ class StripeWebhook(APIView):
                 'type': event.type
             }, event_type)
         elif event_type == 'account.updated':
+            logger.info("Processing account.updated event")
             account = event.data.object
             handle_account_verification(account, event_type)
 
@@ -108,12 +116,16 @@ class StripeAccountDetail(generics.RetrieveAPIView):
 
     def get(self, request, user_id):
         try:
+            logger.info(f"Fetching Stripe account details for user {user_id}")
             stripe_account = StripeAccount.objects.get(user_id=user_id)
             if stripe_account.is_verified:
+                logger.info(f"Stripe account verified for user {user_id}")
                 return Response({'isVerified': True}, status=status.HTTP_200_OK)
             else: 
+                logger.info(f"Stripe account not verified for user {user_id}")
                 return Response({'isVerified': False}, status=status.HTTP_200_OK)
         except StripeAccount.DoesNotExist:
+            logger.warning(f"No Stripe account found for user {user_id}")
             return Response({'error': 'Stripe account not found for the specified user.'}, status=status.HTTP_404_NOT_FOUND)
 
 class StripeAccountList(generics.ListCreateAPIView):
@@ -125,12 +137,12 @@ class StripeAccountList(generics.ListCreateAPIView):
         try:
             user_id = request.data.get('user_id')
             email = request.data.get('email')
-            print('request.data', request.data)
+            logger.info(f"Creating/updating Stripe account for user {user_id}")
 
             existing_account = StripeAccount.objects.filter(user_id=user_id).first()
             
             if existing_account:
-                # If it exists, create account links for verification using the existing account ID
+                logger.info(f"Creating account links for existing account: {existing_account.stripe_account_id}")
                 account_links = stripe.AccountLink.create(
                     account=existing_account.stripe_account_id,
                     refresh_url=f"{settings.FRONTEND_DOMAIN}/stripe/refresh",
@@ -141,7 +153,7 @@ class StripeAccountList(generics.ListCreateAPIView):
                     'url': account_links.url
                 }, status=status.HTTP_200_OK)
 
-            # Create a Stripe Connect account
+            logger.info("Creating new Stripe Connect account")
             account = stripe.Account.create(
                 type='express',  
                 country='US',
@@ -151,13 +163,12 @@ class StripeAccountList(generics.ListCreateAPIView):
                 },
             )
 
-            # Save the account details
             StripeAccount.objects.create(
                 user_id=request.data.get('user_id'),  
                 stripe_account_id=account.id 
             ) 
-            print('raccount')
-            # Create account links for verification 
+            logger.info(f"Created new Stripe account: {account.id}")
+
             account_links = stripe.AccountLink.create(
                 account=account.id,
                 refresh_url=f"{settings.FRONTEND_DOMAIN}/stripe/refresh",
@@ -170,6 +181,7 @@ class StripeAccountList(generics.ListCreateAPIView):
             })
             
         except Exception as e:
+            logger.error(f"Error creating/updating Stripe account: {str(e)}")
             return Response({
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
@@ -180,55 +192,53 @@ class WithdrawView(APIView):
         serializer = WithdrawalSerializer(data=request.data)
     
         if not serializer.is_valid():
+            logger.warning(f"Invalid withdrawal request: {serializer.errors}")
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
         try:
             credits = serializer.validated_data['credits']
             amount_inr = credits * 150  # 1 credit = 150 rupees
+            user_id = request.data.get('user_id')
+            logger.info(f"Processing withdrawal for user {user_id}: {credits} credits ({amount_inr} INR)")
             
-            # Get user's Stripe account
-            stripe_account = StripeAccount.objects.get(user_id=request.data.get('user_id'))
+            stripe_account = StripeAccount.objects.get(user_id=user_id)
 
             if not stripe_account.is_verified:
+                logger.warning(f"Withdrawal rejected: Unverified Stripe account for user {user_id}")
                 return Response({
                     'error': 'Your Stripe account is not fully verified yet'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
-            # Convert INR to USD for the transfer
-            # Using a fixed exchange rate for example. In production, use a real-time rate
-            USD_TO_INR_RATE = 83.0  # Update this rate regularly
+            USD_TO_INR_RATE = 83.0
             amount_usd = amount_inr / USD_TO_INR_RATE
-            print('amount_usd', amount_usd)
-            # Round to 2 decimal places and convert to cents
             amount_usd_cents = int(round(amount_usd * 100))
 
-            # Create transfer in USD
+            logger.info(f"Creating transfer of {amount_usd_cents} USD cents to account {stripe_account.stripe_account_id}")
             transfer = stripe.Transfer.create(
-                amount=amount_usd_cents,  # Amount in USD cents
-                currency='usd',  # Use USD instead of INR
+                amount=amount_usd_cents,
+                currency='usd',
                 destination=stripe_account.stripe_account_id,
                 description=f'Withdrawal of {credits} credits (INR {amount_inr})'
             )
-            print('transfer', transfer)
-            # Create transaction record (store the INR amount for reference)
+
             transaction = Transactions.objects.create(
-                user_id=request.data.get('user_id'),
-                amount=amount_inr,  # Store original INR amount
+                user_id=user_id,
+                amount=amount_inr,
                 purchased_credits=None,
                 transaction_type='withdrawal',
                 status='completed',
                 reference_id=transfer.id
             )
+            logger.info(f"Created transaction record: {transaction.id}")
             
-            # Update user credits via gRPC
             grpc_success = update_user_credits(
-                request.data.get('user_id'), 
+                user_id, 
                 request.data.get('balance_credits') - credits, 
                 is_deduction=True
             )
             
             if not grpc_success:
-                # Reverse the transfer if gRPC call fails
+                logger.error(f"Failed to update user credits, reversing transfer for user {user_id}")
                 stripe.Transfer.create_reversal(
                     transfer.id,
                     amount=amount_usd_cents
@@ -239,6 +249,7 @@ class WithdrawView(APIView):
                     'error': 'Failed to update credits'
                 }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             
+            logger.info(f"Withdrawal completed successfully for user {user_id}")
             return Response({
                 'message': 'Withdrawal successful',
                 'transaction_id': transaction.id,
@@ -247,10 +258,12 @@ class WithdrawView(APIView):
             })
             
         except StripeAccount.DoesNotExist:
+            logger.warning(f"No Stripe account found for user {user_id}")
             return Response({
                 'error': 'Please connect your Stripe account first'
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.error(f"Withdrawal error: {str(e)}")
             return Response({
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
@@ -260,6 +273,7 @@ class TransactionsDetail(generics.ListAPIView):
 
     def get_queryset(self):
         user_id = self.kwargs['user_id']
+        logger.info(f"Fetching transaction history for user {user_id}")
         return Transactions.objects.filter(user_id=user_id).order_by('-transaction_date')
     
 class TransactionsList(generics.ListAPIView):

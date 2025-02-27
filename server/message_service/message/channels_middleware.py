@@ -3,6 +3,10 @@ from channels.db import database_sync_to_async
 from django.db import close_old_connections
 from django.core.exceptions import PermissionDenied
 from .authentication import JWTAuthentication
+import logging
+
+# Get logger for the message app
+logger = logging.getLogger('message')
 
 class JWTWebsocketMiddleware(BaseMiddleware):
     """Middleware to authenticate WebSocket connections using JWT."""
@@ -16,6 +20,7 @@ class JWTWebsocketMiddleware(BaseMiddleware):
         token = query_parameters.get("token", None)
 
         if not token:
+            logger.warning("WebSocket connection attempt without token")
             await send({
                 "type": "websocket.close",
                 "code": 4000  # Missing token
@@ -29,7 +34,9 @@ class JWTWebsocketMiddleware(BaseMiddleware):
             if user:
                 # Attach the payload (or user_id) to the scope
                 scope["user"] = user
+                logger.info(f"WebSocket authenticated for user {user.id}")
             else:
+                logger.warning("WebSocket authentication failed: invalid credentials")
                 await send({
                     "type": "websocket.close",
                     "code": 4000  # Authentication failed
@@ -39,6 +46,7 @@ class JWTWebsocketMiddleware(BaseMiddleware):
             # Call the next middleware or consumer
             return await super().__call__(scope, receive, send)
         except PermissionDenied:
+            logger.error("WebSocket authentication failed: invalid token")
             await send({
                 "type": "websocket.close",
                 "code": 4002  # Invalid token

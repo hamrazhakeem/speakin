@@ -174,18 +174,30 @@ LOGGING = {
             'formatter': 'verbose',
         },
     },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': 'INFO',
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'message_service': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
         'daphne': {
             'handlers': ['console'],
             'level': 'DEBUG',
+            'propagate': False,
         },
         'message': { 
             'handlers': ['console'],
             'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }

@@ -6,9 +6,10 @@ on:
       - main
     paths:
       - 'server/**'
-      - '!server/prometheus/prometheus.yml'
       - '!server/k8s/**'
+      - '!server/prometheus/**'
       - '!server/docker-compose.yml'
+      - '!server/promtail-config.yaml'
 
 jobs:
   code-quality:

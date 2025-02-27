@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: promtail
+  namespace: speakin
+spec:
+  selector:
+    matchLabels:
+      app: promtail
+  template:
+    metadata:
+      labels:
+        app: promtail
+    spec:
+      serviceAccountName: promtail-sa
+      containers:
+      - name: promtail
+        image: grafana/promtail:2.9.2
+        args:
+        - -config.file=/etc/promtail/promtail.yaml
+        securityContext:
+          privileged: true
+          runAsUser: 0
+        volumeMounts:
+        - name: config
+          mountPath: /etc/promtail
+        - name: docker
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+        - name: positions
+          mountPath: /tmp
+        - name: run
+          mountPath: /run/promtail
+        ports:
+        - containerPort: 9080
+          name: http-metrics
+      volumes:
+      - name: config
+        configMap:
+          name: promtail-config
+      - name: docker
+        hostPath:
+          path: /var/lib/docker/containers
+      - name: positions
+        hostPath:
+          path: /run/promtail
+      - name: run
+        hostPath:
+          path: /run/promtail
+          type: DirectoryOrCreate
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: promtail-sa
+  namespace: speakin
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: promtail-role
+rules:
+- apiGroups: [""]
+  resources: ["nodes", "nodes/proxy", "services", "endpoints", "pods"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: promtail-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: promtail-role
+subjects:
+- kind: ServiceAccount
+  name: promtail-sa
+  namespace: speakin 

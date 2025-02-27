@@ -50,3 +50,10 @@ spec:
             name: message-service
             port:
               number: 8003
+      - pathType: Prefix
+        path: /grafana
+        backend:
+          service:
+            name: grafana
+            port:
+              number: 3000

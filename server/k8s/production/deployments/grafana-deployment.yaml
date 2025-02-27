@@ -1,0 +1,85 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  namespace: speakin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      securityContext:
+        fsGroup: 472
+        supplementalGroups:
+          - 0
+      containers:
+        - name: grafana
+          image: grafana/grafana:10.0.3
+          ports:
+            - containerPort: 3000
+              name: http
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+          resources:
+            requests:
+              cpu: 250m
+              memory: 750Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - name: storage
+              mountPath: /var/lib/grafana
+            - name: config
+              mountPath: /etc/grafana/grafana.ini
+              subPath: grafana.ini
+            - name: datasources
+              mountPath: /etc/grafana/provisioning/datasources
+            - name: admin-password
+              mountPath: /etc/grafana/admin
+              readOnly: true
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: grafana-storage
+        - name: config
+          configMap:
+            name: grafana-config
+        - name: datasources
+          configMap:
+            name: grafana-datasources
+        - name: admin-password
+          secret:
+            secretName: grafana-secrets
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-storage
+  namespace: speakin
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ebs-sc
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana
+  namespace: speakin
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+  selector:
+    app: grafana

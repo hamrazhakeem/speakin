@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: speakin
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    scrape_configs:
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      - job_name: 'api-gateway'
+        static_configs:
+          - targets: ['api-gateway:8080']
+        metrics_path: '/direct-metrics/'
+      
+      - job_name: 'user-service'
+        static_configs:
+          - targets: ['user-service:8000']
+        metrics_path: '/direct-metrics/'
+      
+      - job_name: 'payment-service'
+        static_configs:
+          - targets: ['payment-service:8001']
+        metrics_path: '/direct-metrics/'
+      
+      - job_name: 'session-service'
+        static_configs:
+          - targets: ['session-service:8002']
+        metrics_path: '/direct-metrics/'
+      
+      - job_name: 'message-service'
+        static_configs:
+          - targets: ['message-service:8003']
+        metrics_path: '/direct-metrics/'
+      
+      - job_name: 'cadvisor'
+        static_configs:
+          - targets: ['cadvisor:8080']
