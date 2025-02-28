@@ -1,7 +1,7 @@
 from rest_framework.response import Response
-from .models import Message
+from .models import Message, Notification
 from rest_framework import status
-from .serializers import MessageSerializer
+from .serializers import MessageSerializer, NotificationSerializer
 from django.db.models import Q
 from rest_framework.decorators import api_view, permission_classes
 from .permissions import IsOwner
@@ -66,3 +66,46 @@ def get_chat_history(request, user_id, selected_id):
             {'error': str(e)},
             status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+@api_view(['GET'])
+@permission_classes([IsOwner])
+def get_notifications(request, user_id):
+    """
+    Get all notifications for a user
+    """
+    try:
+        notifications = Notification.objects.filter(recipient_id=user_id).order_by('-timestamp')
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        logger.error(f"Error retrieving notifications: {str(e)}")
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
+
+@api_view(['GET'])
+@permission_classes([IsOwner])
+def get_notification_count(request, user_id):
+    try:
+        count = Notification.objects.filter(recipient_id=user_id, is_read=False).count()
+        return Response({'count': count}, status=status.HTTP_200_OK)
+    except Exception as e: 
+        logger.error(f"Error retrieving notification count: {str(e)}")
+        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+@api_view(['DELETE'])
+@permission_classes([IsOwner])
+def clear_all_notifications(request, user_id):
+    try:
+        Notification.objects.filter(recipient_id=user_id).delete()
+        return Response(
+            {'message': 'All notifications cleared'}, 
+            status=status.HTTP_200_OK
+        )
+    except Exception as e:
+        logger.error(f"Error clearing notifications: {str(e)}")
+        return Response(
+            {'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        ) 

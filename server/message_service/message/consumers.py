@@ -1,7 +1,7 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
-from .models import Message
+from .models import Message, Notification
 import logging
 
 # Get logger for the message app
@@ -59,6 +59,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
             # Save the message to the database
             await self.save_message(sender_id, recipient_id, message_content)
 
+            # Send notification to recipient
+            await self.channel_layer.group_send(
+                f"notifications_user_{recipient_id}",
+                {
+                    "type": "send.notification",
+                    "message": "You have a new message",
+                    "sender_id": sender_id,
+                    "recipient_id": recipient_id
+                }
+            )
+
+            # Create and save the notification
+            await self.create_notification(
+                recipient_id,
+                sender_id,
+                f"You have a message from {self.scope['user'].id}"
+            )
+
             # Send the message to the private chat
             await self.channel_layer.group_send(
                 self.private_chat_room,
@@ -109,3 +127,46 @@ class ChatConsumer(AsyncWebsocketConsumer):
             logger.info(f"Message saved to database: from user {sender_id} to user {recipient_id}")
         except Exception as e:
             logger.error(f"Failed to save message to database: {str(e)}")
+
+    @sync_to_async
+    def create_notification(self, recipient_id, sender_id, message):
+        Notification.objects.create(
+            recipient_id=recipient_id,
+            sender_id=sender_id,
+            message=message
+        )
+
+class NotificationConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        try:
+            user = self.scope['user']
+            self.notification_group = f"notifications_user_{user.id}"
+            
+            await self.channel_layer.group_add(
+                self.notification_group,
+                self.channel_name
+            )
+
+            await self.accept()
+            logger.info(f"Notification connection established for user {user.id}")
+        except Exception as e:
+            logger.error(f"Notification connection failed: {str(e)}")
+            await self.close()
+
+    async def disconnect(self, close_code):
+        if hasattr(self, 'notification_group'):
+            await self.channel_layer.group_discard(
+                self.notification_group,
+                self.channel_name
+            )
+
+    async def send_notification(self, event):
+        await self.send(text_data=json.dumps(event))
+
+    @sync_to_async
+    def create_notification(self, recipient_id, sender_id, message):
+        Notification.objects.create(
+            recipient_id=recipient_id,
+            sender_id=sender_id,
+            message=message
+        )

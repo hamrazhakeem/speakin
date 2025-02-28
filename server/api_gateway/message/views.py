@@ -38,3 +38,82 @@ class MessageView(APIView):
                 {"error": "Failed to connect to message service.", "details": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
+        
+class NotificationView(APIView):
+    authentication_classes = [JWTAuthentication]
+    
+    def get(self, request, user_id):
+        try:
+            # Construct URL and log the request forwarding
+            notification_service_url = os.getenv('MESSAGE_SERVICE_URL') + f'notifications/{user_id}/'
+            logger.info(f"Forwarding notification request to notification service for user {user_id}")
+            
+            # Forward request to notification service
+            headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
+            response = requests.get(notification_service_url, json=request.data, headers=headers)   
+
+            # Log service response status
+            if response.status_code >= 400:
+                logger.error(f"Notification service returned error: {response.status_code}")
+            
+            return Response(response.json(), status=response.status_code)
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to forward request to notification service: {str(e)}")
+            return Response(
+                {"error": "Failed to connect to notification service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+class NotificationCountView(APIView):
+    authentication_classes = [JWTAuthentication]
+    
+    def get(self, request, user_id):
+        try:
+            # Construct URL and log the request forwarding
+            notification_service_url = os.getenv('MESSAGE_SERVICE_URL') + f'notifications/count/{user_id}/'
+            logger.info(f"Forwarding notification count request to notification service for user {user_id}")
+            
+            # Forward request to notification service
+            headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
+            response = requests.get(notification_service_url, json=request.data, headers=headers)   
+
+            # Log service response status
+            if response.status_code >= 400:
+                logger.error(f"Notification service returned error: {response.status_code}")
+            
+            return Response(response.json(), status=response.status_code)
+
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to forward request to notification service: {str(e)}")
+            return Response(
+                {"error": "Failed to connect to notification service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+class NotificationClearView(APIView):
+    authentication_classes = [JWTAuthentication]
+    
+    def delete(self, request, user_id):
+        try:
+            # Construct URL and log the request forwarding
+            notification_service_url = os.getenv('MESSAGE_SERVICE_URL') + f'notifications/clear/{user_id}/'
+            logger.info(f"Forwarding notification clear request to notification service for user {user_id}")
+            
+            # Forward request to notification service
+            headers = {key: value for key, value in request.headers.items() if key != 'Content-Type'}
+            response = requests.delete(notification_service_url, json=request.data, headers=headers)
+
+            # Log service response status
+            if response.status_code >= 400:
+                logger.error(f"Notification service returned error: {response.status_code}")
+            
+            return Response(response.json(), status=response.status_code)
+        
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Failed to forward request to notification service: {str(e)}")
+            return Response(
+                {"error": "Failed to connect to notification service.", "details": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+  
