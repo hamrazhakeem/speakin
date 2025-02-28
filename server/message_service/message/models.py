@@ -19,4 +19,5 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
 
     class Meta:
+        db_table = 'message_notification'  # Add this line to explicitly set table name
         ordering = ['-timestamp']

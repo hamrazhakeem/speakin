@@ -173,6 +173,9 @@ const Navbar = () => {
         fetchNotifications();
       }
     } else {
+      if (!showNotifications) {
+        fetchNotifications();
+      }
       setShowNotifications(prev => !prev);
     }
   };
@@ -257,72 +260,76 @@ const Navbar = () => {
     }
   };
 
-  const renderNotifications = () => (
-    <div className="relative">
-      <button
-        onClick={toggleNotifications}
-        className="p-2 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors relative group"
-      >
-        <Bell className="h-5 w-5" />
-        {notificationCount > -1 && (
-          <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-            {notificationCount}
-          </span>
-        )}
-      </button>
+  const renderNotifications = () => {
+    return (
+      <div className="relative">
+        <button
+          onClick={toggleNotifications}
+          className="p-2 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors relative group"
+        >
+          <Bell className="h-5 w-5" />
+          {notificationCount > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {notificationCount}
+            </span>
+          )}
+        </button>
 
-      {showNotifications && (
-        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100">
-          <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="font-medium text-gray-900">Notifications</h3>
-            {notifications.length > 0 && (
-              <button
-                onClick={handleClearAll}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-                disabled={loadingNotifications || clearing}
-              >
-                {clearing ? 'Clearing...' : 'Clear All'}
-              </button>
-            )}
-          </div>
-          <div className="h-72 overflow-y-auto scrollbar-thin">
-            {loadingNotifications ? (
-              <div className="p-4 flex justify-center">
-                <LoadingSpinner size="sm" className="text-blue-600" />
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">No notifications</div>
-            ) : (
-              notifications.map((notification, index) => (
-                <div key={index} className="p-4 border-b border-gray-100 hover:bg-gray-50">
-                  <div className="flex items-start">
-                    <Avatar
-                      src={notification.sender_image}
-                      name={notification.sender_name}
-                      size={32}
-                      className="flex-shrink-0"
-                    />
-                    <div className="ml-3">
-                      <p className="text-sm text-gray-700">
-                        New message from {notification.sender_name}
-                      </p>
-                      <p className="text-xs text-gray-500 mt-1">
-                        {new Date(notification.timestamp).toLocaleTimeString([], {
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true
-                        })}
-                      </p>
+        {showNotifications && (
+          <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+            <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+              <h3 className="font-medium text-gray-900">Notifications</h3>
+              {notifications.length > 0 && (
+                <button
+                  onClick={handleClearAll}
+                  disabled={loadingNotifications || clearing}
+                  className="text-sm text-blue-600 hover:text-blue-700 font-medium disabled:opacity-50"
+                >
+                  {clearing ? 'Clearing...' : 'Clear All'}
+                </button>
+              )}
+            </div>
+            <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+              {loadingNotifications ? (
+                <div className="p-4 flex justify-center">
+                  <LoadingSpinner size="sm" className="text-blue-600" />
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="p-4 text-center text-gray-500">
+                  No notifications
+                </div>
+              ) : (
+                notifications.map((notification, index) => (
+                  <div key={index} className="p-4 border-b border-gray-100 hover:bg-gray-50">
+                    <div className="flex items-start">
+                      <Avatar
+                        src={notification.sender_image}
+                        name={notification.sender_name}
+                        size={32}
+                        className="flex-shrink-0"
+                      />
+                      <div className="ml-3">
+                        <p className="text-sm text-gray-700">
+                          New message from {notification.sender_name}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(notification.timestamp).toLocaleTimeString([], {
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    );
+  };
 
   return (
     <>

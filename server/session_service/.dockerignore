@@ -5,3 +5,4 @@ __pycache__/
 Dockerfile
 docker-compose.yml
 session_service_env
+migrations/

@@ -5,3 +5,4 @@ __pycache__/
 Dockerfile
 docker-compose.yml
 api_env
+migrations/
