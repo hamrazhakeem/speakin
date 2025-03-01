@@ -5,5 +5,3 @@ __pycache__/
 Dockerfile
 docker-compose.yml
 user_service_env
-media/
-migrations/

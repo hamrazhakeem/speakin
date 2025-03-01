@@ -1,10 +1,8 @@
-import React from 'react';
-import SessionSummary from '../../../components/user/sharedpages/videocall/SessionSummary';
+import React from "react";
+import SessionSummary from "../../../components/user/sharedpages/videocall/SessionSummary";
 
 const VideoCallSummary = () => {
-  return (
-    <SessionSummary />
-  );
+	return <SessionSummary />;
 };
 
 export default VideoCallSummary;

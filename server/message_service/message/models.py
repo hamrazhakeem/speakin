@@ -2,14 +2,16 @@ from django.db import models
 
 # Create your models here.
 
+
 class Message(models.Model):
-    sender_id = models.IntegerField()  # Foreign key to User Service
-    recipient_id = models.IntegerField()  # Foreign key to User Service
+    sender_id = models.IntegerField()
+    recipient_id = models.IntegerField()
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['timestamp']
+        ordering = ["timestamp"]
+
 
 class Notification(models.Model):
     recipient_id = models.IntegerField()
@@ -19,5 +21,5 @@ class Notification(models.Model):
     is_read = models.BooleanField(default=False)
 
     class Meta:
-        db_table = 'message_notification'  # Add this line to explicitly set table name
-        ordering = ['-timestamp']
+        db_table = "message_notification"
+        ordering = ["-timestamp"]

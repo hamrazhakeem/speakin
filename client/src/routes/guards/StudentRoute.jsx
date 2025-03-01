@@ -1,17 +1,17 @@
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import React from "react";
+import { Navigate, Outlet } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const StudentRoute = () => {
-  const { isAuthenticated, isTutor } = useSelector((state) => state.auth);
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/sign-in" />;
-  }
+	const { isAuthenticated, isTutor } = useSelector((state) => state.auth);
 
-  if (isTutor) return <Navigate to="/tutor/dashboard" />;
+	if (!isAuthenticated) {
+		return <Navigate to="/sign-in" />;
+	}
 
-  return <Outlet />; 
+	if (isTutor) return <Navigate to="/tutor/dashboard" />;
+
+	return <Outlet />;
 };
 
 export default StudentRoute;

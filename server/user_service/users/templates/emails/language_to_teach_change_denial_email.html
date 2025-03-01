@@ -1,156 +1,167 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            line-height: 1.6;
-            color: #1f2937;
-            background-color: #f8fafc;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        .header {
-            background: linear-gradient(to right, #2563eb, #4f46e5);
-            color: white;
-            padding: 24px;
-            text-align: center;
-            border-radius: 16px 16px 0 0;
-        }
-        .content {
-            padding: 32px;
-            background-color: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 0 0 16px 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .highlight-container {
-            background-color: #fef2f2;
-            border-radius: 12px;
-            padding: 16px;
-            margin: 24px 0;
-            text-align: center;
-        }
-        .highlight {
-            font-size: 24px;
-            font-weight: 600;
-            color: #dc2626;
-        }
-        .status-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            background-color: #dc2626;
-            color: white;
-            border-radius: 9999px;
-            font-size: 14px;
-            font-weight: 500;
-            margin: 8px 0;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 0;
-        }
-        .button {
-            display: inline-block;
-            padding: 12px 24px;
-            background: linear-gradient(to right, #2563eb, #4f46e5);
-            color: white;
-            text-decoration: none;
-            border-radius: 9999px;
-            font-weight: 600;
-            margin-top: 16px;
-        }
-        .info-box {
-            background-color: #f8fafc;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 16px;
-            margin-top: 24px;
-        }
-        .support-link {
-            color: #2563eb;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        .support-link:hover {
-            text-decoration: underline;
-        }
-        .current-language {
-            color: #2563eb;
-            font-weight: 500;
-        }
-        .reasons-list {
-            margin: 16px 0;
-            padding-left: 20px;
-        }
-        .reasons-list li {
-            margin-bottom: 8px;
-            color: #4b5563;
-        }
-        .footer {
-            text-align: center;
-            margin-top: 32px;
-            padding-top: 16px;
-            border-top: 1px solid #e5e7eb;
-            color: #6b7280;
-            font-size: 14px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1 class="logo">SpeakIn</h1>
-        </div>
-        <div class="content">
-            <h2>Language Change Request Status</h2>
-            <p>Dear {{tutor_name}},</p>
-            
-            <div class="highlight-container">
-                <div class="status-badge">Not Approved</div>
-                <p>Your request to teach</p>
-                <div class="highlight">{{language}}</div>
-                <p>requires additional review</p>
-            </div>
+	<head>
+		<style>
+			body {
+				font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+					sans-serif;
+				line-height: 1.6;
+				color: #1f2937;
+				background-color: #f8fafc;
+				margin: 0;
+				padding: 0;
+			}
+			.container {
+				max-width: 600px;
+				margin: 0 auto;
+				padding: 20px;
+			}
+			.header {
+				background: linear-gradient(to right, #2563eb, #4f46e5);
+				color: white;
+				padding: 24px;
+				text-align: center;
+				border-radius: 16px 16px 0 0;
+			}
+			.content {
+				padding: 32px;
+				background-color: white;
+				border: 1px solid #e5e7eb;
+				border-radius: 0 0 16px 16px;
+				box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+			}
+			.highlight-container {
+				background-color: #fef2f2;
+				border-radius: 12px;
+				padding: 16px;
+				margin: 24px 0;
+				text-align: center;
+			}
+			.highlight {
+				font-size: 24px;
+				font-weight: 600;
+				color: #dc2626;
+			}
+			.status-badge {
+				display: inline-block;
+				padding: 4px 12px;
+				background-color: #dc2626;
+				color: white;
+				border-radius: 9999px;
+				font-size: 14px;
+				font-weight: 500;
+				margin: 8px 0;
+			}
+			.logo {
+				font-size: 24px;
+				font-weight: bold;
+				margin: 0;
+			}
+			.button {
+				display: inline-block;
+				padding: 12px 24px;
+				background: linear-gradient(to right, #2563eb, #4f46e5);
+				color: white;
+				text-decoration: none;
+				border-radius: 9999px;
+				font-weight: 600;
+				margin-top: 16px;
+			}
+			.info-box {
+				background-color: #f8fafc;
+				border: 1px solid #e5e7eb;
+				border-radius: 12px;
+				padding: 16px;
+				margin-top: 24px;
+			}
+			.support-link {
+				color: #2563eb;
+				text-decoration: none;
+				font-weight: 500;
+			}
+			.support-link:hover {
+				text-decoration: underline;
+			}
+			.current-language {
+				color: #2563eb;
+				font-weight: 500;
+			}
+			.reasons-list {
+				margin: 16px 0;
+				padding-left: 20px;
+			}
+			.reasons-list li {
+				margin-bottom: 8px;
+				color: #4b5563;
+			}
+			.footer {
+				text-align: center;
+				margin-top: 32px;
+				padding-top: 16px;
+				border-top: 1px solid #e5e7eb;
+				color: #6b7280;
+				font-size: 14px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="header">
+				<h1 class="logo">SpeakIn</h1>
+			</div>
+			<div class="content">
+				<h2>Language Change Request Status</h2>
+				<p>Dear {{tutor_name}},</p>
 
-            <p>After careful consideration, we are unable to approve your request to teach {{language}} at this time. You will continue to be authorized to teach <span class="current-language">{{old_language}}</span>.</p>
-            
-            <div class="info-box">
-                <p style="margin-top: 0;">This decision may be based on one or more of the following factors:</p>
-                <ul class="reasons-list">
-                    <li>Required certification documentation</li>
-                    <li>Teaching experience verification</li>
-                    <li>Language proficiency assessment</li>
-                    <li>Quality of introduction video</li>
-                    <li>Overall application completeness</li>
-                </ul>
-            </div>
+				<div class="highlight-container">
+					<div class="status-badge">Not Approved</div>
+					<p>Your request to teach</p>
+					<div class="highlight">{{language}}</div>
+					<p>requires additional review</p>
+				</div>
 
-            <p>Want to reapply? Here's what you can do:</p>
-            <div class="info-box">
-                <ul style="margin: 0; padding-left: 20px;">
-                    <li>Review and update your language certifications</li>
-                    <li>Enhance your teaching experience documentation</li>
-                    <li>Record a new introduction video</li>
-                    <li>Ensure all required documents are properly submitted</li>
-                </ul>
-            </div>
+				<p>
+					After careful consideration, we are unable to approve your request to
+					teach {{language}} at this time. You will continue to be authorized to
+					teach <span class="current-language">{{old_language}}</span>.
+				</p>
 
-            <p style="margin-top: 32px;">Need assistance or have questions? Our support team is here to help:</p>
-            <a href="mailto:support@speakin.com" class="support-link">support@speakin.com</a>
-            
-            <p style="margin-top: 32px;">Best regards,<br>The SpeakIn Team</p>
+				<div class="info-box">
+					<p style="margin-top: 0">
+						This decision may be based on one or more of the following factors:
+					</p>
+					<ul class="reasons-list">
+						<li>Required certification documentation</li>
+						<li>Teaching experience verification</li>
+						<li>Language proficiency assessment</li>
+						<li>Quality of introduction video</li>
+						<li>Overall application completeness</li>
+					</ul>
+				</div>
 
-            <div class="footer">
-                <p>© 2025 SpeakIn. All rights reserved.</p>
-            </div>
-        </div>
-    </div>
-</body>
+				<p>Want to reapply? Here's what you can do:</p>
+				<div class="info-box">
+					<ul style="margin: 0; padding-left: 20px">
+						<li>Review and update your language certifications</li>
+						<li>Enhance your teaching experience documentation</li>
+						<li>Record a new introduction video</li>
+						<li>Ensure all required documents are properly submitted</li>
+					</ul>
+				</div>
+
+				<p style="margin-top: 32px">
+					Need assistance or have questions? Our support team is here to help:
+				</p>
+				<a href="mailto:support@speakin.com" class="support-link"
+					>support@speakin.com</a
+				>
+
+				<p style="margin-top: 32px">Best regards,<br />The SpeakIn Team</p>
+
+				<div class="footer">
+					<p>© 2025 SpeakIn. All rights reserved.</p>
+				</div>
+			</div>
+		</div>
+	</body>
 </html>

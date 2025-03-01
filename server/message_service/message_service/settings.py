@@ -36,7 +36,6 @@ try:
     hostname = socket.gethostname()
     local_ip = socket.gethostbyname(hostname)
     ALLOWED_HOSTS.append(local_ip)
-    print(f"Added local IP {local_ip} to ALLOWED_HOSTS")
 except socket.error:
     pass
 

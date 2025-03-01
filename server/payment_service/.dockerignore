@@ -5,4 +5,3 @@ __pycache__/
 Dockerfile
 docker-compose.yml
 payment_service_env
-migrations/

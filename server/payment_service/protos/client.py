@@ -5,19 +5,22 @@ import os
 import logging
 
 # Get logger for the payment app
-logger = logging.getLogger('payment')
+logger = logging.getLogger("payment")
 
-def update_user_credits(user_id, credits , is_deduction=False, refund_from_escrow=False):
+
+def update_user_credits(user_id, credits, is_deduction=False, refund_from_escrow=False):
     try:
-        with grpc.insecure_channel(os.getenv('USER_SERVICE_GRPC_HOST') + ':50051') as channel:
+        with grpc.insecure_channel(
+            os.getenv("USER_SERVICE_GRPC_HOST") + ":50051"
+        ) as channel:
             logger.info(f"Initiating gRPC call to update credits for user {user_id}")
             stub = UserServiceStub(channel)
 
             request = UpdateUserCreditsRequest(
-                user_id=user_id, 
+                user_id=user_id,
                 credits=credits,
                 is_deduction=is_deduction,
-                refund_from_escrow=refund_from_escrow
+                refund_from_escrow=refund_from_escrow,
             )
             response = stub.UpdateUserCredits(request)
             if response.success:
