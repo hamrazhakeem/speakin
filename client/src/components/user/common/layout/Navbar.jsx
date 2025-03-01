@@ -296,7 +296,7 @@ const Navbar = () => {
 					className="p-2 text-gray-600 hover:text-blue-600 rounded-full hover:bg-blue-50 transition-colors relative group"
 				>
 					<Bell className="h-5 w-5" />
-					{notificationCount > 0 && (
+					{notificationCount > -1 && (
 						<span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
 							{notificationCount}
 						</span>
