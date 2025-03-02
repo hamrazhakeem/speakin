@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Status](https://img.shields.io/badge/Status-Under%20Development-yellow?style=for-the-badge)](https://github.com/yourusername/speakin)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)](https://github.com/yourusername/speakin)
 
 [![Tech Stack](https://img.shields.io/badge/Frontend-React-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Tech Stack](https://img.shields.io/badge/Backend-Django-green?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
@@ -11,48 +11,99 @@
 
 </div>
 
-## 🚧 Renovation in Progress
+## 📸 Project Screenshots
 
-We're currently enhancing SpeakIn to provide an even better language learning experience. Our platform connects language learners with expert tutors through 1-on-1 video sessions.
+[Add your screenshots here - home.png, landing.png, profile.png]
 
-### 🎯 Current Focus
+## 🎯 About SpeakIn
 
-- **Frontend Standardization**
-  - Implementing consistent naming conventions
-  - Enhancing component reusability
-  - Optimizing React performance
-  - Improving UI/UX patterns
-
-- **Backend Optimization**
-  - Refining microservices architecture
-  - Strengthening API security
-  - Enhancing data validation
-  - Implementing caching strategies
-
-- **Infrastructure**
-  - Preparing for EKS deployment
-  - Setting up CI/CD pipelines
-  - Configuring monitoring and logging
-  - Implementing auto-scaling
+SpeakIn is a robust language learning platform that connects learners with expert tutors through 1-on-1 video sessions. Our platform ensures quality education by verifying native speakers through government ID and non-native tutors through their language certifications.
 
 ### 🌟 Key Features
 
-- **Seamless Video Learning**
-  - Real-time 1-on-1 sessions
-  - Screen sharing capabilities
-  - Interactive whiteboard
+- **Video Learning Platform**
+  - Seamless 1-on-1 video sessions with WebRTC
+  - Real-time chat during sessions
+  - Session scheduling and management
 
-- **Expert Tutors**
-  - Native speaker verification
-  - Language certification validation
-  - Comprehensive tutor profiles
+- **Tutor Verification System**
+  - Native speaker government ID verification
+  - Language certification validation for non-native tutors
+  - Detailed tutor profiles and ratings
 
-- **Smart Booking System**
-  - Flexible scheduling
-  - Time zone management
-  - Credit-based payments
+- **User Management**
+  - Secure authentication system
+  - User profiles and progress tracking
+  - Session history and bookings
 
-### 🔧 Tech Stack
+- **Payment Integration**
+  - Secure payment processing
+  - Session-based billing
+  - Payment history
+
+## 🗂️ Project Structure
+
+```
+speakin/
+├── client/                 # Frontend React Application
+│   ├── src/               # Source files
+│   ├── public/            # Static files
+│   └── package.json       # Frontend dependencies
+│
+├── server/                # Backend Microservices
+│   ├── api_gateway/       # API Gateway Service
+│   ├── user_service/      # User Management Service
+│   ├── session_service/   # Video Session Service
+│   ├── message_service/   # Chat Service
+│   ├── payment_service/   # Payment Processing Service
+│   └── docker-compose.yml # Docker composition file
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Docker
+- Docker Compose
+- Node.js (for local development)
+
+### Running with Docker
+
+1. Pull the images:
+```bash
+docker pull speakin/api-gateway:latest
+docker pull speakin/user-service:latest
+docker pull speakin/session-service:latest
+docker pull speakin/message-service:latest
+docker pull speakin/payment-service:latest
+docker pull speakin/client:latest
+```
+
+2. Start the services:
+```bash
+cd server
+docker-compose up -d
+```
+
+3. Access the application:
+- Frontend: http://localhost:3000
+- API Gateway: http://localhost:8000
+
+### Local Development Setup
+
+1. Frontend:
+```bash
+cd client
+npm install
+npm run dev
+```
+
+2. Backend Services:
+```bash
+cd server
+docker-compose up -d
+```
+
+## 🔧 Tech Stack
 
 - **Frontend**
   - React with Vite
@@ -68,34 +119,25 @@ We're currently enhancing SpeakIn to provide an even better language learning ex
 
 - **Infrastructure**
   - Docker
-  - Kubernetes (EKS)
-  - AWS Services
+  - Kubernetes
   - Nginx
+  - AWS Services
 
-### 🚀 Coming Soon
+## 👥 Contributing
 
-- Advanced matching algorithm
-- Interactive learning materials
-- Progress tracking
-- Community features
-- Mobile applications
+We welcome contributions! Here's how you can help:
 
-## 📅 Roadmap
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-- [x] Project initialization
-- [x] Basic architecture setup
-- [x] Core features implementation
-- [ ] Testing & optimization
-- [ ] Beta release
-- [ ] Public launch
-
-## 👷 Want to Contribute?
-
-We're not accepting contributions just yet, but stay tuned! Once our foundation is solid, we'll welcome collaborators to help build something amazing.
+Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on our code of conduct and development process.
 
 ## 📬 Contact
 
-Have questions? Reach out to us at [support@speakin.com](mailto:support@speakin.com)
+For support or queries, reach out to us at [support@speakin.com](mailto:support@speakin.com)
 
 ---
 
