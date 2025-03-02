@@ -30,6 +30,15 @@ SpeakIn is a robust language learning platform that connects learners with exper
   - Session scheduling and management
   - Interactive learning environment
 
+- **Real-time Communication**
+  - Instant messaging between students and tutors
+  - Real-time notifications for messages
+
+- **Authentication & Security**
+  - Secure Google OAuth 2.0 integration
+  - Email/Password authentication
+  - JWT-based session management
+
 - **Tutor Verification System**
   - Native speaker government ID verification
   - Language certification validation for non-native tutors
@@ -56,6 +65,10 @@ speakin/
 │   │   ├── store/             # Redux store
 │   │   ├── hooks/             # Custom hooks
 │   │   ├── utils/             # Utility functions
+│   │   ├── services/          # API services
+│   │   │   ├── auth/         # Authentication services
+│   │   │   ├── chat/         # Real-time chat services
+│   │   │   └── notifications/ # Notification services
 │   │   └── App.tsx            # Root component
 │   ├── vite.config.js         # Vite configuration
 │   ├── tailwind.config.js     # Tailwind CSS config
@@ -67,12 +80,16 @@ speakin/
 │   │   └── requirements.txt   # Python dependencies
 │   ├── user_service/          # User Management Service
 │   │   ├── src/              # Source files
+│   │   │   ├── auth/        # Authentication handlers
+│   │   │   └── profiles/    # User profile management
 │   │   └── requirements.txt   # Python dependencies
 │   ├── session_service/       # Video Session Service
 │   │   ├── src/              # Source files
 │   │   └── requirements.txt   # Python dependencies
-│   ├── message_service/       # Messaging Service
+│   ├── message_service/       # Real-time Chat Service
 │   │   ├── src/              # Source files
+│   │   │   ├── chat/        # Chat handlers
+│   │   │   └── notifications/ # Notification system
 │   │   └── requirements.txt   # Python dependencies
 │   ├── payment_service/       # Payment Processing Service
 │   │   ├── src/              # Source files
@@ -130,12 +147,14 @@ npm run dev
   - TailwindCSS
   - Redux Toolkit
   - Daily.co SDK
+  - Socket.IO Client (for real-time features)
 
 - **Backend**
   - Django REST Framework
   - PostgreSQL
   - Redis Cache
   - Celery
+  - Django Channels
 
 - **Infrastructure**
   - Docker
