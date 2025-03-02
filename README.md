@@ -13,11 +13,11 @@
 
 ## 📸 Project Screenshots
 
-<div align="center" style="display: flex; justify-content: space-between;">
+<!-- <div align="center" style="display: flex; justify-content: space-between;">
   <img src="./assets/images/landing.png" alt="Landing Page" width="32%" style="margin-right: 1%;"/>
   <img src="./assets/images/home.png" alt="Home Page" width="32%" style="margin-right: 1%;"/>
   <img src="./assets/images/profile.png" alt="Profile Page" width="32%"/>
-</div>
+</div> -->
 
 ## 🎯 About SpeakIn
 
