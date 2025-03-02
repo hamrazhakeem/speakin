@@ -283,9 +283,14 @@ npm run dev
 - **Infrastructure**
   - Docker
   - Kubernetes
-  - AWS Application Load Balancer (A type of ELB)
-  - AWS RDS
-  - AWS S3
+  - CI/CD Pipeline
+    - GitHub Actions
+    - Push to Docker Hub
+    - Continuous deployment to AWS
+  - AWS Services
+    - Application Load Balancer (A type of ELB)
+    - RDS (PostgreSQL)
+    - S3 (File Storage)
   - SonarQube (Code Quality)
 
 ## 👥 Contributing
