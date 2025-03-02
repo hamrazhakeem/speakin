@@ -279,6 +279,12 @@ npm run dev
   - Redis Cache
   - Celery
   - Django Channels
+  - Communication
+    - gRPC (Inter-service communication)
+    - RabbitMQ (Message broker)
+      - Asynchronous messaging
+      - Event-driven architecture
+      - Service queues
 
 - **Infrastructure**
   - Docker
