@@ -14,9 +14,9 @@
 ## 📸 Project Screenshots
 
 <div align="center" style="display: flex; justify-content: space-between;">
-  <img src="./assets/images/Landing.png" alt="Landing Page" width="32%" style="margin-right: 1%;"/>
-  <img src="./assets/images/Home.png" alt="Home Page" width="32%" style="margin-right: 1%;"/>
-  <img src="./assets/images/Profile.png" alt="Profile Page" width="32%"/>
+  <img src="./assets/images/landing.png" alt="Landing Page" width="32%" style="margin-right: 1%;"/>
+  <img src="./assets/images/home.png" alt="Home Page" width="32%" style="margin-right: 1%;"/>
+  <img src="./assets/images/profile.png" alt="Profile Page" width="32%"/>
 </div>
 
 ## 🎯 About SpeakIn
@@ -59,43 +59,102 @@ SpeakIn is a robust language learning platform that connects learners with exper
 ```
 speakin/
 ├── client/                      # Frontend React Application
-│   ├── src/                    # Source files
-│   │   ├── components/         # React components
-│   │   ├── pages/             # Page components
-│   │   ├── store/             # Redux store
-│   │   ├── hooks/             # Custom hooks
-│   │   ├── utils/             # Utility functions
-│   │   ├── services/          # API services
-│   │   │   ├── auth/         # Authentication services
-│   │   │   ├── chat/         # Real-time chat services
-│   │   │   └── notifications/ # Notification services
-│   │   └── App.tsx            # Root component
-│   ├── vite.config.js         # Vite configuration
-│   ├── tailwind.config.js     # Tailwind CSS config
-│   └── package.json           # Frontend dependencies
+│   ├── src/                     # Source directory
+│   │   ├── api/                 # API services
+│   │   ├── assets/              # Static assets
+│   │   ├── components/          # Reusable components
+│   │   ├── hooks/               # Custom hooks
+│   │   ├── pages/               # Page components
+│   │   ├── providers/           # React providers
+│   │   ├── redux/               # Redux Store
+│   │   ├── routes/              # Route configurations
+│   │   ├── App.jsx              # Root component with router setup
+│   │   ├── index.css            # Global styles
+│   │   └── main.jsx             # Application entry point with providers
+│   ├── .gitignore               # Git ignore rules
+│   ├── README.md                # Frontend documentation
+│   ├── eslint.config.js         # ESLint configuration
+│   ├── index.html               # Entry HTML file
+│   ├── package-lock.json        # Locked dependencies
+│   ├── package.json             # Project dependencies and scripts
+│   ├── postcss.config.js        # PostCSS configuration
+│   ├── tailwind.config.js       # Tailwind CSS configuration
+│   └── vite.config.js           # Vite bundler configuration
 │
-├── server/                     # Backend Microservices
-│   ├── api_gateway/           # API Gateway Service
-│   │   ├── src/              # Source files
-│   │   └── requirements.txt   # Python dependencies
-│   ├── user_service/          # User Management Service
-│   │   ├── src/              # Source files
-│   │   │   ├── auth/        # Authentication handlers
-│   │   │   └── profiles/    # User profile management
-│   │   └── requirements.txt   # Python dependencies
-│   ├── session_service/       # Video Session Service
-│   │   ├── src/              # Source files
-│   │   └── requirements.txt   # Python dependencies
-│   ├── message_service/       # Real-time Chat Service
-│   │   ├── src/              # Source files
-│   │   │   ├── chat/        # Chat handlers
-│   │   │   └── notifications/ # Notification system
-│   │   └── requirements.txt   # Python dependencies
-│   ├── payment_service/       # Payment Processing Service
-│   │   ├── src/              # Source files
-│   │   └── requirements.txt   # Python dependencies
-│   ├── k8s/                   # Kubernetes configurations
-│   └── docker-compose.yml     # Docker composition file
+├── server/                           # Backend Microservices
+│   ├── api_gateway/                  # API Gateway Service
+│   │   ├── manage.py                # Django management script
+│   │   ├── requirements.txt         # Python dependencies
+│   │   ├── Dockerfile              # Container configuration
+│   │   └── api_gateway/            # Main project directory
+│   │       ├── __init__.py
+│   │       ├── asgi.py
+│   │       ├── settings.py
+│   │       ├── urls.py
+│   │       └── wsgi.py
+│   │
+│   ├── k8s/                         # Kubernetes Manifests
+│   │   ├── development/
+│   │   │   ├── configmaps/         # Environment configurations
+│   │   │   ├── deployments/        # Service deployments
+│   │   │   ├── statefulsets/       # StatefulSets
+│   │   │   ├── ingress.yaml        # Ingress rules
+│   │   │   └── namespace.yaml      # Namespace
+│   │   └── production/
+│   │       ├── configmaps/
+│   │       ├── deployments/
+│   │       ├── hpa/
+│   │       ├── statefulsets/
+│   │       ├── ebs-sc.yaml
+│   │       ├── ingress.yaml
+│   │       └── namespace.yaml
+│   │
+│   ├── message_service/             # Messaging Service
+│   │   ├── manage.py
+│   │   ├── requirements.txt
+│   │   ├── Dockerfile
+│   │   └── message_service/
+│   │       ├── __init__.py
+│   │       ├── asgi.py
+│   │       ├── settings.py
+│   │       ├── urls.py
+│   │       └── wsgi.py
+│   │
+│   ├── payment_service/             # Payment Processing Service
+│   │   ├── manage.py
+│   │   ├── requirements.txt
+│   │   ├── Dockerfile
+│   │   └── payment_service/
+│   │       ├── __init__.py
+│   │       ├── asgi.py
+│   │       ├── settings.py
+│   │       ├── urls.py
+│   │       └── wsgi.py
+│   │
+│   ├── session_service/             # Video Session Service
+│   │   ├── manage.py
+│   │   ├── requirements.txt
+│   │   ├── Dockerfile
+│   │   └── session_service/
+│   │       ├── __init__.py
+│   │       ├── asgi.py
+│   │       ├── settings.py
+│   │       ├── urls.py
+│   │       └── wsgi.py
+│   │
+│   ├── user_service/                # User Management Service
+│   │   ├── manage.py
+│   │   ├── requirements.txt
+│   │   ├── Dockerfile
+│   │   └── user_service/
+│   │       ├── __init__.py
+│   │       ├── asgi.py
+│   │       ├── settings.py
+│   │       ├── urls.py
+│   │       └── wsgi.py
+│   │
+│   ├── .gitignore                   # Git ignore rules
+│   └── docker-compose.yml           # Docker composition file
 ```
 
 ## 🚀 Getting Started
