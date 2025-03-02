@@ -14,13 +14,11 @@
 ## 📸 Project Screenshots
 
 <div align="center">
-
-![Landing Page](./assets/images/Landing.png)
-
-![Home Page](./assets/images/Home.png)
-
-![Profile Page](./assets/images/Profile.png)
-
+  <img src="./assets/images/Landing.png" alt="Landing Page" width="600"/>
+  <br/><br/>
+  <img src="./assets/images/Home.png" alt="Home Page" width="600"/>
+  <br/><br/>
+  <img src="./assets/images/Profile.png" alt="Profile Page" width="600"/>
 </div>
 
 ## 🎯 About SpeakIn
