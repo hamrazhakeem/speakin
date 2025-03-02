@@ -247,7 +247,7 @@ docker-compose up --build -d
 
 1. Navigate to the client directory:
 ```powershell
-cd client
+cd speakin
 cd client
 ```
 
