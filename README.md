@@ -13,7 +13,15 @@
 
 ## 📸 Project Screenshots
 
-[Landing.png, Home.png, Profile.png]
+<div align="center">
+
+![Landing Page](./assets/images/Landing.png)
+
+![Home Page](./assets/images/Home.png)
+
+![Profile Page](./assets/images/Profile.png)
+
+</div>
 
 ## 🎯 About SpeakIn
 
@@ -22,78 +30,102 @@ SpeakIn is a robust language learning platform that connects learners with exper
 ### 🌟 Key Features
 
 - **Video Learning Platform**
-  - Seamless 1-on-1 video sessions with WebRTC
-  - Real-time chat during sessions
+  - 1-on-1 video sessions powered by Daily.co
   - Session scheduling and management
+  - Interactive learning environment
 
 - **Tutor Verification System**
   - Native speaker government ID verification
   - Language certification validation for non-native tutors
-  - Detailed tutor profiles and ratings
+  - Detailed tutor profiles
 
 - **User Management**
   - Secure authentication system
   - User profiles and progress tracking
   - Session history and bookings
 
-- **Payment Integration**
-  - Secure payment processing
-  - Session-based billing
-  - Payment history
+- **Payment System**
+  - Secure payment processing with Stripe
+  - Tutor payouts via Stripe Connect
+  - Complete payment history
 
 ## 🗂️ Project Structure
 
 ```
 speakin/
-├── client/                 # Frontend React Application
-│   ├── src/               # Source files
-│   └── package.json       # Frontend dependencies
+├── client/                      # Frontend React Application
+│   ├── src/                    # Source files
+│   │   ├── components/         # React components
+│   │   ├── pages/             # Page components
+│   │   ├── store/             # Redux store
+│   │   ├── hooks/             # Custom hooks
+│   │   ├── utils/             # Utility functions
+│   │   └── App.tsx            # Root component
+│   ├── vite.config.js         # Vite configuration
+│   ├── tailwind.config.js     # Tailwind CSS config
+│   └── package.json           # Frontend dependencies
 │
-├── server/                # Backend Microservices
-│   ├── api_gateway/       # API Gateway Service
-│   ├── user_service/      # User Management Service
-│   ├── session_service/   # Video Session Service
-│   ├── message_service/   # Chat Service
-│   ├── payment_service/   # Payment Processing Service
-│   └── docker-compose.yml # Docker composition file
+├── server/                     # Backend Microservices
+│   ├── api_gateway/           # API Gateway Service
+│   │   ├── src/              # Source files
+│   │   └── requirements.txt   # Python dependencies
+│   ├── user_service/          # User Management Service
+│   │   ├── src/              # Source files
+│   │   └── requirements.txt   # Python dependencies
+│   ├── session_service/       # Video Session Service
+│   │   ├── src/              # Source files
+│   │   └── requirements.txt   # Python dependencies
+│   ├── message_service/       # Messaging Service
+│   │   ├── src/              # Source files
+│   │   └── requirements.txt   # Python dependencies
+│   ├── payment_service/       # Payment Processing Service
+│   │   ├── src/              # Source files
+│   │   └── requirements.txt   # Python dependencies
+│   ├── k8s/                   # Kubernetes configurations
+│   └── docker-compose.yml     # Docker composition file
 ```
 
 ## 🚀 Getting Started
 
-1. Pull the images:
-```bash
-docker pull speakin/api-gateway:latest
-docker pull speakin/user-service:latest
-docker pull speakin/session-service:latest
-docker pull speakin/message-service:latest
-docker pull speakin/payment-service:latest
-docker pull speakin/client:latest
+### Prerequisites
+- Docker
+- Docker Compose
+- Django (for local development)
+
+### Running Backend Services
+
+1. Pull the microservice images:
+```powershell
+docker pull hamrazhakeem/speakin-api-gateway:latest
+docker pull hamrazhakeem/speakin-user-service:latest
+docker pull hamrazhakeem/speakin-session-service:latest
+docker pull hamrazhakeem/speakin-message-service:latest
+docker pull hamrazhakeem/speakin-payment-service:latest
 ```
 
 2. Start the services:
-```bash
+```powershell
 cd server
 docker-compose up -d
 ```
 
-3. Access the application:
-- Frontend: http://localhost:3000
-- API Gateway: http://localhost:8000
+### Running Frontend Locally
 
-### Local Development Setup
-
-1. Frontend:
-```bash
+1. Clone the repository and install dependencies:
+```powershell
+git clone <repository-url>
 cd client
 npm install
+```
+
+2. Start the development server:
+```powershell
 npm run dev
 ```
 
-2. Backend Services:
-```bash
-cd server
-docker-compose up -d
-```
+3. Access the application:
+- Frontend: http://localhost:5173
+- API Gateway: http://localhost:8000
 
 ## 🔧 Tech Stack
 
@@ -101,6 +133,7 @@ docker-compose up -d
   - React with Vite
   - TailwindCSS
   - Redux Toolkit
+  - Daily.co SDK
 
 - **Backend**
   - Django REST Framework
@@ -111,7 +144,7 @@ docker-compose up -d
 - **Infrastructure**
   - Docker
   - Kubernetes
-  - Nginx
+  - AWS Application Load Balancer
   - AWS Services
 
 ## 👥 Contributing
@@ -123,8 +156,6 @@ We welcome contributions! Here's how you can help:
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-Please read our [Contributing Guidelines](CONTRIBUTING.md) for details on our code of conduct and development process.
 
 ## 📬 Contact
 
