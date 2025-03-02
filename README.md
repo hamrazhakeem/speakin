@@ -13,7 +13,7 @@
 
 ## 📸 Project Screenshots
 
-[Add your screenshots here - home.png, landing.png, profile.png]
+[Landing.png, Home.png, Profile.png]
 
 ## 🎯 About SpeakIn
 
@@ -47,7 +47,6 @@ SpeakIn is a robust language learning platform that connects learners with exper
 speakin/
 ├── client/                 # Frontend React Application
 │   ├── src/               # Source files
-│   ├── public/            # Static files
 │   └── package.json       # Frontend dependencies
 │
 ├── server/                # Backend Microservices
@@ -60,13 +59,6 @@ speakin/
 ```
 
 ## 🚀 Getting Started
-
-### Prerequisites
-- Docker
-- Docker Compose
-- Node.js (for local development)
-
-### Running with Docker
 
 1. Pull the images:
 ```bash
@@ -109,7 +101,6 @@ docker-compose up -d
   - React with Vite
   - TailwindCSS
   - Redux Toolkit
-  - WebRTC
 
 - **Backend**
   - Django REST Framework
