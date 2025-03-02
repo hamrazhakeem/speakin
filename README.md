@@ -13,12 +13,10 @@
 
 ## 📸 Project Screenshots
 
-<div align="center">
-  <img src="./assets/images/Landing.png" alt="Landing Page" width="600"/>
-  <br/><br/>
-  <img src="./assets/images/Home.png" alt="Home Page" width="600"/>
-  <br/><br/>
-  <img src="./assets/images/Profile.png" alt="Profile Page" width="600"/>
+<div align="center" style="display: flex; justify-content: space-between;">
+  <img src="./assets/images/Landing.png" alt="Landing Page" width="32%" style="margin-right: 1%;"/>
+  <img src="./assets/images/Home.png" alt="Home Page" width="32%" style="margin-right: 1%;"/>
+  <img src="./assets/images/Profile.png" alt="Profile Page" width="32%"/>
 </div>
 
 ## 🎯 About SpeakIn
