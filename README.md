@@ -284,7 +284,8 @@ npm run dev
   - Docker
   - Kubernetes
   - AWS Application Load Balancer (A type of ELB)
-  - AWS Services
+  - AWS RDS
+  - AWS S3
   - SonarQube (Code Quality)
 
 ## 👥 Contributing
