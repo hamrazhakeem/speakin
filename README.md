@@ -183,42 +183,86 @@ speakin/
 ### Prerequisites
 - Docker
 - Docker Compose
-- Django (for local development)
+- Node.js (v18 or higher)
+- npm
+- Python 3.9+
+- Django
 
-### Running Backend Services
+### Installation & Setup
 
-1. Pull the microservice images:
+1. Clone the repository:
 ```powershell
-docker pull hamrazhakeem/speakin-api-gateway:latest
-docker pull hamrazhakeem/speakin-user-service:latest
-docker pull hamrazhakeem/speakin-session-service:latest
-docker pull hamrazhakeem/speakin-message-service:latest
-docker pull hamrazhakeem/speakin-payment-service:latest
+git clone https://github.com/hamrazhakeem/speakin.git
+cd speakin
 ```
 
-2. Start the services:
+2. Create a .env file in the server directory with required environment variables:
+```env
+# Database Configurations
+USER_DB_NAME=your_db_name
+USER_DB_USER=your_db_user
+USER_DB_PASSWORD=your_db_password
+USER_DB_HOST=your_db_host
+USER_DB_PORT=your_db_port
+
+PAYMENT_DB_NAME=your_db_name
+PAYMENT_DB_USER=your_db_user
+PAYMENT_DB_PASSWORD=your_db_password
+PAYMENT_DB_HOST=your_db_host
+PAYMENT_DB_PORT=your_db_port
+
+SESSION_DB_NAME=your_db_name
+SESSION_DB_USER=your_db_user
+SESSION_DB_PASSWORD=your_db_password
+SESSION_DB_HOST=your_db_host
+SESSION_DB_PORT=your_db_port
+
+MESSAGE_DB_NAME=your_db_name
+MESSAGE_DB_USER=your_db_user
+MESSAGE_DB_PASSWORD=your_db_password
+MESSAGE_DB_HOST=your_db_host
+MESSAGE_DB_PORT=your_db_port
+
+# Stripe CLI Configuration
+STRIPE_API_KEY=your_stripe_api_key
+
+# RabbitMQ Configuration
+RABBITMQ_USER=your_rabbitmq_user
+RABBITMQ_PASS=your_rabbitmq_password
+```
+
+### Starting the Backend Services
+
+1. Navigate to the server directory:
 ```powershell
 cd server
-docker-compose up -d
 ```
 
-### Running Frontend Locally
-
-1. Clone the repository and install dependencies:
+2. Start the services using Docker Compose:
 ```powershell
-git clone <repository-url>
+docker-compose up --build -d
+```
+
+### Starting the Frontend
+
+1. Navigate to the client directory:
+```powershell
 cd client
+cd client
+```
+
+2. Install dependencies:
+```powershell
 npm install
 ```
 
-2. Start the development server:
+3. Start the development server:
 ```powershell
 npm run dev
 ```
 
-3. Access the application:
+### Accessing the Application
 - Frontend: http://localhost:5173
-- API Gateway: http://localhost:8000
 
 ## 🔧 Tech Stack
 
@@ -227,7 +271,7 @@ npm run dev
   - TailwindCSS
   - Redux Toolkit
   - Daily.co SDK
-  - Socket.IO Client (for real-time features)
+  - WebSocket (for real-time features)
 
 - **Backend**
   - Django REST Framework
@@ -239,8 +283,9 @@ npm run dev
 - **Infrastructure**
   - Docker
   - Kubernetes
-  - AWS Application Load Balancer
+  - AWS Application Load Balancer (A type of ELB)
   - AWS Services
+  - SonarQube (Code Quality)
 
 ## 👥 Contributing
 
