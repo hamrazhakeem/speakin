@@ -4,7 +4,7 @@ metadata:
   name: session-service
   namespace: speakin
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:    
       app: session-service
@@ -24,13 +24,13 @@ spec:
             name: session-service-config
         - secretRef:
             name: session-service-secrets
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "128Mi"
-          limits:
-            cpu: "200m"
-            memory: "256Mi"
+        # resources:
+        #   requests:
+        #     cpu: "100m"
+        #     memory: "128Mi"
+        #   limits:
+        #     cpu: "200m"
+        #     memory: "256Mi"
 ---
 apiVersion: v1
 kind: Service

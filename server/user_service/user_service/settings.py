@@ -242,3 +242,6 @@ LOGGING = {
         },
     },
 } 
+
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240  # Increased from default 1000
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880  # 5MB, adjust if needed
