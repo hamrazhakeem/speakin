@@ -143,10 +143,7 @@
 					<ul class="session-details">
 						<li>
 							<i>📅</i>
-							<span>
-								{{ start_time|date:"l, F j, Y" }} at {{ start_time|time:"g:i A"
-								}} - {{ end_time|time:"g:i A" }} (UTC)
-							</span>
+							<span>{{ start_time|date:"l, F j, Y g:i A" }} - {{ end_time|date:"g:i A" }} (UTC)</span>
 						</li>
 						<li>
 							<i>🗣️</i>
