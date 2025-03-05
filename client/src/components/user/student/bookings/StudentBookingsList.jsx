@@ -55,22 +55,16 @@ const StudentBookingsList = ({
 	};
 
 	const isSessionMissed = (session) => {
-		const sessionStartTime = new Date(session.availabilityDetails.start_time);
-		const currentTime = new Date();
-
-		// Add 5 minutes to the session start time
-		const fiveMinutesAfterStartTime = new Date(
-			sessionStartTime.getTime() + 5 * 60000
-		);
-
-		// Check if current time is greater than 5 minutes after start time
-		const isPastFiveMinutes = currentTime > fiveMinutesAfterStartTime;
-
-		// Check if both student and tutor did not join within 5 minutes
-		const isStudentMissed = !session.student_joined_within_5_min;
-		const isTutorMissed = !session.tutor_joined_within_5_min;
-
-		return isPastFiveMinutes && isStudentMissed && isTutorMissed;
+		// Only check for missed status if the session is marked as no_show
+		if (session.booking_status === "no_show_by_student" || session.booking_status === "no_show_by_tutor") {
+			const isStudentMissed = !session.student_joined_within_5_min;
+			const isTutorMissed = !session.tutor_joined_within_5_min;
+			
+			// Only return true if both missed and it's a no-show status
+			return isStudentMissed && isTutorMissed;
+		}
+		
+		return false;
 	};
 
 	const getSessionDuration = (start, end) => {

@@ -159,3 +159,4 @@ const BookingsManage = () => {
 };
 
 export default BookingsManage;
+ 
