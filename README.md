@@ -58,6 +58,10 @@ SpeakIn is a robust language learning platform that connects learners with exper
 
 ```
 speakin/
+├── .github/                          
+│   └── workflows/  
+│       └── ci-cd.yml                # GitHub Actions workflow for CI/CD
+|
 ├── client/                          # Frontend React Application
 │   ├── src/                         # Source directory
 │   │   ├── api/                     # API services
