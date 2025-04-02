@@ -8,7 +8,7 @@ metadata:
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
     # alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-north-1:980921730669:certificate/cb249995-e41b-4252-9a96-39894b49a059
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:609400231968:certificate/9e3d8a8f-2dcb-4669-b3c3-b2a8bad8bed3
     alb.ingress.kubernetes.io/ssl-policy: ELBSecurityPolicy-TLS-1-2-2017-01
     
     alb.ingress.kubernetes.io/backend-protocol: HTTP
@@ -18,7 +18,7 @@ metadata:
     alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=3600
     
     # Security
-    alb.ingress.kubernetes.io/security-groups: sg-0e4e9ead42ca5bf49
+    alb.ingress.kubernetes.io/security-groups: sg-0e26e2a406df9ddeb
 
     # Health Check Annotations for API Gateway
     alb.ingress.kubernetes.io/healthcheck-path: /api/health/
@@ -30,7 +30,7 @@ metadata:
 spec:
   ingressClassName: alb
   rules:
-  - host: backend.speakin.hamrazhakeem.site
+  - host: backend.speakin.hamrazhakeem.tech
     http:
       paths:
       - pathType: Prefix

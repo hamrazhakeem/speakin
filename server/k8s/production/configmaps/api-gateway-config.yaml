@@ -6,8 +6,8 @@ metadata:
 data:
   # General settings
   DEBUG: "False"
-  ALLOWED_HOSTS: "api-gateway,backend.speakin.hamrazhakeem.site,api-gateway.speakin.svc.cluster.local" 
-  CORS_ALLOWED_ORIGINS: "https://speakin.hamrazhakeem.site,https://www.speakin.hamrazhakeem.site"
+  ALLOWED_HOSTS: "api-gateway,backend.speakin.hamrazhakeem.tech,api-gateway.speakin.svc.cluster.local" 
+  CORS_ALLOWED_ORIGINS: "https://speakin.hamrazhakeem.tech,https://www.speakin.hamrazhakeem.tech"
 
   # Service URLs (keeping internal k8s DNS names)
   USER_SERVICE_URL: "http://user-service:8000/"

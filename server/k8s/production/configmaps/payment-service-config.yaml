@@ -6,13 +6,13 @@ metadata:
 data:
   # General settings
   DEBUG: "False"
-  ALLOWED_HOSTS: "payment-service,backend.speakin.hamrazhakeem.site,api-gateway"
+  ALLOWED_HOSTS: "payment-service,backend.speakin.hamrazhakeem.tech,api-gateway"
 
   # Database settings
   DB_PORT: "5432"
 
   # Frontend URL
-  FRONTEND_DOMAIN: "https://speakin.hamrazhakeem.site"
+  FRONTEND_DOMAIN: "https://speakin.hamrazhakeem.tech"
 
   # User service grpc host
   USER_SERVICE_GRPC_HOST: "user-service"
