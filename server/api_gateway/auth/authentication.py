@@ -43,10 +43,10 @@ class JWTAuthentication(BaseAuthentication):
             logger.warning(
                 f"Authentication failed: Token expired for request from {request.META.get('REMOTE_ADDR')}"
             )
-            raise AuthenticationFailed("Token has expired.")
+            return None, {"error": "Token has expired.", "status_code": 401}
 
         except jwt.InvalidTokenError:
             logger.warning(
                 f"Authentication failed: Invalid token from {request.META.get('REMOTE_ADDR')}"
             )
-            raise AuthenticationFailed("Invalid token.")
+            return None, {"error": "Invalid token.", "status_code": 401}
