@@ -2,7 +2,7 @@
 
 <div align="center">
 
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-success?style=for-the-badge)](https://github.com/yourusername/speakin)
+[![Status](https://img.shields.io/badge/Status-Currently%20Down-critical?style=for-the-badge)](https://github.com/hamrazhakeem/speakin)
 
 [![Tech Stack](https://img.shields.io/badge/Frontend-React-blue?style=for-the-badge&logo=react)](https://reactjs.org/)
 [![Tech Stack](https://img.shields.io/badge/Backend-Django-green?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
@@ -10,6 +10,8 @@
 [![Tech Stack](https://img.shields.io/badge/Architecture-Microservices-orange?style=for-the-badge&logo=kubernetes)](https://microservices.io/)
 
 </div>
+
+> ⚠️ **Service Status**: The platform is currently experiencing downtime. Our team is working to restore services. We apologize for any inconvenience.
 
 ## 📸 Project Screenshots
 
